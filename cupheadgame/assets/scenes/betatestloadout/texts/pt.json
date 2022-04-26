@@ -1,0 +1,4 @@
+{
+	"selectweapon": "ESCOLHA ARMA\n&f[,,,,0.6,0.6](principal, secundário)&f",
+	"selectcharm": "ESCOLHA AMULETO\n&f[,,,,0.6,0.6](aplicado ao reiniciar o nível)&f"
+}

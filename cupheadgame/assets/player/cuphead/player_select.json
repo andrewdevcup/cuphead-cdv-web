@@ -1,0 +1,16 @@
+{
+	"bitmap": [
+		{
+			"name": "CupheadPlayerSelectBitmap",
+			"src": "player/cuphead/SpriteAtlasTexture_PlayerSelectCuphead-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "cuphead:PLAYER_SELECT",
+			"bitmaps": ["CupheadPlayerSelectBitmap"],
+			"frames": "player/cuphead/SpriteAtlasTexture_PlayerSelectCuphead.csv",
+			"anims": "player/cuphead/playerSelectCuphead.anims.json"
+		}
+	]
+}

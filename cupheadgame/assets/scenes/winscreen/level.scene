@@ -1,0 +1,779 @@
+
+b5.LoadScene = function(world, scene, data, game) {
+	//scene is the main scene where resources and actors will be added
+	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
+	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
+  
+  world.camera_update = false;
+  game.Flags.pausingEnabled = false;
+  game.Flags.inLevel = false;
+  game.GUI.disableButtons('B,X,Y,L,R,DPAD');
+  
+  //Texts
+  new b5.Raw('Texts',data.resourcePath + 'texts/'+game.cfg.Language.lang+'.json',true, txts=>{
+  	data.Texts = JSON.parse(txts);
+  },true);
+  
+  !data.loadData.players && (data.loadData.players=[]);
+  
+  //Get level data to be compared with results for records
+  data.levelPreviousStats = game.SlotUtils.getLevelData(data.loadData.fromLevelID) 
+  || {
+  	grade: 0
+  };
+  
+  data.loadMap = function() {
+  	//Update level stats
+  	if(data.levelPreviousStats) {
+  		data.grade > data.levelPreviousStats.grade && (data.levelPreviousStats.grade = data.grade);
+  		data.levelPreviousStats.completed = true;
+  		(data.stats.skill > data.levelPreviousStats.difficultyBeaten) && (data.levelPreviousStats.difficultyBeaten = data.stats.skill);
+  		data.stats.time < data.levelPreviousStats.bestTime && (data.levelPreviousStats.bestTime = data.stats.time);
+  		//Save game
+  	 	game.save();
+  	}
+  	
+  	game.LoadScene(game.contents.maps[game.SaveSlots.currentSaveSlot.mapDataManager.currentMap], false, true, 
+				    {music_fade_speed:0.35,show_anim:"close",hide_anim:"open",hourglass:true},
+				    {fromLevel: b5.Game.SceneLoader.sceneId,
+				     fromLevelID: data.loadData.fromLevelID,
+				     level_completed: true,
+				     contract: data.stats.skill > 0
+	 });
+  }
+  
+  //Background and scores
+  
+  var bg = new b5.Actor();
+  bg.name = "Background";
+  bg.bitmap = scene.findResource('WSBG','bitmap');
+  bg.setSize(1600,1600);
+  bg.rot_speed = -0.014;
+  //Rotation anim
+  bg.setInterval(t=>{
+  	t.data.rotation += t.data.rot_speed;
+  	t.data.dirty();
+  },1/20);
+  world.addActor(bg);
+  
+  //Scoreboard
+  var sb = new b5.Actor();
+  sb.atlas = scene.findResource('WSAtlas','brush');
+  sb.current_frame = 23;
+  sb.name = "Scoreboard";
+  world.addActor(sb);
+  
+  //Title
+  var title = new b5.Actor();
+  title.atlas = scene.findResource('ResultsTitleAtlas','brush');
+  title.frame_speed = 12;
+  title.y = -265;
+  title.name = "title";
+  world.addActor(title);
+  
+  //Mdhr entertainment inc. subtitle (only on english)
+  
+  if(game.cfg.Language.lang == "en") {
+  	title._y = -285;
+  	
+  	var subtitle = new b5.Actor();
+  	subtitle.atlas = sb.atlas;
+  	subtitle.current_frame = 42;
+  	subtitle.name = "Subtitle";
+  	subtitle.y = -200;
+  	world.addActor(subtitle);
+  }
+  
+  //Scoreboard texts
+  
+  //Score titles
+  var scoreTitles =  new b5.LabelActor();
+  scoreTitles.font = scene_GUI.findResource('CupheadMemphisFont','brush');
+  scoreTitles.name = "ScoreboardTextTitles";
+  scoreTitles.text_align = "left";
+  scoreTitles.setPosition(-205,-125);
+  scoreTitles._scale = 0.85;
+  scoreTitles.line_height = 53;
+  sb.addActor(scoreTitles);
+  
+  //Scores
+  var scoreTexts = new b5.LabelActor();
+  scoreTexts.font = scoreTitles.font;
+  scoreTexts.name = "ScoreboardTexts";
+  scoreTexts.text_align = "right";
+  scoreTexts.setPosition(185,-125);
+  scoreTexts._scale = 0.85;
+  scoreTexts.line_height = 53;
+  sb.addActor(scoreTexts);
+  
+  //Select type of level for scores
+  //boss: SUPER, platforming: coins
+  var stats = data.loadData.stats || {
+  	time: 52,
+  	hp: 3,
+  	parry: 3,
+  	super: 6,
+  	coins: 0,
+  	skill: 1,
+  	type: "boss",
+  	optimalTime: 60, //A minute
+  	damage_given: 0
+  };
+  
+  data.stats = stats;
+  !stats.optimalTime && (stats.optimalTime = 100000);
+  !stats.type && (stats.type = "boss");
+  
+  //Dots
+  var createDots = function(dots) {
+  	return new Array(dots).fill(" .");
+  };
+  
+  //Score counter
+  data.scoreCounter = {
+  	time: 0,
+  	hp: 0,
+  	parry: 0,
+  	super: 0,
+  	coins: 0,
+  	skill: 0
+  }
+  
+  data.maxScores = {
+		time: 599,
+		hp: 3,
+		parry: 3,
+		super: 6,
+		coins: 5,
+		skill: 2 //easy-0,normal-1,hard-2
+	}
+	
+	data.gradeTable = [
+		"?", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S", "P"
+	];
+	
+	data.grade = 0;
+	
+	data.golden = "#f7d538";
+	
+	data.skip_count = false;
+	
+	//To get the scores:
+	// (time < 2mins = 1) +  hp + parry + (super-1 || coins) (D- to A+)
+	//If: skill 0, limit max grade to B+, skill 1, leave as is, skill 2, add one
+	//if (special flag damage_given == 0) set grade to P in platforming
+  
+  //Replace dots with character of strings
+  var dotLine = function(dotCount,rightText) {
+  	var dots = createDots(dotCount);
+  	//Right
+  	for(var i = 0, r = rightText; i < r.length; i++) dots[i] = r[i];
+  	//Left
+  	return dots.join('');
+  };
+  
+  //Score titles texts
+  scoreTitles.onTick = function() {
+  	if(data.Texts) {
+			 this.text = 
+  			dotLine(16,data.Texts.time) +"\n"+
+  			dotLine(16,data.Texts.hp) +"\n"+
+		 		dotLine(16,data.Texts.parry) +"\n"+
+				dotLine(15,stats.type == "boss" ? data.Texts.super : data.Texts.coins) +"\n"+
+  			dotLine(16,data.Texts.skill);
+  		this.dirty();
+  	}
+  }
+  
+  scoreTexts.onTick = function() {
+  	var t = data.Texts,
+  	timeScore = new Date(Math.floor(data.scoreCounter.time*1000)),
+  	timeString = String(timeScore.getMinutes()).padStart(2,"0") + ":" + String(timeScore.getSeconds()).padStart(2,"0");
+
+  	this.text = 
+  	  timeString +'\n'+
+  		data.scoreCounter.hp + '/' + data.maxScores.hp +'\n'+
+  	  data.scoreCounter.parry + '/' + data.maxScores.parry +'\n'+
+  		(stats.type == "boss" ? data.scoreCounter.super +'/'+ data.maxScores.super: data.scoreCounter.coins + '/'+data.maxScores.coins);
+  	this.dirty();
+  }
+  
+  //Skill level stars
+  for(var i = 0, mx = 140, sep = 30, c = stats.skill == 0 ? 1 : stats.skill; i <= c; i++) {
+  	var star = new b5.Actor();
+  	star.atlas = sb.atlas;
+  	star.current_frame = b5.Maths.randomRange(36,38); //Star outlines
+  	star.x = mx + (i*sep);
+  	star.y = 45;
+  	star.name = "skill-star-"+i;
+  	star.layer = 4;
+  	star.earned = stats.skill >= i;
+  	sb.addActor(star);
+  }
+  
+  //Line
+  var line = new b5.RectActor();
+  line.setSize(400,3);
+  line.fill_style = "#cccccc";
+  line.y = 85;
+  line.name = "SBLine";
+  sb.addActor(line);
+  
+  //Grade and top texts
+  var gradeTitle = new b5.LabelActor();
+  gradeTitle.font = scoreTexts.font;
+  gradeTitle.text = dotLine(9, data.Texts.grade);
+  gradeTitle.name = "GradeTitle";
+  gradeTitle.fill_style = data.golden;
+  gradeTitle.setPosition(-165,133);
+  gradeTitle.text_align = "left";
+  sb.addActor(gradeTitle);
+  
+  var gradeLabel = new b5.LabelActor();
+  gradeLabel.font = scoreTexts.font;
+  gradeLabel.onTick = function() {
+  	gradeLabel.text = data.gradeTable[data.grade];
+  }
+  gradeLabel.name = "GradeLabel";
+  gradeLabel.setPosition(110,133);
+  gradeLabel._scale = 1.2;
+  gradeLabel.scale_spacing = false;
+  sb.addActor(gradeLabel);
+  
+  //Circle
+  var gradeCircle = new b5.Actor();
+  gradeCircle.atlas = sb.atlas;
+  gradeCircle.name = "GradeCircle";
+  gradeCircle.setPosition(110,115);
+  gradeCircle.visible = false;
+  sb.addActor(gradeCircle);
+  
+  //Top Grade
+  var topGrade = new b5.LabelActor();
+  topGrade.font = gradeLabel.font;
+  topGrade.text = data.Texts.topGrade + ': '+ data.gradeTable[data.levelPreviousStats.grade];
+  topGrade.name = "TopGradeLabel";
+  topGrade.y = 165;
+  topGrade._scale = .5;
+  sb.addActor(topGrade);
+  
+  //Animation
+  data.animateCountFinish = function(scoreTextLine,golden) {
+  	var anim = {
+  		scale: 1,
+  		ox: 200
+  	},
+  	tweenScaleIn = new b5.Tweener(anim,'scale',null,1,1.1,0.15,b5.Ease.sininout),
+  	tweenScaleOut = new b5.Tweener(anim,'scale',null,1.1,1,0.15,b5.Ease.sininout);
+  	anim.task = world.setInterval(t=>{
+  		world.findActor('ScoreboardTexts',true).applyFormatLine(scoreTextLine,0,0,[golden?data.golden:"white",void 0, (anim.scale-1)*anim.ox, (anim.scale-1)*anim.ox/5.5, anim.scale,anim.scale])
+  	},0);
+  	
+  	tweenScaleIn.onfinish = ()=>{
+  		tweenScaleIn.cancel();
+  		tweenScaleOut.onfinish = ()=>{
+  			world.clearInterval(anim.task);
+  		}
+  		tweenScaleOut.start();
+  	}
+  	tweenScaleIn.start();
+  }
+  
+  //Counter
+  data.Counter = function(line, property, to, accum, gold) {
+  	let evts = {
+  		onTick: null,
+  		onEnd: null
+  	};
+  	world.setInterval(task =>{
+		if(data.scoreCounter[property] < to && !data.skip_count) {
+			data.scoreCounter[property] +=accum;
+			evts.onTick && evts.onTick();
+		}
+		else {
+			data.skip_count = false;
+			data.scoreCounter[property] = to;
+			data.animateCountFinish(line, gold);
+			world.clearInterval(task.name);
+			evts.onEnd && evts.onEnd();
+		}
+		
+		data.skip_count = false;
+	},1/27);
+	return evts;
+  }
+  
+  data.Puff = function(target,x,y) {
+  	var u = new b5.Actor();
+  	u.atlas = scene.findResource('fxPuffStarsCombinedAtlas','brush');
+  	target.addActor(u);
+  	u.setPosition(x,y);
+  	u.layer = 5;
+  	u._scale = .95;
+  	u.frame_speed = 24;
+  	u.frames_repeat = false;
+  	u.onAnimEnd = u.destroy;
+  }
+};
+b5.onAllResourcesLoaded = function(world,scene,data,game) {
+	//When scene has loaded all resources (a bit after onLoadingScreenOut)
+
+ //Layout
+ //0 players: No characters, score on center
+ //1 player: Character to the left, score on the right
+ //2 players: P1 on the left, P2 on the right, flipped, score on the center
+  data.layout = [
+  	{
+  		p1x: 0,
+  		p2x: 0,
+  		scorex: 0
+  	},
+  	{
+  		p1x: -320,
+  		p2x: 0,
+  		scorex: 140,
+  	},
+  	{
+  		p1x: -460,
+  		p2x: 470,
+  		scorex: 2
+  	}
+  ][Math.min(data.loadData.players.length,2)];
+  
+  data.layout.y = 35;
+  
+  data.players = [];
+  
+  //Players
+  
+  for(var i = 0, pl = data.loadData.players; i < pl.length; i++) {
+  	var player = new b5.Actor();
+  	player.atlas = scene.findResource(pl[i]+':WinScreen','brush');
+  	player.name = pl[i];
+  	if(i == 0) {
+  		player.x = data.layout.p1x;
+  		player.scale_x = player.atlas.facing * 1;
+  	}
+  	else {
+  		player.x = data.layout.p2x;
+  		player.scale_x = player.atlas.facing * -1;
+  	}
+  	player.y = data.layout.y;
+  	world.addActor(player);
+  	player.blinkcount = b5.Maths.randomRange(0,6);
+  	player.nextblinktime = 5;
+  	player.blinking = false;
+  	
+  	//Blink sprite
+  	var blink = new b5.Actor();
+  	blink.atlas = player.atlas;
+  	blink.name = pl[i]+'blink';
+  	blink.visible=false;
+  	if(i == 0) blink.x = data.layout.p1x;
+  	else blink.x = data.layout.p2x;
+  	blink.scale_x = player.scale_x;
+  	blink.y = data.layout.y;
+  	world.addActor(blink);
+  	
+  	player.blinksprite = blink;
+  	
+  	//Player name
+  	var namelabel = new b5.LabelActor();
+  	namelabel._scale = 0.75;
+  	if(i == 0) namelabel.x = data.layout.p1x;
+  	else namelabel.x = data.layout.p2x;
+  	namelabel.y = 265 + data.layout.y;
+  	namelabel.font = scene.findResource('CupheadHenrietteFont','brush');
+  	world.addActor(namelabel);
+  	
+  	player.namelabel = namelabel;
+  	
+  	//Manually set the animation frame instead of playAnim
+  	//Synchronize the blink and idle on low fps
+  	//Since both animations have the same frame count, reuse current frame
+  	//Use 'blink' animation frames for blink actor
+  	player.onTick = function() {
+  		if(this.blinking) {
+  			this.blinksprite.current_frame = this.current_frame;
+  		}
+  	}
+  	player.onAnimRepeat = function() {
+  		if(this.blinking) this.blinking = false;
+  		this.blinkcount++;
+  		this.blinkcount > this.nextblinktime && (
+  			this.blinksprite.visible = true,
+  			this.blinking = true,
+  			this.blinkcount = 0
+  		);
+  	}
+  	data.players.push(player);
+  }
+  
+  //Scores
+  var sb = world.findActor('Scoreboard',true);
+  sb.setPosition(
+  	data.layout.scorex,
+  	data.layout.y + 19
+  );
+  sb.dirty(true);
+  
+};
+b5.onLoadingScreenOut = function(world, scene, data, game) {
+	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
+  
+  for(var i=0; i<data.players.length; i++)
+  	data.players[i].playAnim('idle',true),
+  	data.players[i].blinksprite.playAnim('blink'),
+  	data.players[i].namelabel.text = data.players[i].name.toUpperCase();
+
+	var mus = scene.findResource('WSMusic','sound');
+	mus.play();
+	
+	mus.onComplete = function() {
+		data.loadMap();
+	}
+   
+  var clocksfx = scene.findResource('TimeClockSfx','sound'),
+  clockfinishsfx = scene.findResource('TimeClockFinishSfx','sound'),
+  scoretick = scene.findResource('ScoreTickSfx','sound'),
+  skillstar = scene.findResource('SkillStarSfx','sound'),
+  gradefinal = scene.findResource('GradeFinalSfx','sound');
+  
+	//Start counting
+	var index = 0,
+	nextCounter = function() {
+		var cnt = null;
+		switch(index) {
+			case 0: 
+				cnt = data.Counter(0,'time',data.stats.time, 1, data.stats.time <= data.stats.optimalTime);
+				clocksfx.play();
+				cnt.onEnd = ()=>{ 
+					world.setTimeout(nextCounter, 1) 
+				  clocksfx.stop();
+				  clockfinishsfx.play();
+				};
+			  break;
+			case 1:
+				cnt = data.Counter(1,'hp', data.stats.hp, 1, data.stats.hp == data.maxScores.hp);
+				cnt.onTick = t => scoretick.play();
+				cnt.onEnd = ()=>{ 
+					scoretick.play();
+					world.setTimeout(nextCounter, 1);
+				};
+				break;
+			case 2:
+				cnt = data.Counter(2,'parry', data.stats.parry, 1, data.stats.parry == data.maxScores.parry);
+				cnt.onTick = t => scoretick.play();
+				cnt.onEnd = ()=>{ 
+					scoretick.play();
+					world.setTimeout(nextCounter, 1); 
+				};
+				break;
+			case 3:
+				var is_super = data.stats.type == "boss" ? 'super':'coins';
+				cnt = data.Counter(3,is_super, data.stats[is_super], 1, data.stats[is_super] == data.maxScores[is_super]);
+				cnt.onTick = t => scoretick.play();
+				cnt.onEnd = ()=>{ 
+					scoretick.play();
+					world.setTimeout(nextCounter, 1); 
+				};
+				break;
+			case 4:
+				//Count stars
+				let star_index = 0,
+				star = world.findActor('skill-star-0',true),
+				onAnimEnd = function() {
+					star_index++;
+					star = world.findActor('skill-star-'+star_index,true);
+					if(star && star.earned) {
+						star.onAnimEnd = function() {
+							this.clearAnim();
+				    	this.current_frame = b5.Maths.randomRange(39,41);
+							world.setTimeout(onAnimEnd,.25);
+						}
+						skillstar.play();
+						star.playAnim('star_appear');
+					}
+					else world.setTimeout(nextCounter, 1);
+				}
+				star.onAnimEnd = function() {
+					this.clearAnim();
+					this.current_frame = b5.Maths.randomRange(39,41);
+					world.setTimeout(onAnimEnd,0.25);
+				}
+				skillstar.play();
+				star.playAnim('star_appear');
+				break;
+			case 5:
+				//Calculate grade
+				var s = data.stats,
+				grade = ( s.time <= s.optimalTime ? 1 : 0 ) + 
+								(s.skill == 0 ? Math.floor(s.hp/2) || 1: s.hp) + /* Minimum will always be one, so cannot be 0, half on easy*/
+								s.parry + 
+								(s.type == "boss" ? Math.floor(s.super/2) : Math.floor(s.coins>0?s.coins+1:s.coins)) +
+								s.skill;
+
+				//Pacifist
+				s.type == "platforming" && s.damage_given == 0 && (grade = 13);
+				
+				var anim_random_grades = world.setInterval(t => {
+					data.grade = [1,4,7,10][b5.Maths.randomRange(0,3)];
+					scoretick.play();
+				},1/18);
+				
+				world.setTimeout(()=>{
+					world.clearInterval(anim_random_grades);
+					data.grade = grade;
+					gradefinal.play();
+					
+					//Circle
+					var circ = world.findActor('GradeCircle',true);
+					circ.visible = true;
+					circ.playAnimWithEnd('circle',_=>{
+						circ.playAnim('circleboil',true);
+					});
+					
+					index = -1;
+					
+					//Background rotation speed
+					world.findActor("Background",true).TweenTo('rot_speed',-0.044,0.85);
+				
+					var gdl = world.findActor('GradeLabel',true);
+					gdl.TweenToWithEnd('_scale',1.4,0.15,b5.Ease.sininout,true,0,i=>{
+						gdl.TweenTo('_scale',1.2,0.15,b5.Ease.sininout)
+					});
+					
+					//Compare record
+					if(data.grade > data.levelPreviousStats.grade) {
+						//Fade out top grade label
+						var topgrade = world.findActor('TopGradeLabel',true);
+						topgrade.TweenTo('opacity',0,0.4);
+						
+						var scoreboard = topgrade.parent;
+						
+						//Create banner and fx
+						var banner = new b5.Actor();
+						banner.atlas = scoreboard.atlas;
+						banner.name = "BannerBG";
+						banner.y = 180;
+						scoreboard.addActor(banner);
+						
+						//Texts and mask
+						var bannerlabel = new b5.LabelActor();
+						bannerlabel.font = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
+						bannerlabel.text = data.stats.type != "boss" ? data.Texts.highScore : data.grade >= 11 ? data.Texts.perfectScore : data.Texts.highScore;
+						scoreboard.addActor(bannerlabel);
+						bannerlabel.setPosition(0,199);
+						bannerlabel.name = "BannerLabel";
+						bannerlabel._scale = 0.5;
+						bannerlabel.letter_spacing = 8;
+						bannerlabel.fill_style = "black";
+						bannerlabel.styles = [
+							{ fill: "#e60205", oy: -2 },
+							{ fill: "black", oy: 0 }
+						];
+						bannerlabel.styleIndex = 1;
+						
+						//Fx
+						data.Puff(scoreboard, 0, 155);
+						
+						//Arc
+						var hz = 3,
+						amp= 65,
+						offs = 1.8;
+						bannerlabel.onTick = function() {
+						for(var i = 0; i < this.text.length; i++) {
+							var pos = i/this.text.length,
+							oy = Math.cos((pos*hz)+offs)*amp,
+							style = this.styles[this.styleIndex];
+							this.applyFormatIndex(i, [style.fill,,,oy+style.oy]);
+						}
+						var large = bannerlabel.w > 770;
+						
+						this._scale = 620/ (bannerlabel.w * (large ? .88 : 1));
+						
+						var amt = ((large?0.85:0.7)/this._scale);
+						
+						amp = 65 * amt;
+						this.y2 = (amt > 1 ? amt*(large?-.1:5.8) : 0) + (data.Texts.highScoreY||0);
+						
+						if(!banner.boil) {
+							this.styleIndex = Math.round(Math.abs(Math.cos(app.now*.008)));
+						}
+						}
+						
+						//Mask
+						var bLMask = new b5.RectActor();
+						bLMask.setSize(0,160);
+						bLMask.setPosition(0,181);
+						scoreboard.addActor(bLMask);
+						bLMask.name = "BannerLabelMask";
+						
+						bannerlabel.setMask(bLMask);
+						
+						//Animate mask and banner
+						banner.playAnimWithEnd('banner_nolabel',e=>{
+							banner.playAnim('bannerboil',true);
+							banner.boil = true;
+						});
+						
+						bLMask.setTimeout(()=>{
+							bLMask.TweenTo('w',500,0.5);
+						},.092);
+						bLMask.onTick = function() {
+							this.dirty();
+						}
+						
+						//Faster blink speed and banner frame
+						banner.TweenTo('frame_speed',22,1.5);
+						banner.onTick = function() {
+							if(this.boil) switch(Math.round(this.current_frame)) {
+								case 0: bannerlabel.styleIndex = 0; break;
+								case 2: bannerlabel.styleIndex = 1; break;
+							}
+						}
+					}
+					
+				},0.5);
+				
+		}
+		index++;
+	}
+	//Time
+	nextCounter();
+	
+	//Listen to input
+	var A_press = false;
+	world.setInterval(()=>{
+		var btnA = game.Input.player1.A || game.Input.player2.A;
+		if(A_press != btnA) {
+			A_press = btnA;
+			data.skip_count = btnA;
+			if(A_press) {
+				if(index == -1) {
+					//Back to map
+					data.loadMap();
+					mus.onComplete = void 0;
+					index = 7;
+				}
+			}
+		}
+	},1/60);
+	
+};
+b5.addSceneResources = function(scene, data, game) {
+	//Resources that will be added to scene, this will be called before LoadScene
+ 
+  !data.loadData.players && (data.loadData.players=[]);
+  
+  //Load character sprites for win screen
+  for(let i = 0, players = data.loadData.players; i<players.length; i++) {
+  	let path = b5.Paths.player + players[i] + '/winscreen/',
+  	resources = new b5.Raw(players[i]+':atlasDescriptor',path + 'atlas.json',true, atlasData => {
+  		let ad = JSON.parse(atlasData),
+  		atlas = new b5.ImageAtlas(players[i]+':WinScreen',[]);
+  	 	atlas.facing = ad.facing;
+  		for(var a = 0; a < ad.bitmaps.length; a++)
+  			atlas.bitmaps.push(
+  				scene.addResource(
+  					new b5.Bitmap(players[i]+'WinScreenBitmap'+a, path + ad.bitmaps[a]),
+  					'bitmap'
+  				));
+  				
+  		scene.addResource(new b5.Raw(players[i]+"Frames",path+ad.frames,true,csv=>{
+  			atlas.parseFrames(csv);
+  		}),'raw');
+  		scene.addResource(new b5.Raw(players[i]+"Anims",path+ad.anims,true,json=>{
+  			atlas.parseAnims(json);
+  		}),'raw');
+  		scene.addResource(atlas, 'brush');
+  	});
+  	scene.addResource(resources,'raw');
+  }
+  
+  //Font
+  
+  var henfont = new b5.ImageAtlas('CupheadHenrietteFont',[
+  	scene.addResource(
+  		new b5.Bitmap('CupheadHenrietteFontBitmap0', b5.Paths.fonts + 'CupheadHenriette-A-merged-0.png'),
+  		'bitmap'
+  	)
+  ]);
+  scene.addResource(henfont,'brush');
+  
+  scene.addResource(new b5.Raw('henriettefontframes', b5.Paths.fonts + 'CupheadHenriette-A-merged.bft', true, font => {
+  	henfont.parseFrames(font);
+  }), 'raw');
+  
+  //BG
+  scene.addResource(
+  	new b5.Bitmap('WSBG', data.resourcePath + 'winscreen_bg.jpg'),
+  	'bitmap'
+  );
+  
+  //WS Atlas
+  var wsatlas = scene.addResource(
+  	new b5.ImageAtlas('WSAtlas',[
+  		scene.addResource(
+  			new b5.Bitmap('WSBitmap0', data.resourcePath + 'SpriteAtlasTexture_WinScreen-0.png'),
+  			'bitmap'
+  		)
+  	]),
+  	'brush'
+  );
+  
+  scene.addResource(
+  	new b5.Raw('WSAtlasFrames', data.resourcePath + 'SpriteAtlasTexture_WinScreen.csv', true, frames => {
+  		wsatlas.parseFrames(frames);
+  	}),
+  	'raw'
+  );
+  scene.addResource(
+  	new b5.Raw('WSAtlasAnims', data.resourcePath + 'winscreen.atlas.json', true, anims => {
+  		wsatlas.parseAnims(anims)
+  	}),
+  	'raw'
+  );
+  
+  //Music
+  var winmus = new b5.Sound('WSMusic', data.resourcePath + 'MUS_VictoryScreen.ogg', true, false, false, {equalizer:true,limiter:true});
+  game.Music.add(winmus);
+  winmus.gain = .65;
+  winmus.output_gain = game.Music.volume;
+  winmus.onDestroy = game.Music.remove;
+  scene.addResource(winmus, 'sound');
+  
+  //Title atlas
+  //Load corresponding language
+  var path = data.resourcePath + 'results_title/' + game.cfg.Language.lang + '/';
+  
+  var titleAtlas = scene.addResource(
+  	new	b5.ImageAtlas('ResultsTitleAtlas',[
+  		scene.addResource(
+  			new b5.Bitmap('ResultsTitleBitmap0', path + 'SpriteAtlasTexture_ResultsTitle-0.png'),
+  			'bitmap'
+  		)
+    ]),
+    'brush'
+  );
+  
+  scene.addResource(new b5.Raw('ResultsTitleAtlasFrames',path + 'SpriteAtlasTexture_ResultsTitle.csv', true, frames => {
+  	titleAtlas.parseFrames(frames);
+  }), 'raw');
+  
+  //Sfx
+  //scene.addResource(
+  	new b5.Raw('SfxResTest', data.resourcePath + 'resourcesplus.json', true, resources => {
+  		game.parseResources(resources,scene);
+  	},true);
+  //	'raw'
+ // );
+	
+};
+b5.onSceneUnload = function(world, scene, data, game, clearResources) {
+    //Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
+    //You can also remove created objects in b5.Game if they were created and used on the scene.
+};
+b5.UpdateScene = function(world, scene, data, game) {
+	//For updating actors and behaviors on your scene every frame
+};

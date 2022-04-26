@@ -1,0 +1,23 @@
+[vertex]
+[/vertex]
+[fragment]
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform vec3 chromaColor;
+uniform float epsilon;
+
+void main(void) {
+	vec4 color = texture2D(uSampler, vTextureCoord);
+	
+	if( length( color.rgb - chromaColor) < epsilon || color.a < 0.0001 ) return;
+	
+	gl_FragColor = color;
+}
+[/fragment]
+[uniforms]
+{
+	"chromaColor": [0,0,0],
+	"epsilon": 0
+}
+[/uniforms]

@@ -1,0 +1,315 @@
+{
+	"id": 3,
+	"WorldScale": [100,100],
+	"view": {
+		"zoom": 1,
+		"cameraExtents": [-1488, -650, 1280, 875]
+	},
+	"physicsObjects": [
+	],
+	"worldObjects": [{
+		"name": "MAP",
+		"type": "",
+		"size": [0,0],
+		"pos": [-1205, -55],
+		"visible": true,
+		"layer": 0,
+		"scale": 1
+	},
+	{
+		"name": "WorldOcean1",
+		"type": "",
+		"size": [1847,2048],
+		"pos": [65, 173],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 0,
+		"scale": 1.1,
+		"bitmap": "Ocean1Bitmap"
+	},
+	{
+		"name": "WorldOcean2",
+		"type": "",
+		"size": [1847,2048],
+		"pos": [2105,173],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 0,
+		"scale": 1.1,
+		"bitmap": "Ocean2Bitmap"
+	},
+	{
+		"name": "NPC_EKHouse",
+		"type": "Rect",
+		"size": [150,130],
+		"pos": [-1370,-320],
+		"visible": true,
+		"layer": 2,
+		"tags": ["NPC"],
+		"add_collider": true,
+		"scale": 1,
+		"color": "transparent"
+	},
+	{
+		"name": "EKHouse",
+		"type": "",
+		"size": [150,150],
+		"pos": [-186,-245],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 2,
+		"scale": 1.05,
+		"cull": false,
+		"atlas": "LevelsIconsAtlas"
+	},
+	{
+		"name": "SmallIslandMain",
+		"type": "",
+		"size": [1232,1208],
+		"pos": [0,0],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 1,
+		"scale": 1,
+		"bitmap": "SmallIslandMainBitmap"
+	},
+	{
+		"name": "TopLevelPieces1",
+		"type": "",
+		"size": [1582,1305],
+		"pos": [-815,50],
+		"visible": true,
+		"layer": 3,
+		"scale": 1,
+		"bitmap": "TopLevelPieces1Bitmap"
+	},
+	{
+		"name": "LightHouse",
+		"type": "",
+		"size": [150,150],
+		"pos": [-650, -380],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 0,
+		"scale": 1,
+		"cull": false,
+		"atlas": "MiscDecoAtlas",
+		"base_frame": 4
+	},
+	{
+		"name": "Dock",
+		"type": "",
+		"size": [150,150],
+		"pos": [-399, 360],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 1,
+		"scale": 1,
+		"cull": false,
+		"atlas": "MiscDecoAtlas",
+		"base_frame":1
+	},
+	{
+		"name": "LargeIslandMain1",
+		"type": "",
+		"size": [1240,1884],
+		"pos": [1187, 47],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 1,
+		"scale": 1,
+		"bitmap": "LargeIslandMain1"
+	},
+	{
+		"name": "LargeIslandMain2",
+		"type": "",
+		"size": [1240,1944],
+		"pos": [2427,67.0],
+		"visible": false,
+		"appendTo": "MAP",
+		"sub_layer": 1,
+		"scale": 1,
+		"bitmap": "LargeIslandMain2"
+	},
+	{
+		"name": "SmallIslandBridge",
+		"type": "",
+		"size": [380,190],
+		"pos": [-533,45],
+		"visible": true,
+		"appendTo": "LargeIslandMain1",
+		"sub_layer": 1,
+		"cull": false,
+		"scale": 1,
+		"atlas": "BridgesAtlas",
+		"base_frame": 8
+	},
+	{
+		"name": "SmallIslandBridgeFrontTop",
+		"type": "",
+		"size": [10,10],
+		"pos": [-550,90],
+		"visible": true,
+		"layer": 3,
+		"tags": ["TopDeco"],
+		"scale": 1,
+		"atlas": "BridgesAtlas",
+		"base_frame": 1
+	},
+	{
+		"name": "SmallIslandBridgeBackTop",
+		"type": "",
+		"size": [10,10],
+		"pos": [-553,-30],
+		"visible": true,
+		"layer": 3,
+		"tags": ["TopDeco"],
+		"scale": 1,
+		"atlas": "BridgesAtlas",
+		"base_frame": 0
+	},
+	{
+		"name": "TopLevelPieces2",
+		"type": "",
+		"size": [1581,1672],
+		"pos": [765,72],
+		"visible": true,
+		"layer": 3,
+		"scale": 1,
+		"bitmap": "TopLevelPieces2Bitmap"
+	},
+	{
+		"name": "NPC_Veggies",
+		"type": "Rect",
+		"size": [150,130],
+		"pos": [-300,490],
+		"visible": true,
+		"layer": 2,
+		"tags": ["NPC"],
+		"add_collider": true,
+		"scale": 1,
+		"color": "transparent"
+	},
+	{
+		"name": "VeggiesLevel",
+		"type": "",
+		"size": [150,150],
+		"pos": [878,555],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 2,
+		"scale": 0.9,
+		"atlas": "LevelsIconsAtlas",
+		"base_anim": "veggies",
+		"cull": false,
+		"anim_loop": true
+	},
+	{
+		"name": "NPC_Shop",
+		"type": "Rect",
+		"size": [150,130],
+		"pos": [105,130],
+		"visible": true,
+		"layer": 2,
+		"tags": ["NPC"],
+		"add_collider": true,
+		"scale": 1,
+		"color": "transparent"
+	},
+	{
+		"name": "Shop-Temp",
+		"type": "",
+		"size": [150,150],
+		"pos": [1330,160],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 2,
+		"scale": 0.95,
+		"atlas": "LevelsIconsAtlas",
+		"base_anim": "shop",
+		"cull": false,
+		"anim_loop": true,
+		"properties": {
+			"tint_colour": "#ffc000"
+		}
+	}
+	],
+	"resources": {
+		"bitmap": [
+			{
+				"name": "SmallIslandMainBitmap",
+				"src": "scenes/inkwellIsle1/world1_small_island_main.png"
+			},
+			{
+				"name": "LargeIslandMain1",
+				"src": "scenes/inkwellIsle1/world1_large_island_main_01.png"
+			},
+			{
+				"name": "LargeIslandMain2",
+				"src": "scenes/inkwellIsle1/world1_large_island_main_02.png"
+			},
+			{
+				"name": "TopLevelPieces1Bitmap",
+				"src": "scenes/inkwellIsle1/world1_top_level_pieces_01.png"
+			},
+			{
+				"name": "TopLevelPieces2Bitmap",
+				"src": "scenes/inkwellIsle1/world1_top_level_pieces_02.png"
+			},
+			{
+				"name": "Ocean1Bitmap",
+				"src": "scenes/inkwellIsle1/world1_ocean_01.jpg"
+			},
+			{
+				"name": "Ocean2Bitmap",
+				"src": "scenes/inkwellIsle1/world1_ocean_02.jpg"
+			},
+			{
+				"name": "LevelsIcons",
+				"src": "scenes/inkwellIsle1/SpriteAtlasTexture_Levels1-0.png"
+			},
+			{
+				"name": "Bridges",
+				"src": "scenes/inkwellIsle1/SpriteAtlasTexture_Bridges-0.png"
+			},
+			{
+				"name": "Deco",
+				"src": "scenes/inkwellIsle1/SpriteAtlasTexture_Misc-0.png"
+			},
+			{
+				"name": "DecoTree",
+				"src": "scenes/inkwellIsle1/world1_tree_island.png"
+			}
+		],
+		"brush": [
+			{
+				"name": "LevelsIconsAtlas",
+				"bitmaps": ["LevelsIcons"],
+				"frames": "scenes/inkwellIsle1/SpriteAtlasTexture_Levels1.csv",
+				"anims": "scenes/inkwellIsle1/Levels.atlas.json"
+			},
+			{
+				"name": "BridgesAtlas",
+				"bitmaps": ["Bridges"],
+				"frames": "scenes/inkwellIsle1/SpriteAtlasTexture_Bridges.csv"
+			},
+			{
+				"name": "MiscDecoAtlas",
+				"bitmaps": ["Deco", "DecoTree"],
+				"frames": "scenes/inkwellIsle1/SpriteAtlasTexture_Misc.csv"
+			}
+		],
+		"sound": [
+			{
+				"name": "MUS_InkwellIsleOne",
+				"src": "scenes/inkwellIsle1/MUS_InkwellIsleOne.ogg",
+				"category": "music",
+				"loop": true,
+				"options": {
+					"equalizer": true,
+					"limiter": true
+				}
+			}
+		]
+	}
+}

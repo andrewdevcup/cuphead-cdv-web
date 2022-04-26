@@ -1,0 +1,50 @@
+(function() {
+	var bg = new b5.RectActor;
+	bg.setSize(1280,720);
+	bg.opacity = 0.7;
+  bg._av = false;
+	scene_GUI.addActor(bg);
+	bg._layer = 5;
+	
+  var label = new b5.LabelActor;
+	label.font = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
+  bg.addActor(label);
+  label.use_parent_opacity = false;
+  label.timer = 0;
+  label.fill_style = "black";
+  label.line_height = 46;
+  label._y = -48;
+  label.round_pixels = false;
+  
+  
+  label.onTick = function() {
+  	this.text = b5.Game.Texts.texts.player2Joined;
+  	
+  	this.timer += app.dt*6.5;
+  	this._scale = 2.7+Math.cos(this.timer)*0.3
+  };
+  
+  b5.Game.ShowPlayerJoinedScreen = function() {
+  	bg._av = true;
+  	this.GUI.disableButtons();
+  	this.Flags.inPlayerJoinedScreen = true;
+  	this.Flags.inPauseMenu && this.PauseMenu.hide(true);
+  	bg.opacity = 0;
+  	var pauseenabled = this.Flags.pausingEnabled;
+  	this.Flags.pausingEnabled = false;
+  	this.GUI.active = false;
+  	sceneMain.active = false;
+  	bg.TweenToWithEnd('opacity',.7,0.3,b5.Ease.linear,0,0,function(){
+  		app.setTimeout(function() {
+  			bg.TweenToWithEnd('opacity',0,0.3,b5.Ease.linear,0,0,function(){
+  				sceneMain.active = true;
+  				b5.Game.Flags.pausingEnabled = pauseenabled;
+  				b5.Game.GUI.active = true;
+  				bg._av = false;
+  				b5.Game.Flags.inPlayerJoinedScreen = false;
+  				b5.Game.GUI.enableAllButtons();
+  			});
+  		},2.3);
+  	});
+  }
+})();

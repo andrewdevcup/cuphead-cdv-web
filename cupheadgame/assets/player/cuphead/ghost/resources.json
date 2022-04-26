@@ -1,0 +1,19 @@
+{
+	"sound": [
+	],
+	"bitmap": [
+		{
+			"name": "CupheadGhostBitmap0",
+			"src": "player/cuphead/ghost/SpriteAtlasTexture_CupheadGhost-0.png",
+			"preload": false
+		}
+	],
+	"brush": [
+		{
+			"name": "CupheadGhostAtlas",
+			"bitmaps": ["CupheadGhostBitmap0"],
+			"frames": "player/cuphead/ghost/SpriteAtlasTexture_CupheadGhost.csv",
+			"anims": "player/cuphead/ghost/CupheadGhost.atlas.json"
+		}
+	]
+}

@@ -1,0 +1,10 @@
+{
+	"cuphead-outline": {
+		"frames": [10, 11, 12],
+		"speed": 12
+	},
+	"mugman-outline": {
+		"frames": [13, 14, 15],
+		"speed": 12
+	}
+}

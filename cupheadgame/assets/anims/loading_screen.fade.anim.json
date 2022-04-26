@@ -1,0 +1,24 @@
+{
+	"fade_in": {
+		"target": "b5.Game.loadingScreen",
+		"property": "opacity",
+		"frames": [0,1],
+		"times": [0,1],
+		"repeats": 1,
+		"tween": true,
+		"easing": [0,0],
+		"destroy": false,
+		"auto_play": false
+	},
+	"fade_out": {
+		"target": "b5.Game.loadingScreen",
+		"property": "opacity",
+		"frames": [1,0],
+		"times": [0,1],
+		"repeats": 1,
+		"tween": true,
+		"easing": [0,0],
+		"destroy": false,
+		"auto_play": false
+	}
+}

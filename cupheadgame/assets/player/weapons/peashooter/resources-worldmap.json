@@ -1,0 +1,15 @@
+{
+	"bitmap": [
+		{
+			"name": "PeashooterEquipIconBitmap0",
+			"src": "player/weapons/peashooter/SpriteAtlasTexture_Peashooter_EquipIcon-0.png"
+		}
+	],
+	"brush": [
+		{
+	  	"name": "peashooter:WEAPON_EQUIP_ICON",
+	  	"bitmaps": ["PeashooterEquipIconBitmap0"],
+	  	"frames": "player/weapons/peashooter/SpriteAtlasTexture_Peashooter_EquipIcon.csv"
+  	}
+  ]
+}

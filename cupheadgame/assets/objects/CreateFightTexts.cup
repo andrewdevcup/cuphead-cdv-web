@@ -1,0 +1,170 @@
+b5.export = function(world, scene, data, game) {
+	var myexports = {};
+
+	//Load sequences
+
+myexports.loadResources = function() {
+	var special = game.cfg.Language.lang == "es" ? b5.Maths.randomChance(1/50) ? '-AZUKAR' : '' : '',
+	basePath = b5.Paths.sceneRes + 'common_bosslevel/FightText/',
+	readyRes = basePath + 'GetReady' + special + '/SpriteAtlasTexture_GetReady-',
+	KOres = basePath + 'KO/SpriteAtlasTexture_Knockout-0.png';
+	
+	//Get ready
+	for (var i = 0, bitmaps = []; i <= 1; i++) if(!scene.findResource('FightTextGetReadyBitmap'+i, 'bitmap')) {
+		var bitmap = new b5.Bitmap('FightTextGetReadyBitmap'+i, readyRes + i + '.png');
+		scene.addResource(bitmap, 'bitmap');
+		bitmaps.push(bitmap);
+	}
+	
+	if(!scene.findResource('FightTextGetReadyAtlas','brush')) {
+		var readyTextAtlas = new b5.ImageAtlas('FightTextGetReadyAtlas', bitmaps);
+		readyTextAtlas.parseFrames(b5.File.readSync(basePath + 'GetReady'+ special + '/GetReady.frames.json'),true);
+
+		scene.addResource(readyTextAtlas, 'brush');
+	}
+	
+	//Knockout
+	
+	if(!scene.findResource('FightTextKOBitmap'+i,'bitmap')) {
+		var bitmap = new b5.Bitmap('FightTextKOBitmap'+i, KOres),
+		bitmaps = [];
+		scene.addResource(bitmap, 'bitmap');
+		bitmaps.push(bitmap);
+	}
+	if(!scene.findResource('FightTextKOAtlas','brush')) {
+		var KOTextAtlas = new b5.ImageAtlas('FightTextKOAtlas', bitmaps);
+		KOTextAtlas.parseFrames(b5.File.readSync(basePath + 'KO/Knockout.frames.json'),true);
+		scene.addResource(KOTextAtlas, 'brush');
+	}
+}
+	//Play
+	data.playFightText = function(text, onAnimEnd) {
+		switch (text) {
+			case 'GetReady':
+				game.Flags.pausingEnabled = false;
+
+				for (var i = 0, p = world.findActorsByTagName('player', true); i < p.length; i++)
+					data[p[i].name].flags.controllable = false;
+
+
+				//Announcer
+				[
+					scene.findResource('AnnouncerGetReady1', 'sound'),
+					scene.findResource('AnnouncerGetReady2', 'sound'),
+					scene.findResource('AnnouncerGetReady3', 'sound'),
+					scene.findResource('AnnouncerGetReady4', 'sound'),
+					scene.findResource('AnnouncerGetReady5', 'sound')
+				][b5.Maths.randomRange(0, 4)].play();
+				scene.findResource('LevelBellIntro', 'sound').play(0.8);
+				world.setTimeout(function() {
+					var a = new b5.Actor;
+					a.atlas = scene.findResource('FightTextGetReadyAtlas', 'brush');
+					scene.addActor(a);
+					a._layer = 5;
+					a._scale = 2.5;
+					a.frame_speed = 24;
+					a.frames_repeat = false;
+					a.onAnimEnd = function() {
+						a.destroy();
+					};
+					world.setTimeout(function() {
+						game.Flags.pausingEnabled = !game.Multiplayer.isGuest;
+						data.levelData.fightStarted = true;
+						[
+							scene.findResource('AnnouncerFight1', 'sound'),
+							scene.findResource('AnnouncerFight2', 'sound'),
+							scene.findResource('AnnouncerFight3', 'sound'),
+							scene.findResource('AnnouncerFight4', 'sound'),
+							scene.findResource('AnnouncerFight5', 'sound')
+						][b5.Maths.randomRange(0, 4)].play();
+						
+						scene.events.dispatch('fightstarted');
+
+						for (var i = 0, p = world.findActorsByTagName('player', true); i < p.length; i++)
+							data[p[i].name].flags.controllable = true;
+					},
+						0.8);
+				}, 1.45);
+				break;
+			case 'YouDied':
+				var bg = new b5.RectActor,
+				a = new b5.Actor;
+
+				bg.fill_style = "black";
+				bg.setSize(1280, 720);
+				bg.opacity = 0.52;
+				
+				bg.fit = b5.Actor.FitSize;
+
+				a.bitmap = scene.findResource('YouDiedTextBitmap', 'bitmap');
+				a.setSize(1076, 232);
+				a.use_parent_opacity = false;
+				a.round_pixels = false;
+				a.onTick = function() {
+					this.setPosition(
+						b5.Maths.randomRange(-1,
+							1,
+							true),
+						b5.Maths.randomRange(-1,
+							1,
+							true)
+					);
+				}
+				bg.addActor(a);
+				bg.name = "YouDiedTextBackground"
+				scene.addActor(bg);
+				bg._layer = 5;
+
+				a.setTimeout(function() {
+					a.TweenToWithEnd('opacity',
+						0,
+						0.35,
+						b5.Ease.linear,
+						true,
+						0,
+						onAnimEnd
+						)
+				}, 1);
+				break;
+			case 'Knockout':
+				var a = new b5.Actor;
+				a.atlas = scene.findResource('FightTextKOAtlas', 'brush');
+				scene.addActor(a);
+				a._layer = 5;
+				a._scale = 2.5;
+				a.frame_speed = 24;
+				a.frames_repeat = false;
+				world.active = false;
+				scene.world.m_sleep = true;
+				game.Flags.pausingEnabled = false;
+				//Play sfx
+				scene.findResource('LevelBellKnockout', 'sound').play();
+				scene.findResource('AnnouncerKnockout', 'sound').play();
+
+				data.levelData.fightStarted = false;
+				for (var i = 0, p = world.findActorsByTagName('player', true); i < p.length; i++) {
+					p[i].setIntangible(true);
+					p[i].flags.canShoot = false;
+					p[i].flags.invincible = true;
+				}
+
+				a.onAnimEnd = function() {
+					world.active = true;
+					scene.world.m_sleep = false;
+					scene.events.dispatch('after-knockout');
+					a.destroy();
+					world.setTimeout(function() {
+					  scene.findResource('BossDefeatSting', 'sound').play();
+						world.setTimeout(f => game.Music.stopAll(true),1.8);
+						world.setTimeout(function() {
+							game.Sfx.fade_out(1.99);
+							!game.Multiplayer.isGuest && scene.events.dispatch('onfightwin:nextscene');
+							game.Flags.pausingEnabled = !game.Multiplayer.isGuest;
+						},2);
+					}, 1.5);
+				};
+				break;
+		}
+	};
+	return myexports;
+};

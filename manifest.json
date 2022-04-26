@@ -1,0 +1,11 @@
+{
+  "background_color": "#FFF",
+  "display": "standalone",
+  "name": "Cuphead CDV",
+  "short_name": "Cuphead CDV",
+  "version": "com.andrewdev.cupheadgame",
+  "description": "A fangame made with effort.",
+  "author": "AndrewDevCup",
+  "icons": [],
+  "start_url": "index.html"
+}

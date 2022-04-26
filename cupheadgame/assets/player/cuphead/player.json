@@ -1,0 +1,150 @@
+{
+	"sub_layer": 2,
+	"body": {
+		"hitboxes": {
+			"onStanding": {
+				"type": "Rect",
+				"name": "StandingHitbox",
+				"offset": [0, 0],
+				"size": [60,107]
+			},
+			"onJumping": {
+				"type": "Arc",
+				"name": "JumpingHitbox",
+				"offset": [0, -18],
+				"radius": 35
+			},
+			"onDucking": {
+				"type": "Rect",
+				"name": "DuckingHitbox",
+				"offset": [0, 30],
+				"size": [90,55]
+			},
+			"onRunning": {
+				"type": "Arc",
+				"name": "RunningHitbox",
+				"offset": [10, -10],
+				"radius": 50
+			},
+			"onDashing": {
+				"type": "Rect",
+				"name": "DashingHitbox",
+				"offset": [0, 0],
+				"size": [150,50],
+				"times": [2,99999]
+			},
+			"parryHitbox": {
+				"type": "Arc",
+				"name": "ParryHitbox",
+				"offset": [0, -18],
+				"radius": 72
+			}
+		},
+		"physicsBody": {
+			"shape": "TypePolygon",
+			"density": 1,
+			"friction": 0,
+			"size": [65,110],
+			"onJumping_size": [60,60],
+			"onRunning_size": [110,110],
+			"onDashing_size": [140,60],
+			"onDashing_size_ground": [140,110]
+		}
+	},
+	"variables": {
+		"baseSpeed": 24,
+		"jumpSpeed": 50,
+		"dashTime": 0.3,
+		"jumpHeight": 182,
+		"dashSpeed": 50,
+		"dashRecoil": 0.1,
+		"coyote": 0.032,
+		"color": "#a02100",
+		"parryJumpHeightMultiplier": 1.65,
+		"intangibleDuration": 2.3,
+		"shootOffset": [0,0],
+		"supermeter": 0,
+		"max_supermeter_score": 500,
+		"diedAt": 0,
+		"times_died": 0,
+		"damageMultiplier": 1
+	},
+	"flags": {
+		"standing": true,
+		"running": false,
+		"dashing": false,
+		"inAir": false,
+		"inPlatform": false,
+		"droppingPlatform": false,
+		"jumpState": 0,
+		"parryActive": false,
+		"parrying": false,
+		"successfulParry": false,
+		"damageHit": false,
+		"controllable": true,
+		"invincible": false,
+		"intangible": false,
+		"hittable": true,
+		"heartPoints": 3,
+		"shooting": false,
+		"canShoot": true,
+		"canShootEX": true,
+		"shootingDiagonal": false,
+		"locking": false,
+		"weaponIndex": 0,
+		"ducking": false,
+		"shootingEX": false,
+		"move_x_axis": 0
+	},
+	"components": [
+		"AtlasAnimationsComponent.cup",
+		"JumpComponent.cup",
+		"MovementComponent.cup",
+		"ShootComponent.cup",
+		"ShootEXComponent.cup",
+		"LockComponent.cup",
+		"DuckComponent.cup",
+		"DashComponent.cup",
+		"HitboxesComponent.cup",
+		"ParryComponent.cup",
+		"GhostComponent.cup",
+		"DamageComponent.cup",
+		"BoilAnimationsComponent.cup",
+		"WeaponSwitch.cup",
+		"CharmComponent.cup",
+		"ScoreComponent.cup"
+	],
+	"resources": {
+		"bitmaps": [
+			{
+				"name": "CupheadLevelBitmap0",
+				"src": "player/cuphead/SpriteAtlasTexture_Cuphead-0.png",
+				"preload": false
+  		},
+  		{
+				"name": "CupheadLevelBitmap1",
+				"src": "player/cuphead/SpriteAtlasTexture_Cuphead-1.png",
+				"preload": false
+  		},
+  		{
+				"name": "CupheadLevelBitmap2",
+				"src": "player/cuphead/SpriteAtlasTexture_Cuphead-2.png",
+				"preload": false
+  		},
+  		{
+				"name": "CupheadLevelBitmap3",
+				"src": "player/cuphead/SpriteAtlasTexture_Cuphead-3.png",
+				"preload": false
+  		}
+		],
+		"atlas": {
+			"name": "CupheadLevelAtlas",
+			"frames": "player/cuphead/SpriteAtlasTexture_Cuphead.csv",
+			"anims": "player/cuphead/CupheadAtlasAnims.atlas.json",
+			"offset": [0,-21],
+			"scale": 1.05
+		},
+		"alignment_frame": 0,
+		"sounds": []
+	}
+}

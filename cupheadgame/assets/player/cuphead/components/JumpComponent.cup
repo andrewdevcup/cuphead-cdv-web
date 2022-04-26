@@ -1,0 +1,114 @@
+return function(thisPlayer, flags, input, world, scene, game, data) {
+	//Setup local variables here
+	//This function will be called when player is first created
+	//For executing actions when loading screen is being hidden,
+	//add the method thisPlayer.onLoadingScreenOut = function(){...}
+	//var myvar = flags.jumping
+
+	var enableHold = true,
+	jumping = false,
+	stA = false,
+	startHeight = 32768;
+
+	//Sfx
+	var jumpsfx = [
+		scene.findResource('PlayerJumpSfx1', 'sound'),
+		scene.findResource('PlayerJumpSfx2', 'sound'),
+		scene.findResource('PlayerJumpSfx3', 'sound')
+	],
+	landsfx = [
+		scene.findResource('PlayerLandSfx1', 'sound'),
+		scene.findResource('PlayerLandSfx2', 'sound')
+	];
+
+	return function(thisPlayer, flags, input, world, scene, game, data) {
+		//This is a loop function
+		//It will be called consecutively when loadingScreenOut
+
+		//Detect physics body overlaps
+		var overlaps = thisPlayer.A_overlaps;
+		!flags.inAir && (flags.inAir = true,
+		flags.inPlatform = false);
+		
+		for (var i = 0; i < overlaps.length; i++) if (Math.round(thisPlayer.body.m_linearVelocity.y) >= 0) {
+			if (overlaps[i].tags.indexOf('floor') != -1 && thisPlayer.y < overlaps[i].y - (overlaps[i].h/2)) {
+				flags.inAir = false; break;
+			} else if (overlaps[i].tags.indexOf('platform')>-1 && overlaps[i].playersOver[thisPlayer.name] && !flags.inPlatform && !flags.droppingPlatform) {
+				flags.inAir = false; flags.inPlatform = true; break
+			}
+		}
+	/*	if (overlaps.length == 0) {
+			flags.inAir = true;
+			flags.inPlatform = false;
+		}*/
+    
+
+		//Air state change
+		if (flags.inAir != jumping) {
+			jumping = flags.inAir;
+
+			if (jumping && flags.jumpState == 0) {
+				flags.jumpState = 1; //Leave ground
+				flags.ducking = false;
+			} else if (!jumping) {
+				flags.jumpState = 0; //In ground
+				startHeight = 32768;
+				flags.parryActive = false;
+				flags.successfulParry = false;
+				flags.canShootEX = true;
+				flags.droppingPlatform = false;
+				//Spawn particle
+				data.spawnPlayerParticle('landDust', thisPlayer);
+				//Play sfx
+				landsfx[b5.Maths.randomRange(0, 1)].play();
+
+			}
+
+
+			thisPlayer.updateAnimations = true;
+		}
+
+		//Input A state change
+		if (input.A && !stA && flags.controllable) {
+			stA = true;
+
+			//If inAir, parry
+			if (flags.inAir && flags.jumpState == 2 && !flags.dashing) {
+				flags.parryActive = true;
+				flags.jumpState = 3; //Parry
+				//On parry anim end
+				thisPlayer.updateAnimations = true;
+			}
+		} else stA = false;
+
+		if (flags.controllable) {
+			if (input.A && enableHold && flags.jumpState == 0 && !flags.dashing) {
+				//Jump time
+				if (startHeight != thisPlayer.y && !(flags.ducking && flags.inPlatform)) {
+					startHeight = thisPlayer.y;
+					enableHold = false;
+					//Play sfx
+					jumpsfx[b5.Maths.randomRange(0, 2)].play();
+				} else if (flags.ducking && flags.inPlatform) {
+					if (thisPlayer.data.platform != null) {
+						/*Platform*/
+						thisPlayer.data.platform.drop(thisPlayer);
+						thisPlayer.data.platform = null;
+					}
+				}
+
+			} else if (!input.A) {
+				if (flags.jumpState == 0) enableHold = true;
+				else if (flags.jumpState == 1) {
+					flags.jumpState = 2; //A button released
+					startHeight = 32768;
+				}
+			}
+		}
+		var jumpHeight = !flags.damageHit && !flags.shootingEX ? startHeight - thisPlayer.data.jumpHeight : 32768;
+
+		if (startHeight != 32768 && thisPlayer.y > jumpHeight)
+			thisPlayer.body.m_linearVelocity.y = flags.dashing || (flags.ducking && flags.inPlatform)?  0: !flags.shootingEX ?-thisPlayer.data.jumpSpeed:0;
+		else if (thisPlayer.y < jumpHeight && flags.inAir) startHeight = 32768;
+	};
+};

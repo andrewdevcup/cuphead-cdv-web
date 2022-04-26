@@ -1,0 +1,681 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [-425,0],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 1,
+		"playerLayer": 1,
+		"zoom": 0.9,
+		"world_depth": 1,
+		"cameraExtents": [0,0,2842,0],
+		"cameraRange": 1,
+		"freeCamera": true
+	},
+	"physicsObjects": [{
+		"name": "LevelFloor",
+		"type": "RectActor",
+		"size": [8000, 30],
+		"detectionSize": [8000,32],
+		"pos": [3020, 272],
+		"color": "blue",
+		"visible": false,
+		"layer": 1,
+		"sub_layer": 2,
+		"tags": [],
+		"detectionTags": ["floor"],
+		"body": {
+			"friction": 1,
+			"fixedRotation": true,
+			"bodyType": "static"
+		}
+	},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [-600, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "CubeColl",
+			"type": "RectActor",
+			"size": [215,154],
+			"detectionSize": [215,164],
+			"pos": [925,180],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["ignoreBullets"],
+			"detectionTags": ["floor","ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Cylinder1CollW",
+			"type": "RectActor",
+			"size": [185,340],
+			"detectionSize": [185,340],
+			"pos": [1510,110],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall", "ignoreBullets"],
+			"detectionTags": ["ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Cylinder1CollPlat",
+			"type": "RectActor",
+			"size": [500,20],
+			"detectionSize": [500,25],
+			"detectionTags": ["platform","ignoreBullets"],
+			"pos": [1850,-75],
+			"color": "blue",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Cylinder1CollFloor",
+			"type": "RectActor",
+			"size": [185,20],
+			"detectionSize": [185,25],
+			"pos": [1510,-75],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["ignoreBullets"],
+			"detectionTags": ["floor","ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static",
+				"weldTo": "Cylinder1CollPlat"
+			}
+		},
+		{
+			"name": "Cylinder1CollW2",
+			"type": "RectActor",
+			"size": [185,340],
+			"detectionSize": [185,340],
+			"pos": [2030,-260],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Plynth0Coll0",
+			"type": "RectActor",
+			"size": [195,340],
+			"detectionSize": [195,340],
+			"pos": [3325,60],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall", "ignoreBullets"],
+			"detectionTags": ["ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Plynth0CollFloor",
+			"type": "RectActor",
+			"size": [195,25],
+			"detectionSize": [195,30],
+			"pos": [3325,-260],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["ignoreBullets"],
+			"detectionTags": ["floor","ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Cylinder2Coll",
+			"type": "RectActor",
+			"size": [165,345],
+			"detectionSize": [165,350],
+			"pos": [4330,97],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["ignoreBullets"],
+			"detectionTags": ["floor","ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Cube2Coll",
+			"type": "RectActor",
+			"size": [192,175],
+			"detectionSize": [192,180],
+			"pos": [4527,205],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["ignoreBullets"],
+			"detectionTags": ["floor","ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "Cube3Coll",
+			"type": "RectActor",
+			"size": [187,181],
+			"detectionSize": [187,186],
+			"pos": [6015,205],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["ignoreBullets"],
+			"detectionTags": ["floor","ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [6860, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		}
+  ],
+	"worldObjects": [{
+		"name": "TutorialBG",
+		"type": "",
+		"size": [1024,576],
+		"pos": [0,0],
+		"visible": true,
+		"appendTo": "scene_background",
+		"sub_layer": 0,
+		"scale": 1.25
+	},
+		{
+			"name": "TutorialFront",
+			"type": "",
+			"size": [1024,576],
+			"pos": [0,0],
+			"visible": true,
+			"appendTo": "scene",
+			"sub_layer": 2,
+			"scale": 1.25
+		},
+		{
+			"name": "TutorialLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [-380,-30],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.2,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "DuckLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [135,-40],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "DuckArrow",
+			"type": "",
+			"size": [0,0],
+			"pos": [135,120],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1
+		},
+		{
+			"name": "JumpLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [625,150],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "JumpArrow",
+			"type": "",
+			"size": [0,0],
+			"pos": [685,30],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1
+		},
+		{
+			"name": "Cube",
+			"type": "",
+			"size": [0,0],
+			"pos": [935,180],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.2
+		},
+		{
+			"name": "DashLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [1230,-190],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "DashArrow",
+			"type": "",
+			"size": [0,0],
+			"pos": [1390,-250],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1
+		},
+		{
+			"name": "CylinderAndPlatform",
+			"type": "",
+			"size": [0,0],
+			"pos": [1770,-85],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.53
+		},
+		{
+			"name": "DescendLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [1785,126],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "DescendArrow",
+			"type": "",
+			"size": [0,0],
+			"pos": [1745,69],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 1,
+			"scale": 1.2
+		},
+		{
+			"name": "ShootLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [2400,-19],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "LockLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [2800,-19],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "LockArrow",
+			"type": "",
+			"size": [0,0],
+			"pos": [3140,0],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1
+		},
+		{
+			"name": "Plynth0",
+			"type": "",
+			"size": [0,0],
+			"pos": [3345,135],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1
+		},
+		{
+			"name": "Plynth0Pyramid",
+			"type": "",
+			"size": [0,0],
+			"pos": [3325,-51],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.99
+		},
+		{
+			"name": "Plynth0Target",
+			"type": "",
+			"id": 200,
+			"size": [60,75],
+			"pos": [3325,-170],
+			"visible": true,
+			"tags": ["hittableEnemy"],
+			"add_collider": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.99
+		},
+		{
+			"name": "ParryLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [3880,-223],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "ParryObject1",
+			"type": "",
+			"id": 70,
+			"size": [71,71],
+			"pos": [3670, -65],
+			"visible": true,
+			"tags": ["Parryable"],
+			"add_collider": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.05,
+			"parryScore": 100
+		},
+		{
+			"name": "ParryObject2",
+			"type": "",
+			"id": 71,
+			"size": [71,71],
+			"pos": [3880, -65],
+			"visible": true,
+			"tags": ["Parryable"],
+			"add_collider": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.05,
+			"parryScore": 100
+		},
+		{
+			"name": "ParryObject3",
+			"type": "",
+			"id": 72,
+			"size": [71,71],
+			"pos": [4090, -65],
+			"visible": true,
+			"tags": ["Parryable"],
+			"add_collider": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.05,
+			"parryScore": 100
+		},
+		{
+			"name": "ParryArrow1",
+			"type": "",
+			"size": [71,71],
+			"pos": [3668, 40],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.4
+		},
+		{
+			"name": "ParryArrow2",
+			"type": "",
+			"size": [71,71],
+			"pos": [3880, 38],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.4
+		},
+		{
+			"name": "ParryArrow3",
+			"type": "",
+			"size": [71,71],
+			"pos": [4090, 38],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.4
+		},
+		{
+			"name": "ParryArrowBounce",
+			"type": "",
+			"size": [71,71],
+			"pos": [4190, -140],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1
+		},
+		{
+			"name": "Cylinder2",
+			"type": "",
+			"size": [0,0],
+			"pos": [4340, 90],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.05
+		},
+		{
+			"name": "Cube2",
+			"type": "",
+			"size": [0,0],
+			"pos": [4537, 180],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.05
+		},
+		{
+			"name": "ArrowRevive",
+			"type": "",
+			"size": [1,1],
+			"pos": [4660, -175],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.1
+		},
+		{
+			"name": "ReviveLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [4865,-184],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "EXLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [5310,20],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "Cube3",
+			"type": "",
+			"size": [0,0],
+			"pos": [6025, 180],
+			"visible": true,
+			"tags": [],
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.05
+		},
+		{
+			"name": "CoinLabel",
+			"type": "Label",
+			"size": [],
+			"pos": [6015,-174],
+			"visible": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 0.95,
+			"color": "#1e1e1e",
+			"cull": true
+		},
+		{
+			"name": "NPC_ExitDoor",
+			"type": "",
+			"size": [230,273],
+			"pos": [6670, 110],
+			"visible": true,
+			"tags": ["NPC"],
+			"add_collider": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1.1
+		},
+		{
+			"name": "ParryLight",
+			"type": "",
+			"id": 73,
+			"size": [60,60],
+			"pos": [1990, -360],
+			"visible": true,
+			"tags": ["Parryable"],
+			"add_collider": true,
+			"layer": 1,
+			"sub_layer": 0,
+			"scale": 1,
+			"color": "magenta"
+		}
+	],
+	"resources": {
+		"bitmap": [
+			{
+				"name": "CupheadGhostBitmap0",
+				"src": "player/cuphead/ghost/SpriteAtlasTexture_CupheadGhost-0.png"
+			}
+		],
+		"brush": [
+			{
+				"name": "CupheadGhostAtlas",
+				"bitmaps": ["CupheadGhostBitmap0"],
+				"frames": "player/cuphead/ghost/SpriteAtlasTexture_CupheadGhost.csv",
+				"anims": "player/cuphead/ghost/CupheadGhost.atlas.json"
+			}
+		]
+	}
+}

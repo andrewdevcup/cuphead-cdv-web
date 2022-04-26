@@ -1,0 +1,46 @@
+/* Written by AndrewDev */
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform vec2 size;
+uniform float epsilon;
+uniform bool fill;
+uniform bool stroke;
+uniform vec3 fillColor;
+uniform vec3 strokeColor;
+
+vec2 pixel = vec2(1./size.x, 1./size.y);
+
+void main(void) {
+
+	//Get sample for current pixel and sides
+	vec4 color = texture2D(uSampler, vTextureCoord);
+	vec4 luma = vec4(0.);
+
+	//Sample up pixel
+	luma += texture2D(uSampler, vTextureCoord - vec2(0., pixel.y));
+
+	//Sample down pixel
+	luma += texture2D(uSampler, vTextureCoord + vec2(0., pixel.y));
+
+	//Sample left pixel
+	luma += texture2D(uSampler, vTextureCoord - vec2(pixel.x, 0.));
+
+	//Sample right pixel
+	luma += texture2D(uSampler, vTextureCoord + vec2(pixel.x, 0.));
+
+	//Average
+	luma *= .25;
+
+	//Average luma for current pixel and sides
+	float lmc = (color.r + color.g + color.b) / 3.;
+	float lms = (luma.r + luma.g + luma.b) / 3.;
+
+	//Compare
+	//Set to white if sides average luma is greater than current luma, else set to black.
+	color.rgb = vec3(lms > lmc + epsilon ? 
+	  (stroke ? strokeColor : color.rgb): 
+	  (fill ? fillColor : color.rgb));
+
+	gl_FragColor = color;
+}

@@ -1,0 +1,41 @@
+{
+	"sound": [
+		{
+			"automatize": {
+				"name": "PlayerWorldmapFootstepSfx%i",
+				"start": 1,
+				"end": 12,
+				"pad": 3,
+				"src": "player/common_map/footstep/sfx_WorldMap_Footstep_###.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		},
+		{
+			"automatize": {
+				"name": "PlayerWorldmapFootstepBridgeSfx%i",
+				"start": 1,
+				"end": 10,
+				"pad": 3,
+				"src": "player/common_map/footstep_bridge/sfx_WorldMap_Footstep_Bridge_###.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		}
+	],
+	"bitmap": [
+		{
+			"name": "playerMapDust0",
+			"src": "player/common_map/SpriteAtlasTexture_playerMapDust-0.png",
+			"allow_cache": true
+		}
+	],
+	"brush": [
+		{
+			"name": "playerMapDustAtlas",
+			"bitmaps": ["playerMapDust0"],
+			"frames": "player/common_map/SpriteAtlasTexture_playerMapDust.csv",
+			"anims": "player/common_map/playerMapDust.atlas.json"
+		}
+	]
+}

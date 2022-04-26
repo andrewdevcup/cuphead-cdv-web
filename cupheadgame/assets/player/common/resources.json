@@ -1,0 +1,355 @@
+{
+	"sound": [
+		{
+			"name": "PlayerDashSfx1",
+			"src": "player/common/sfx_player_dash_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDashSfx2",
+			"src": "player/common/sfx_player_dash_02.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDashSfx3",
+			"src": "player/common/sfx_player_dash_03.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerJumpSfx1",
+			"src": "player/common/sfx_player_jump_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerJumpSfx2",
+			"src": "player/common/sfx_player_jump_02.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerJumpSfx3",
+			"src": "player/common/sfx_player_jump_03.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerLandSfx1",
+			"src": "player/common/sfx_player_land_ground_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerLandSfx2",
+			"src": "player/common/sfx_player_land_ground_02.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerWpnExSfx1",
+			"src": "player/common/sfx_player_ex_forward_ground_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerWpnExSfx2",
+			"src": "player/common/sfx_player_ex_forward_ground_02.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerWpnExSfx3",
+			"src": "player/common/sfx_player_ex_forward_ground_03.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerWpnExSfx4",
+			"src": "player/common/sfx_player_ex_forward_ground_04.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerParrySlapSfx1",
+			"src": "player/common/sfx_player_parry_slap_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerParrySlapSfx2",
+			"src": "player/common/sfx_player_parry_slap_02.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerParryPowerUpSfx1",
+			"src": "player/common/sfx_player_parry_power_up_hit_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerParryPowerUpSfx2",
+			"src": "player/common/sfx_player_parry_power_up_hit_02.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerParryPowerUpFull",
+			"src": "player/common/sfx_player_parry_power_up_full.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerReviveSfx",
+			"src": "player/common/sfx_player_thankyou_revive.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerCardSfx1",
+			"src": "player/common/sfx_player_card0.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerCardSfx2",
+			"src": "player/common/sfx_player_card1.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDamageCrack0",
+			"src": "player/common/sfx_player_damage_crack0.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDamageCrack1",
+			"src": "player/common/sfx_player_damage_crack1.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDamageCrack2",
+			"src": "player/common/sfx_player_damage_crack2.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDamageCrack3",
+			"src": "player/common/sfx_player_damage_crack3.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerHitSfx0",
+			"src": "player/common/sfx_player_hit0.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerHitSfx1",
+			"src": "player/common/sfx_player_hit1.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerHitSfx2",
+			"src": "player/common/sfx_player_hit2.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerHitSfx3",
+			"src": "player/common/sfx_player_hit3.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerHitSfx4",
+			"src": "player/common/sfx_player_hit4.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDeathSfx1",
+			"src": "player/common/sfx_player_death0.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "PlayerDeathSfx2",
+			"src": "player/common/sfx_player_death1.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		}
+	],
+	"bitmap": [
+		{
+			"name": "HUD_Bitmap",
+			"src": "player/common/sactx_BC7_HUD.png",
+			"preload": false
+		},
+		{
+			"name": "playerRunningDustBitmap",
+			"src": "player/common/runningDust/playerRunningDustAtlas.png",
+			"preload": false
+		},
+		{
+			"name": "playerDashDustBitmap",
+			"src": "player/common/dashDust/playerDashDustAtlas.png",
+			"preload": false
+		},
+		{
+			"name": "playerLandDustBitmap",
+			"src": "player/common/landDust/playerLandDustAtlas.png",
+			"preload": false
+		},
+		{
+			"name": "parrySparkFXBitmap",
+			"src": "player/common/parrySpark/playerParrySparkAtlas.png",
+			"preload": false
+		},
+		{
+			"name": "parryEffectBitmap1",
+			"src": "player/common/Cuphead-ParryEffectA_0001.png",
+			"preload": false
+		},
+		{
+			"name": "parryEffectBitmap2",
+			"src": "player/common/Cuphead-ParryEffectA_0002.png",
+			"preload": false
+		},
+		{
+			"name": "playerHitFXBitmap",
+			"src": "player/common/PlayerHitFX-0.png",
+			"preload": false
+		},
+		{
+			"name": "playerEXChargeBitmap",
+			"src": "player/common/EX_ChargeUp-0.png",
+			"preload": false
+		},
+		{
+			"name": "playerEXDustBitmap0",
+			"src": "player/common/exDust/SpriteAtlasTexture_WeaponEX_Dust-0.png",
+			"preload": false
+		},
+		{
+			"name": "playerEXDustBitmap1",
+			"src": "player/common/exDust/SpriteAtlasTexture_WeaponEX_Dust-1.png",
+			"preload": false
+		},
+		{
+			"name": "playerDeathBodiesBitmap0",
+			"src": "player/common/SpriteAtlasTexture_PlayerDeathBodies-0.png"
+		},
+		{
+			"name": "playerExplodeBitmap0",
+			"src": "player/common/SpriteAtlasTexture_playerExplodeFX-0.png"
+		},
+		{
+			"name": "playerExplodeBitmap1",
+			"src": "player/common/SpriteAtlasTexture_playerExplodeFX-1.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "HUD_Atlas",
+			"bitmaps": ["HUD_Bitmap"],
+			"frames": "player/common/sactx_BC7_HUD.csv",
+			"anims": "player/common/PlayerHUD.atlas.json"
+		},
+		{
+			"name": "playerRunningDustAtlas",
+			"bitmaps": ["playerRunningDustBitmap"],
+			"frames": "player/common/runningDust/playerRunningDustAtlas.csv",
+			"anims": "player/common/runningDust/runningDust.atlas.json"
+		},
+		{
+			"name": "playerDashDustAtlas",
+			"bitmaps": ["playerDashDustBitmap"],
+			"frames": "player/common/dashDust/playerDashDustAtlas.csv",
+			"anims": "player/common/dashDust/playerDashDust.atlas.json"
+		},
+		{
+			"name": "playerLandDustAtlas",
+			"bitmaps": ["playerLandDustBitmap"],
+			"frames": "player/common/landDust/playerLandDustAtlas.csv",
+			"anims": "player/common/landDust/landDust.atlas.json"
+		},
+		{
+			"name": "playerParrySparkAtlas",
+			"bitmaps": ["parrySparkFXBitmap"],
+			"frames": "player/common/parrySpark/playerParrySparkAtlas.csv",
+			"anims": "player/common/parrySpark/parrySpark.atlas.json"
+		},
+		{
+			"name": "playerParryEffectAtlas",
+			"bitmaps": ["parryEffectBitmap1","parryEffectBitmap2"],
+			"frames": "player/common/Cuphead-ParryEffectA.csv"
+		},
+		{
+			"name": "playerHitFXAtlas",
+			"bitmaps": ["playerHitFXBitmap"],
+			"frames": "player/common/PlayerHitFX.csv"
+		},
+		{
+			"name": "playerEXChargeUpAtlas",
+			"bitmaps": ["playerEXChargeBitmap"],
+			"frames": "player/common/EX_ChargeUp.csv"
+		},
+		{
+			"name": "playerEXDustAtlas",
+			"bitmaps": ["playerEXDustBitmap0", "playerEXDustBitmap1"],
+			"frames": "player/common/exDust/SpriteAtlasTexture_WeaponEX_Dust.csv"
+		},
+		{
+			"name": "playerDeathBodiesAtlas",
+			"bitmaps": ["playerDeathBodiesBitmap0"],
+			"frames": "player/common/SpriteAtlasTexture_PlayerDeathBodies.csv",
+			"anims": "player/common/playerDeathBodies.atlas.json"
+		},
+		{
+			"name": "playerExplodeFXAtlas",
+			"bitmaps": ["playerExplodeBitmap0","playerExplodeBitmap1"],
+			"frames": "player/common/SpriteAtlasTexture_playerExplodeFX.csv"
+		}
+	],
+	"shader": [
+	]
+}

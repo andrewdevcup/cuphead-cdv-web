@@ -1,0 +1,98 @@
+{
+	"sound": [
+		{
+			"name": "CoinGrabSfx1",
+			"src": "scenes/common_platforming/sfx_coin_pickup_01.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "CoinGrabSfx2",
+			"src": "scenes/common_platforming/sfx_coin_pickup_02.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "CoinGrabSfx3",
+			"src": "scenes/common_platforming/sfx_coin_pickup_03.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		}
+	],
+	"bitmap": [
+		{
+			"name": "GenericLGExplosionBitmap0",
+			"src": "scenes/common_platforming/explosions/large/Generic_LG_Explosion-0.png",
+			"preload": false
+		},
+		{
+			"name": "GenericLGExplosionBitmap1",
+			"src": "scenes/common_platforming/explosions/large/Generic_LG_Explosion-1.png",
+			"preload": false
+		},
+		{
+			"name": "GenericLGExplosionBitmap2",
+			"src": "scenes/common_platforming/explosions/large/Generic_LG_Explosion-2.png",
+			"preload": false
+		},
+		{
+			"name": "GenericLGExplosionBitmap3",
+			"src": "scenes/common_platforming/explosions/large/Generic_LG_Explosion-3.png",
+			"preload": false
+		},
+		{
+			"name": "GenericLGExplosionBitmap4",
+			"src": "scenes/common_platforming/explosions/large/Generic_LG_Explosion-4.png",
+			"preload": false
+		},
+		{
+			"name": "GenericLGExplosionBitmap5",
+			"src": "scenes/common_platforming/explosions/large/Generic_LG_Explosion-5.png",
+			"preload": false
+		},
+		{
+			"name": "GenericLGExplosionBitmap6",
+			"src": "scenes/common_platforming/explosions/large/Generic_LG_Explosion-6.png",
+			"preload": false
+		},
+		{
+			"name": "CoinBitmap0",
+			"src": "scenes/common_platforming/coin/SpriteAtlasTexture_CoinLevel-0.png",
+			"preload": false
+		},
+		{
+			"name": "CoinGrabBitmap0",
+			"src": "scenes/common_platforming/coin/SpriteAtlasTexture_CoinGrab.png",
+			"preload": false
+		}
+	],
+	"brush": [
+		{
+			"name": "GenericLGExplosionAtlas",
+			"bitmaps": [
+				"GenericLGExplosionBitmap0",
+				"GenericLGExplosionBitmap1",
+				"GenericLGExplosionBitmap2",
+				"GenericLGExplosionBitmap3",
+				"GenericLGExplosionBitmap4",
+				"GenericLGExplosionBitmap5",
+				"GenericLGExplosionBitmap6"
+			],
+			"frames": "scenes/common_platforming/explosions/large/Generic_LG_Explosion.csv",
+			"anims": "scenes/common_platforming/explosions/large/LG_Explosions.json"
+		},
+		{
+			"name": "CoinLevelAtlas",
+			"bitmaps": ["CoinBitmap0"],
+			"frames": "scenes/common_platforming/coin/SpriteAtlasTexture_CoinLevel.csv"
+		},
+		{
+			"name": "CoinGrabAtlas",
+			"bitmaps": ["CoinGrabBitmap0"],
+			"frames": "scenes/common_platforming/coin/SpriteAtlasTexture_CoinGrab.csv"
+		}
+	]
+}

@@ -1,0 +1,48 @@
+{
+	"sound": [{
+		"name": "TimeClockSfx",
+		"src": "scenes/winscreen/winscreen_time_clock_isolated.ogg",
+		"category": "sfx",
+		"loop": true
+	},
+		{
+			"name": "TimeClockFinishSfx",
+			"src": "scenes/winscreen/winscreen_time_finish_isolated.ogg",
+			"category": "sfx"
+		},
+		{
+			"name": "ScoreTickSfx",
+			"src": "scenes/winscreen/winscreen_score_tick_isolated.ogg",
+			"category": "sfx",
+			"reuse": true
+		},
+		{
+			"name": "SkillStarSfx",
+			"src": "scenes/winscreen/winscreen_skill_star_isolated.ogg",
+			"category": "sfx",
+			"reuse": true
+		},
+		{
+			"name": "GradeFinalSfx",
+			"src": "scenes/winscreen/winscreen_grade_final_isolated.ogg",
+			"category": "sfx"
+		}],
+	"bitmap": [{
+		"automatize": {
+			"name": "FXPuffStarsBitmap%i",
+			"start": 0,
+			"end": 25,
+			"pad": 4,
+			"src": "scenes/winscreen/fxPuffStarsCombined/results_fx_puff_stars_combined_####.png"
+		}
+	}],
+	"brush": [{
+		"name": "fxPuffStarsCombinedAtlas",
+		"bitmaps": {
+			"name-prefix": "FXPuffStarsBitmap%i",
+			"start": 0,
+			"end": 25
+		},
+		"frames": "scenes/winscreen/fxPuffStarsCombined/results_fx_puff_stars_combined.json"
+	}]
+}

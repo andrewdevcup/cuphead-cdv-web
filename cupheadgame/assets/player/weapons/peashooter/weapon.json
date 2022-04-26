@@ -1,0 +1,95 @@
+{
+	"speed": 100,
+	"damage": 4,
+	"supermeter_score": 2.48,
+	"delay": 0.11,
+	"scale": 0.8,
+	"despawnTime": 1.3,
+	"ex": {
+		"speed": 45,
+		"damage": 8.33,
+		"multiHit": 3,
+		"hitDelay": 4.5,
+		"scale": 0.85,
+		"despawnTime": 3.5,
+		"consumption": 100
+	},
+	"body": {
+		"shape": "TypeBox",
+		"size": [40,25],
+		"fixedRotation": true,
+		"sub_layer": 0,
+		"bodyType": "collider",
+		"hitbox": {
+			"type": "Arc",
+			"size": 20
+		},
+		"ex": {
+			"shape": "TypeBox",
+			"size": [100,100],
+			"fixedRotation": true,
+			"bodyType": "collider",
+			"sub_layer": 3,
+	  	"hitbox": {
+  			"type": "Arc",
+			  "size": 70
+	  	}
+		}
+	},
+	"resources": {
+		"bitmap": [
+			{
+				"name": "PeashooterBitmap0",
+				"src": "player/weapons/peashooter/PeashooterAtlas-optimized.png",
+				"preload": false
+			},
+			{
+				"name": "PeashooterEquipIconBitmap0",
+				"src": "player/weapons/peashooter/SpriteAtlasTexture_Peashooter_EquipIcon-0.png"
+			}
+		],
+		"brush": [{
+			"name": "PeashooterAtlas",
+			"bitmaps": ["PeashooterBitmap0"],
+			"frames": "player/weapons/peashooter/PeashooterAtlas-optimized.csv",
+			"anims": "player/weapons/peashooter/peashooter.atlas.json"
+		},
+		{
+			"name": "peashooter:WEAPON_EQUIP_ICON",
+			"bitmaps": ["PeashooterEquipIconBitmap0"],
+			"frames": "player/weapons/peashooter/SpriteAtlasTexture_Peashooter_EquipIcon.csv"
+		}],
+		"sound": [
+			{
+			"name": "PeashooterStartSfx1",
+			"src": "player/weapons/peashooter/sfx_player_default_fire_start_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		  },
+			{
+				"name": "PeashooterStartSfx2",
+				"src": "player/weapons/peashooter/sfx_player_default_fire_start_02.ogg",
+				"preload": false,
+				"reuse": true,
+				"category": "sfx"
+			},
+			{
+				"name": "PeashooterLoopSfx1",
+				"src": "player/weapons/peashooter/sfx_player_default_fire_loop_01.ogg",
+				"preload": false,
+				"reuse": false,
+				"loop": true,
+				"category": "sfx"
+			},
+			{
+				"name": "PeashooterLoopSfx2",
+				"src": "player/weapons/peashooter/sfx_player_default_fire_loop_02.ogg",
+				"preload": false,
+				"reuse": false,
+				"loop": true,
+				"category": "sfx"
+			}
+    ]
+	}
+}

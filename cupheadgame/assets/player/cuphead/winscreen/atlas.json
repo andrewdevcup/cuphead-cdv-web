@@ -1,0 +1,6 @@
+{
+	"bitmaps": ["SpriteAtlasTexture_CupheadWinScreen-0.png"],
+	"frames": "SpriteAtlasTexture_CupheadWinScreen.csv",
+	"anims": "cupheadWinScreen.atlas.json",
+	"facing": 1
+}

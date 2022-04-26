@@ -1,0 +1,13 @@
+{
+	"time": "TIME",
+	"hp": "HP BONUS",
+	"parry": "PARRY",
+	"super": "SUPER METER",
+	"coins": "COINS",
+	"skill": "SKILL LEVEL",
+	"grade": "GRADE",
+	"topGrade": "TOP-GRADE",
+	"highScore": "A BRAND NEW RECORD!",
+	"highScoreY": 4,
+	"perfectScore": "GOLLY! A PERFECT SCORE!"
+}

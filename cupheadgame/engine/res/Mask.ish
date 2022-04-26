@@ -1,0 +1,28 @@
+[vertex]
+[/vertex]
+[fragment]
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform sampler2D mask;
+uniform vec2 size;
+uniform vec2 maskSize;
+uniform vec2 maskOffset;
+uniform bool invert;
+
+vec2 ratio = vec2(size.y/size.x, (size.x/size.y) - (1.-(maskSize.y/size.y)));
+
+void main(void) {
+	vec4 color = texture2D(uSampler, vTextureCoord);
+	if (color.a > 0.) {
+		vec4 maskColor = texture2D(mask, (vTextureCoord * ratio)-maskOffset);
+		float alpha = color.a * (invert ? 1. - maskColor.a : maskColor.a);
+		gl_FragColor = vec4(color.rgb * alpha, alpha);
+	}
+}
+[/fragment]
+[uniforms]
+{
+	
+}
+[/uniforms]

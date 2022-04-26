@@ -1,0 +1,100 @@
+b5.export = function(world, scene, data, game) {
+	var myexports = {};
+
+	//Import resources
+	var resources = JSON.parse(b5.File.readSync(b5.Paths.sceneRes + 'common_platforming/resources.json'));
+
+	game.parseResources(resources,scene);
+
+	//Load particles
+	var particles = Function(b5.File.readSync(b5.Paths.sceneRes + 'common_platforming/particles.cup'))();
+	data.spawnParticle = function(name, target) {
+		return particles[name](target, scene);
+	};
+
+	var coinGrabSfx = [
+		sceneMain.findResource('CoinGrabSfx1', 'sound'),
+		sceneMain.findResource('CoinGrabSfx2', 'sound'),
+		sceneMain.findResource('CoinGrabSfx3', 'sound')
+	];
+
+	data.levelData.collectedCoins = [];
+
+	data.saveCoinsToSlot = function() {
+		for (var i = 0; i < this.levelData.collectedCoins.length; i++) {
+			var coins = game.SaveSlots.currentSaveSlot.coinManager.coins;
+			if (coins.indexOf(this.levelData.collectedCoins[i]) == -1) coins.push(this.levelData.collectedCoins[i]);
+		}
+	};
+
+	data.createCoin = function(id) {
+		var coin = new b5.Actor;
+		coin.atlas = scene.findResource('CoinLevelAtlas', 'brush');
+		coin.frame_speed = 24;
+		coin.center_atlas = true;
+		coin.name = id.substr(0,id.lastIndexOf('::'));
+		coin.id = id;
+		coin._scale = 0.95;
+		coin.setSize(96,140);
+		coin.tags = ["Coin"];
+		coin._onGrab = function(player) {
+			data.spawnParticle('coinGrab', this);
+			this.onGrab && this.onGrab(player, id);
+			coinGrabSfx[b5.Maths.randomRange(0, 2)].play();
+			data.addScore('coins',1);
+			//Write to save data
+			data.levelData.collectedCoins.push({
+				coinID: this.id,
+				collected: true,
+				player: 2147483647
+			});
+			
+			//Wifi sync
+			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['coingrabbed',[this.id]]);
+			
+			this.destroy();
+		};
+		//On added to actor or scene
+		coin.onAdded = function() {
+			this.initBody('collider',true);
+			this.addFixtureSelf();
+		}
+		return coin;
+	};
+	
+	//Event
+	scene.events.on("coingrabbed", evtdata => {
+		if(game.Multiplayer.isGuest) {
+			var coin = world.findActorById(evtdata[0], true);
+			if(coin) coin._onGrab();
+		}
+	});
+
+  data.transferCoinsToSaveSlot = function() {
+  	for(var i = 0; i < data.levelData.collectedCoins.length; i++)
+  	  game.SaveSlots.currentSaveSlot.coinManager.coins.push(data.levelData.collectedCoins[i]);
+  	data.levelData.collectedCoins = [];
+  };
+
+	//Create coins
+	var coinsRes = data.levelDataPath + 'coins.json';
+	if (b5.File.exists(coinsRes)) {
+		var coins = JSON.parse(b5.File.readSync(coinsRes));
+		for (var i = 0; i < coins.length; i++) {
+			//Spawn only if not already collected (in the save file)
+			for (var a = 0, b = false, cm = game.SaveSlots.currentSaveSlot.coinManager.coins; a < cm.length; a++)
+				if (cm[a].coinID == coins[i].id) {
+				b = true; //Collected
+				break;
+			}
+			if (!b) {
+				//Spawn
+				var coin = data.createCoin(coins[i].id);
+				world.findActor('Layer'+data.view.playerLayer).addActor(coin);
+				coin.setPosition(coins[i].pos[0], coins[i].pos[1]);
+			}
+		}
+	}
+
+	return myexports;
+};

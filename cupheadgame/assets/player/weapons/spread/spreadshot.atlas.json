@@ -1,0 +1,24 @@
+{
+	"ex_loop": {
+		"indices":[7,8,9,10],"speed":24
+	},"ex_death": {
+		"indices":[0,1,2,3,4,5],"speed":24
+	},"test": {
+		"indices":[11,12,13,14,15,10],"speed":1
+	},"ex_spawn": {
+		"indices":[11,12,13,14,15],"speed":24
+	},"ex_flame": {
+		"indices":[16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],"speed":24
+	},"spread_idle": {
+		"indices":[44,45,46,47],"speed":24
+	},"spread_large_death": {
+		"indices":[34,35,36,37],"speed":24
+	},"spread_large_hit": {
+		"indices":[38,39,40,41,42],"speed":24
+	},"spread_small_death": {
+		"indices":[59,60,61,62,49,50,51,52],"speed":24
+	},"spread_small_hit": {
+		"indices":[53,54,55,56,57],"speed":24
+	},"spark": {
+		"indices":[66,67,68,69],"speed":24
+	}}

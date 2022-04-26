@@ -1,0 +1,202 @@
+/*
+*
+* This will create player objects with physics body, properties, weapons and UI
+* It loads the corresponding atlas for players and selected weapons
+* rather than loading them all like on the original version.
+* This is to save in resources.
+* It also appends player flags and states to sceneData,
+* aswell as an input listener.
+* For the moment, only two players are allowed,
+* but in the futute this may change.
+* (You can add more players, but you should add more inputs too)
+* Player properties and resources are located at (assetsFolder)/player/
+*/
+
+b5.export = function(world, scene, data, game) {
+	var myexports = {};
+
+	game.importObject('CreateCommonPlayerMapResources');
+
+	game.Flags.inMainGame = true;
+	//Load player data
+	data.players = JSON.parse(b5.File.readSync(b5.Paths.player + 'players.json'));
+
+	var isP1Mugman = game.SaveSlots.currentSaveSlot.isPlayer1Mugman;
+
+	data.players.player1 = data.players.characters[isP1Mugman ? 1: 0];
+	data.players.player2 = data.players.characters[isP1Mugman ? 0: 1];
+
+	myexports.createPlayer = function(player, playerInput, asPlayer2, forceLoad) {
+		var playerPath = b5.Paths.player + player + '/',
+		playerid = !asPlayer2 ? "playerOne": "playerTwo";
+
+		data[player] = JSON.parse(
+			b5.File.readSync(playerPath + 'player-map.json')
+		);
+
+		//	asPlayer2 && (data[player].flags.heartPoints = 1); Made easier because of desync, enjoy
+		//Load resources
+		var res = data[player].resources;
+
+		//Bitmaps
+		for (var a = 0, bitmaps = []; a < res.bitmaps.length; a++) {
+			var btm = scene.findResource(res.bitmaps[a].name, 'bitmap');
+			if (btm === null) {
+				var bitmap = new b5.Bitmap(res.bitmaps[a].name, b5.Paths.assets + res.bitmaps[a].src, res.bitmaps[a].preload);
+				scene.addResource(bitmap, 'bitmap');
+			} else var bitmap = btm;
+			bitmaps.push(bitmap);
+		}
+		//Atlas
+		if (scene.findResource(res.atlas.name, 'brush') === null) {
+			var atlas = new b5.ImageAtlas(res.atlas.name, bitmaps);
+			atlas.parseFrames(b5.File.readSync(b5.Paths.assets + res.atlas.frames));
+			atlas.parseAnims(b5.File.readSync(b5.Paths.assets + res.atlas.anims));
+			scene.addResource(atlas, 'brush');
+		} else var atlas = scene.findResource(res.atlas.name, 'brush');
+
+		//Sounds
+		for (var a = 0; a < res.sounds.length; a++) {
+			var snd = scene.findResource(res.sounds[a].name, 'sound');
+			if (snd === null) {
+				var sound = new b5.Sound(res.sounds[a].name, b5.Paths.assets + res.sounds[a].src, res.sounds[a].preload, res.sounds[a].reuse, false);
+				sound.loop = res.sounds[a].loop;
+				sound.onDestroy = game.Sfx.remove;
+				sound.output_gain = game.Sfx.volume;
+				game.Sfx.add(sound);
+				scene.addResource(sound, 'sounds');
+			}
+		}
+		forceLoad && scene.tryLoadNextResource();
+
+		var phyb = data[player].body.physicsBody,
+		plyb = data[player].body.boundHitbox;
+		
+		
+		//Spawn where
+		var mapData = game.SlotUtils.getSessionInMap(data.mapId),
+		ws = data.worldScale,
+		p_c = scene.findActorsByTagName('player',true),
+		POSX = 0,
+		POSY = 0;
+		
+		if(p_c.length === 0) {
+			POSX = mapData['player'+(asPlayer2 ? 'Two' : 'One')+'Position'].x * ws[0],
+			POSY = -mapData['player'+(asPlayer2 ? 'Two' : 'One')+'Position'].y * ws[1];
+		}
+		else {
+			POSX = p_c[p_c.length-1].x,
+			POSY = p_c[p_c.length-1].y;
+		}
+
+		//Create player and attach physics body
+		
+		var ply = new b5[plyb.type+'Actor'];
+		phyb.size ? (ply.w = phyb.size[0],
+		ply.h = phyb.size[1]) : (ply.radius = phyb.radius, ply.h = ply.radius*1.9);
+		ply.fill_style = game.Flags.debugShowHitboxes?'blue':'transparent';
+		ply.name = player;
+		ply.tag = "player";
+		world.findActor("Layer0", true).addActor(ply);
+		ply._layer = data[player].sub_layer || 1;
+		ply.initBody("dynamic", true, false);
+
+		ply.addFixture({
+			type: b5.Shape[phyb.shape],
+			width: phyb.radius,
+			restitution: 0,
+			density: phyb.density,
+			friction: phyb.friction
+		});
+		
+		ply.setPosition(POSX,POSY);
+		
+
+		ply.data = data[player].variables;
+		ply.flags = data[player].flags;
+
+		//Attach atlas
+		var playerAtlas = new b5.Actor;
+		playerAtlas.atlas = atlas;
+		playerAtlas.current_frame = res.alignment_frame;
+		playerAtlas.round_pixels = false;
+		playerAtlas.ox = res.atlas.offset[0];
+		playerAtlas.oy = res.atlas.offset[1];
+		ply.addActor(playerAtlas);
+		playerAtlas.name = "AtlasImage";
+		playerAtlas._scale = res.atlas.scale || 1;
+		playerAtlas.center_atlas = !!res.atlas.centered;
+
+		playerAtlas.playAnim("idle_down", true);
+		
+		ply.Sprite = playerAtlas;
+    
+		//Input
+		ply._playerInput = playerInput ? 'player2': 'player1';
+
+		//Add components
+		
+		ply.components = {};
+		var cmps = data[player].components;
+		for (var i = 0; i < cmps.length; i++) {
+			var cmp = cmps[i].replace(".cup", '');
+
+			//Initialize components
+			//Get loop function as output to update them
+			var func = Function(b5.File.readSync(playerPath + 'components_map/' + cmps[i]))();
+			ply.components[cmp] = func && func(ply, data[player].flags, ply._playerInput, world, scene, game, data);
+		}
+
+		data.players.activePlayers.push(player);
+
+	};
+
+	myexports.removePlayer = function(p) {
+		var pl = world.findActor(p, true);
+		pl.onRemove && pl.onRemove();
+		pl.release(true);
+		data.players.activePlayers.splice(
+			data.players.activePlayers.indexOf(p), 1);
+		delete data[p];
+		game.Multiplayer.player2Joined = false;
+
+	};
+
+	myexports.createPlayer(
+		data.players.player1, false
+	);
+	//Add player 2 if joined
+	game.Multiplayer.player2Joined && myexports.createPlayer(
+		data.players.player2, true
+	);
+
+	data.initializePlayers = function() {
+		var players = world.findActorsByTagName('player', true);
+		for (var i = 0; i < players.length; i++) {
+			players[i].releaseJoints();
+			//Called when loading screen is being hidden
+			players[i].onLoadingScreenOut && players[i].onLoadingScreenOut();
+			//Start updating components
+			players[i].onTick = function() {
+				if(data[this.name]) for (var a = 0; a < data[this.name].components.length; a++) {
+					var c = this.components[data[this.name].components[a].replace('.cup', '')];
+					c && c(this, data[this.name].flags, game.Input[this._playerInput], world, scene, game, data);
+				}
+			};
+		}
+		//Reset joints
+		for (var i = 0; i < players.length; i++) players[i].releaseJoints();
+
+/*
+		for (var i = 0; i < players.length; i++) {
+			for (var a = 0; a < players.length; a++)
+			//Create joints with no collision so the players doesn't collide with each other
+			players[a] != players[i] && players[i].disableCollision(players[a]);
+		}*/
+	};
+	
+	data.createPlayer = myexports.createPlayer;
+	data.removePlayer = myexports.removePlayer;
+
+	return myexports;
+};

@@ -1,0 +1,12 @@
+{
+	"timelines": [{
+		"anims": [{
+			"property": "y-anim",
+			"frames": [200,-100,150],
+			"times": [0.25,0.3],
+			"easing": ["linear"],
+			"repeats": 1
+		}],
+		"auto_play": false
+	}]
+}

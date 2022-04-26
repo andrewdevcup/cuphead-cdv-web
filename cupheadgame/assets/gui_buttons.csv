@@ -1,0 +1,28 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,128,128,0,0,A-level
+0,128,0,128,128,0,0,A-menu
+0,256,0,128,128,0,0,B-level-boomerang
+0,384,0,128,128,0,0,B-level-charge
+0,512,0,128,128,0,0,B-level-lobber
+0,640,0,128,128,0,0,B-level-peashooter
+0,768,0,128,128,0,0,B-level-spread
+0,0,128,128,128,0,0,B-menu
+0,128,128,128,128,0,0,L-level
+0,256,128,128,128,0,0,L-menu
+0,384,128,128,128,0,0,R-level
+0,512,128,128,128,0,0,R-menu
+0,640,128,128,128,0,0,X-level-cuphead
+0,768,128,128,128,0,0,X-level-mugman
+0,0,256,128,128,0,0,X-menu
+0,128,256,128,128,0,0,Y-level-boomerang
+0,256,256,128,128,0,0,Y-level-charge
+0,384,256,128,128,0,0,Y-level-chaser
+0,512,256,128,128,0,0,Y-level-peashooter
+0,640,256,128,128,0,0,Y-level-spread
+0,768,256,128,128,0,0,Y-menu
+0,907,0,55,54,0,0,Pause
+1,0,0,512,512,0,0,DPAD
+0,908,57,87,30,0,0, hide gui arrow
+0,908,88,87,30,0,0, show gui arrow
+0,907,124,64,55,0,0, hand point
+0,908,191,47,46,5,-3, hand idle

@@ -1,0 +1,16 @@
+{
+	"health": 500,
+	"maxHealth": 500,
+	"difficultyAndPhases": [
+		{},
+  	{
+			"phases": [
+				{
+					"health": 0,
+					"deathCardMessage": "default"
+				}
+			]
+		},
+		{}
+	]
+}

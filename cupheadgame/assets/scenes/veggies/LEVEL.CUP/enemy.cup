@@ -1,0 +1,516 @@
+return {
+	projectile1: function(world, scene, data, game) {
+		var j = new b5.Actor;
+		j.atlas = scene.findResource('PotatoShootAtlas','brush');
+		j.playAnim('potato_projectile1',true);
+		j.tag = "enemy";
+		j.tags = ["enemy"];
+		world.findActor('Layer'+scene.data.view.playerLayer).addActor(j);
+		
+		j.initBody('collider',true);
+		var ft = j.getFixtureSelf();
+		ft.width = 60;
+		ft.type = b5.Shape.TypeCircle;
+		j.addFixture(ft);
+		
+		j._layer = data.layer;
+		j.setPosition(data.pos.x,data.pos.y);
+		j.data = data.data;
+		j._scale = 0.95;
+		
+		j.id = j.data.id;
+		
+		j.onOffscreen = function() {
+			this.release(true);
+		}
+		
+		j.onPlayerHit = j.onDeath = function() {
+			this.body.SetActive(false);
+			this.tags = [];
+			this.playAnimWithEnd('projectile1_death', t => {
+				t.onOffscreen();
+			});
+			
+			//Multiplayer
+			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+		}
+		
+		j.setTimeout(t => {
+			t.data.onOffscreen();
+		},3.5);
+	
+		j.body.m_linearVelocity.x = -j.data.speed;
+		return j;
+	},
+	projectileWorm: function(world, scene, data, game) {
+		var j = new b5.Actor;
+		j.atlas = scene.findResource('PotatoShootAtlas','brush');
+		j.playAnim('projectile_pink',true);
+		j.tag = "enemy";
+		j.tags = ["enemy","Parryable"];
+		world.findActor('Layer'+scene.data.view.playerLayer).addActor(j);
+		
+		j.initBody('collider',true);
+		var ft = j.getFixtureSelf();
+		ft.width = 60;
+		ft.type = b5.Shape.TypeCircle;
+		j.addFixture(ft);
+		
+		j._layer = data.layer;
+		j.setPosition(data.pos.x,data.pos.y);
+		j.data = data.data;
+		j._scale = 0.95;
+		
+		j.parryScore = 100;
+		j.id = j.data.id;
+		
+		j.onOffscreen = function() {
+			this.release(true);
+		}
+		
+		j.onPlayerHit = j.onDeath = function() {
+			this.body.SetActive(false);
+			this.tags = [];
+			scene.findResource('WormExplodeSfx'+b5.Maths.randomRange(1,2),'sound').play();
+			this.playAnimWithEnd('projectile_pink_death', t => {
+				t.onOffscreen();
+			});
+			
+			//Multiplayer
+			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+		}
+		
+		j.onParry = j.onPlayerHit;
+		
+		j.setTimeout(t => {
+			t.data.onOffscreen();
+		},3.5);
+	
+		j.body.m_linearVelocity.x = -j.data.speed;
+		return j;
+	},
+	carrotBomb: function(world, scene, data, game) {
+		var b = new b5.Actor;
+		b.atlas = scene.findResource('CarrotBombAtlas','brush');
+		b.playAnim('carrot_bomb_large',true);
+		b.tag = "enemy";
+		b.tags = ["enemy",'hittableEnemy'];
+		world.findActor('Layer'+scene.data.view.playerLayer).addActor(b);
+		
+		b.initBody('collider',true);
+		var ft = b.getFixtureSelf();
+		ft.width = 40;
+		ft.type = b5.Shape.TypeCircle;
+		b.addFixture(ft);
+		
+		b._layer = 4;//data.layer;
+		b.setPosition(data.pos.x,data.pos.y);
+		b.data = data.data;
+		b._scale = 0.92;
+		
+		b.id = b.data.id;
+		
+		b.target = b.data.target;
+		b.health = 3;
+		
+		b.deg90 = Math.PI/2;
+		b.rotation_target = 0;
+		
+		b.destroyProjectile = function() {
+			this.release(true);
+		}
+		
+		b.onPlayerHit = b.onDeath = function() {
+			this.body.SetActive(false);
+			this.tags = [];
+			this.player_hit = true;
+			this.setRotation(0);
+			scene.findResource('CarrotBombExplodeSfx'+b5.Maths.randomRange(1,4),'sound').play();
+			this.playAnimWithEnd('bomb_explode_'+['a','b'][b5.Maths.randomRange(0,1)], t => {
+				t.destroyProjectile();
+			});
+			
+			//Multiplayer
+			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+		}
+		
+		var enemyHitShader = scene.findResource('EnemyHitShader','shader');
+		
+		b.onBulletHit = function(bullet) {
+			this.addFilter(enemyHitShader.filter);
+		 	this.setTimeout(t=>{
+				t.data.removeFilter(enemyHitShader.filter);
+			},app.dt*4);
+			this.health -= bullet.damage;
+			this.health <= 0 && this.onPlayerHit();
+		}
+		
+		b.onTick = function() {
+			for(var i = 0; i < this.A_overlaps.length; i++) 
+				if(this.A_overlaps[i].tags.indexOf('floor')!=-1 && !this.player_hit) {
+					this.onPlayerHit();
+					return;
+				}
+			if(this.target && this.target.flags && this.target.flags.heartPoints<=0) {
+				this.target = null;
+			}
+				
+			//Chaser behavior
+			if(this.health > 0 && !this.player_hit) {
+				var targetAngle = b5.Maths.posAngle(this.x, this.y, this.target ? this.target.x : 0, this.target ? this.target.y : 899999);
+				
+				this.rotation_target = b5.Maths.interpAngle(this.rotation_target, targetAngle, .06*game.speed)
+				
+				this.setRotation(this.rotation_target - this.deg90);
+
+				var lv = this.body.m_linearVelocity;
+
+				lv.x = Math.cos(this.rotation_target) * this.data.speed;
+				lv.y = Math.sin(this.rotation_target) * this.data.speed;
+			}
+		}
+		return b;
+	},
+	hypnoLoop: function(world, scene, data, game) {
+		var b = new b5.Actor;
+		b.atlas = scene.findResource('CarrotHypnoAtlas','brush');
+		b.tag = "enemy";
+		b.tags = ["enemy"];
+		world.findActor('Layer'+scene.data.view.playerLayer).addActor(b);
+		
+		b.initBody('collider',true);
+		var ft = b.getFixtureSelf();
+		ft.width = 75;
+		ft.type = b5.Shape.TypeCircle;
+		b.addFixture(ft);
+		
+		b._layer = 4;// data.layer;
+		b.setPosition(data.pos.x-3,data.pos.y);
+		b.data = data.data;
+		b._scale = 0.92;
+		
+		b.id = b.data.id;
+		
+		b.target = b.data.target;
+		
+		b.playAnimWithEnd('hypno_loop_spawn', f => b.playAnim('hypno_loop',true));
+		
+		//Set rotate and speed to target
+		b.setRotation(b5.Maths.posAngle(b.x, b.y, b.target[0], b.target[1]));
+		
+		var lv = b.body.m_linearVelocity;
+
+		lv.x = Math.cos(b.rotation) * b.data.speed;
+		lv.y = Math.sin(b.rotation) * b.data.speed;
+		
+		b.destroyProjectile = function() {
+			this.release(true);
+		}
+		
+		b.onPlayerHit = b.onDeath = function() {
+			this.body.SetActive(false);
+			this.tags = [];
+			this.player_hit = true;
+			this.playAnimWithEnd('hypno_loop_death', t => {
+				t.destroyProjectile();
+			});
+			
+			//Multiplayer
+			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+		}
+		
+		b.onTick = function() {
+			for(var i = 0; i < this.A_overlaps.length; i++) 
+				if(this.A_overlaps[i].tags.indexOf('floor')!=-1 && !this.player_hit) {
+					this.onPlayerHit();
+					return;
+				}
+		}
+		return b;
+	},
+	onionTear: function(world, scene, data, game) {
+		var b = new b5.Actor;
+		b.atlas = scene.findResource('OnionAtlas','brush');
+		b.tag = "enemy";
+		b.tags = ["enemy"];
+		world.findActor('Layer'+scene.data.view.playerLayer).addActor(b);
+		
+		b.initBody('collider',true);
+		var ft = b.getFixtureSelf();
+		ft.width = 19;
+		ft.type = b5.Shape.TypeCircle;
+		b.addFixture(ft);
+		
+		b._layer = 4;
+		b.setPosition(data.pos.x,data.pos.y);
+		b.data = data.data;
+		b._scale = 0.92;
+		
+		b.id = b.data.id;
+		
+		b.parryScore = 100;
+		
+		b.data.pink && b.tags.push('Parryable');
+		
+		b.playAnim(b.data.pink?'teardrop_pink':('teardrop_'+['a','b','c','d','e'][b5.Maths.randomRange(0,4)]),true);
+		
+	  b.body.m_linearVelocity.y = b.data.speed;
+		
+		b.destroyProjectile = function() {
+			this.body.SetActive(false);
+			scene.findResource('OnionTeardropSfx'+b5.Maths.randomRange(1,6),'sound').play();
+			this.playAnimWithEnd(b.data.pink ? 'teardrop_death_pink':('teardrop_death_'+['a','b','c'][b5.Maths.randomRange(0,2)]), e => {
+				e.release(true);
+			});
+		}
+		
+		b.onPlayerHit = b.onDeath = function() {
+			this.tags = [];
+			!this.in_floor && this.release(true);
+			
+			//Multiplayer
+			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+		}
+		
+		b.onParry = b.destroyProjectile;
+		
+		b.onTick = function() {
+			for(var i = 0; i < this.A_overlaps.length; i++) 
+				if(this.A_overlaps[i].tags.indexOf('floor')!=-1 && !this.in_floor) {
+					this.in_floor = true;
+					this.onPlayerHit();
+					this.destroyProjectile();
+					return;
+				}
+		}
+		return b;
+	},
+	raddish: function(world, scene, data, game) {
+		var r = new b5.ArcActor();
+		r.radius = 55;
+		r.spawnHitbox = new b5.ArcActor();
+		r.spawnHitbox.radius = 80;
+		r.Sprite = new b5.Actor();
+		r.Sprite.atlas = scene.findResource('RaddishAtlas','brush');
+		r.Sprite.y = 20;
+		r.Sprite.use_parent_opacity = false;
+		r.tag = "enemy";
+		r.name = "Raddish";
+		r.tags = ["hittableEnemy"];
+		world.findActor('Layer'+scene.data.view.playerLayer).addActor(r);
+		r.addActor(r.Sprite);
+		
+		r.initBody('dynamic',true);
+		var ft = r.getFixtureSelf();
+		ft.width = 55;
+		ft.friction = 0;
+		r.addFixture(ft);
+		r.body.m_invMass = 1e-6;
+		
+		r.parent.addActor(r.spawnHitbox);
+		r.spawnHitbox.initBody('collider',true);
+		r.spawnHitbox.addFixtureSelf();
+		r.spawnHitbox.tags = ["enemy"];
+		
+		r._layer = 2;
+		r.data = data.data;
+		
+		r.maxHp = r.data.hp;
+		r.health = r.maxHp;
+		
+		r.setPosition(data.pos.x,data.pos.y);
+		r.spawnHitbox.setPosition(data.pos.x + (110 * -r.data.facing),data.pos.y-10);
+		
+		r.spawnHitbox.visible = (r.opacity = game.Flags.debugShowHitboxes?1:0.001)==1;
+		
+		r.Sprite.setScale(0.93 * -r.data.facing, 0.93);
+		
+		r.Sprite.playAnimWithEnd('raddish_intro', _ => {
+			_.playAnim('raddish_move',true);
+		});
+		
+		r.setTimeout(e => {
+			r._layer = 3;
+			r.bringToFront();
+		}, 0.25);
+		
+		r.puffParticle = function() {
+			var p = new b5.Actor();
+			p.atlas = scene.findResource('RaddishPuffAtlas','brush');
+			p.frame_speed = 24;
+			p.rotation = b5.Maths.randomRange(-Math.PI,Math.PI,true);
+			p.frames_repeat = false;
+			p.setPosition(this.x,this.y);
+			this.parent.addActor(p);
+			p._layer = 4;
+			p._scale = 1.1;
+			p.onAnimEnd = p.destroy;
+		}
+		r.leavesParticle = function() {
+			var p = new b5.Actor();
+			p.atlas = scene.findResource('RaddishAtlas','brush');
+			p.playAnim('raddish_death_leaves');
+			p.setPosition(this.x,this.y-30);
+			this.parent.addActor(p);
+			p._layer = 4;
+			p._scale = 0.9;
+			p.onAnimEnd = p.destroy;
+		}
+		r.bitsParticle = function() {
+			let p = new b5.Actor();
+			p.atlas = scene.findResource('RaddishAtlas','brush');
+			p.playAnim('raddish_bits_'+['a','b','c','d'][b5.Maths.randomRange(0,3)],true);
+			p.setPosition(this.x,this.y);
+			this.parent.addActor(p);
+			p._layer = 5;
+			p._scale = 0.93;
+			p.x_accel = b5.Maths.randomRange(-16,20);
+			p.y_accel = b5.Maths.randomRange(-24,-30,true);
+			p.gravity = b5.Maths.randomRange(0.81,2,true);
+			world.setTimeout(e => p.destroy(),3);
+			world.setInterval(a => {
+				if(!p.destroyed) {
+					p._x += p.x_accel;
+					p._y += p.y_accel;
+					
+					p.y_accel += p.gravity;
+				}
+				else world.clearInterval(a.name);
+			},0);
+		}
+		
+		r.spawnHitbox.onPlayerHit = e => r.spawnHitbox.release(true);
+		
+		r.playeraddedevt = scene.events.on('playeradded', function(player) {
+			r.disableCollision(world.findActor(player,true));
+		});
+		r.playerremovedevt = scene.events.on('playerremoved', function(player) {
+			r.enableCollision(world.findActor(player,true));
+		});
+		
+		r.playersdeadevt = scene.events.once('allplayersdead', function() {
+			r.tasks.clear();
+			r.body.SetActive(false);
+		});
+		
+		for(var i = 0, p = scene.data.getActivePlayers(); i < p.length;i++)
+			r.disableCollision(p[i]);
+			
+		var loopsfx = scene.findResource('RaddishLoopSfx','sound'),
+		bonksfx = scene.findResource('RaddishIntroBonkSfx','sound'),
+		startsfx = scene.findResource('RaddishStartSfx','sound'),
+		introsfx = scene.findResource('RaddishIntroSfx','sound');
+		
+		//Nice stereo effect
+		var amn = r.absPos.x / (app.design_width>>1);
+			
+		loopsfx.setStereoPan(amn);
+		bonksfx.setStereoPan(amn);
+		startsfx.setStereoPan(amn);
+		introsfx.setStereoPan(amn);
+		
+		var enemyHitShader = scene.findResource('EnemyHitShader','shader');
+		
+		r.onDeath = function() {
+			scene.events.off(this.playersdeadevt);
+			scene.events.off(this.playerremovedevt);
+			scene.events.off(this.playeraddedevt);
+			scene.events.off(this.syncevt);
+			this.tags = [];
+			!this.spawnHitbox.destroyed && this.spawnHitbox.release(true);
+			this.body.SetActive(false);
+			loopsfx.stop();
+			this.tasks.clear();
+			this.removeFilter(enemyHitShader.filter);
+			this.Sprite._y = 0;
+			this.Sprite._rotation = 0;
+		  this.Sprite.playAnim('raddish_death',true);
+		  scene.findResource('RaddishDeathVoiceSfx','sound').play();
+		  scene.findResource('RaddishEndSfx','sound').play();
+		  this.puffParticle();
+		  this.leavesParticle();
+		  this.setTimeout(a => this.puffParticle(),1);
+		  !scene.data.players_dead && this.setTimeout(a => {
+		  	scene.findResource('RaddishDeathSfx','sound').play();
+		  	//Spawn bits
+		  	for(var i = 0, n = b5.Maths.randomRange(5,6);i<n;i++)this.bitsParticle();
+		  	this.puffParticle();
+		  	this.release(true);
+		  },2.8);
+		  
+		  //Synchronize
+		  if(game.Multiplayer.isHosting) {
+				game.Multiplayer.sendToGuest('DISPATCH_EVENT',['RaddishDie',[]]);
+			}
+		}
+		
+		scene.events.on('RaddishDie', u => r.onDeath());
+		r.syncevt = scene.events.on('RaddishSync', u => {
+			r.setPosition(u[0],u[1]);
+			r.body.m_force.x = u[2];
+			r.body.m_linearVelocity.x = u[3];
+		});
+		
+		r.onBulletHit = function(bullet) {
+			this.addFilter(enemyHitShader.filter);
+		 	this.setTimeout(t=>{
+				t.data.removeFilter(enemyHitShader.filter);
+			},app.dt*4);
+			
+			this.health -= bullet.damage;
+			
+			if(this.health <= 0) r.onDeath();
+		}
+		
+		r.changeTarget = function(target) {
+			
+		}
+			
+		r.onTick = function() {
+			var v = this.body.m_linearVelocity,
+			f = this.body.m_force;
+			
+			if(this.health > 0) {
+				v.x = b5.Maths.cap(v.x, -this.data.maxspeed,this.data.maxspeed);
+			
+				f.x = this.data.target.x > this.x ? this.data.accel : -this.data.accel;
+			
+				if(r.body.m_invMass == 0.1) r.Sprite._rotation = b5.Maths.interpAngle(r.Sprite.rotation, Math.sign(-f.x)*.1, 0.1*game.speed);
+			
+				//Update stereo effect
+				amn = r.absPos.x / (app.design_width>>1);
+			
+				loopsfx.setStereoPan(amn);
+			}
+		}
+	  
+	  //Start moving
+		r.setTimeout(e => r.body.m_invMass = 0.1, 2.5);
+		
+		//Set hostile
+		r.setTimeout(e => {
+			r.tags.push('enemy'),
+			r.spawnHitbox.release(true);
+			bonksfx.play();
+		},0.4);
+		
+		r.setTimeout(e => {
+			startsfx.play();
+			loopsfx.play();
+		},1.4);
+		
+		introsfx.play();
+		
+		//Synchronize with guest on online multiplayer
+		r.setInterval(e => {
+			if(game.Multiplayer.isHosting) {
+				game.Multiplayer.sendToGuest('DISPATCH_EVENT',['RaddishSync',[
+					r.x, r.y, Math.round1000(r.body.m_force.x),
+					Math.round1000(r.body.m_linearVelocity.x)
+				]]);
+			}
+		},1);
+		
+		return r;
+	}
+};

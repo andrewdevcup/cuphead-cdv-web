@@ -1,0 +1,29 @@
+{
+	"NPC_EKHouse": {
+		"dialogs": [],
+		"script": "scripts/ek_house.cup"
+	},
+	"NPC_Veggies": {
+		"dialogs": [],
+		"script": "scripts/veggies.cup"
+	},
+	"NPC_Shop": {
+		"dialogs": [],
+		"script": "scripts/shop.cup"
+	},
+	"NPC_DialogTest": {
+		"cameraOffset": [-100, -100],
+    "dialogs": [
+    	{
+    		"texts": ["trav_dlg1", "trav_dlg2", "trav_dlg3", "trav_dlg4"],
+    		"times": [0.2, 0.2, 0.2, 0.2],
+    		"data": []
+    	}
+  	],
+  	"script": "scripts/dialogTest.cup"
+	},
+	"NPC_TriggerTest": {
+		"isTrigger": true,
+		"script": "scripts/triggerTest.cup"
+	}
+}

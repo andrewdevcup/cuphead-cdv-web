@@ -1,0 +1,41 @@
+[vertex]
+[/vertex]
+[fragment]
+/* Written by AndrewDev */
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform sampler2D screenfxTextureLight;
+uniform sampler2D screenfxTextureDark;
+uniform vec2 sourceSize;
+uniform vec2 textureSize;
+uniform bool flipX;
+uniform bool flipY;
+
+void main(void) {
+	vec4 color = texture2D(uSampler, vTextureCoord);
+	vec2 fxCoord = vTextureCoord * (sourceSize/textureSize);
+	
+	vec3 fxColorLight = texture2D(screenfxTextureLight, vec2( flipX ? 1.-fxCoord.x:fxCoord.x, flipY ? 1.-fxCoord.y:fxCoord.y)).rgb;
+  vec3 fxColorDark = texture2D(screenfxTextureDark, vec2( !flipX ? 1.-fxCoord.x:fxCoord.x, !flipY ? 1.-fxCoord.y:fxCoord.y)).rgb;
+  
+  //Darks
+  color.rgb *= 1.-(fxColorDark*fxColorDark);
+  
+  //Lights
+  color.rgb += fxColorLight*fxColorLight; //Black background correction
+  color.rgb /= (1.-fxColorLight); //Overexposure
+  
+	gl_FragColor = color;
+}
+[/fragment]
+[uniforms]
+{
+	"screenfxTextureLight": "TEX",
+	"screenfxTextureDark": "TEX",
+	"sourceSize": [1,1],
+	"textureSize": [1,1],
+	"flipX": false,
+	"flipY": false
+}
+[/uniforms]

@@ -1,0 +1,33 @@
+{
+	"timelines": [{
+		"anims": [{
+			"property": "rotation",
+			"frames": [0, -1.5707963267948966],
+			"times": [0, 1.5],
+			"easing": ["quadinout"],
+			"repeats": 1
+		},
+			{
+				"property": "ox",
+				"frames": [0, -315],
+				"times": [0, 1.5],
+				"easing": ["quadinout"],
+				"repeats": 1
+			},
+			{
+				"property": "oy",
+				"frames": [0, -100],
+				"times": [0, 1.5],
+				"easing": ["quadinout"],
+				"repeats": 1
+			},
+			{
+				"property": "_scale",
+				"frames": [1, 3.5],
+				"times": [0, 1.5],
+				"easing": ["quadinout"],
+				"repeats": 1
+			}],
+		"auto_play": false
+	}]
+}

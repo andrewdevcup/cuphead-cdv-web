@@ -1,0 +1,103 @@
+{
+	"speed": 45,
+	"damage": 2.85,
+	"supermeter_score": 2.48,
+	"delay": 0.15,
+	"scale": 0.92,
+	"despawnTime": 3,
+	"angleDispersion": 2.5,
+	"ex": {
+		"speed": 69,
+		"damage": 7,
+	  "count": 4,
+		"scale": 0.95,
+		"angleDispersion": 80,
+		"orbitOffset": 90,
+		"orbitSpeed": 15,
+		"despawnTime": 100,
+		"consumption": 100
+	},
+	"enemyDetectionRange": 1000,
+	"body": {
+		"shape": "TypeBox",
+		"size": [40,25],
+		"fixedRotation": true,
+		"sub_layer": 0,
+		"bodyType": "collider",
+		"hitbox": {
+			"type": "Arc",
+			"size": 13
+		},
+		"ex": {
+			"shape": "TypeCircle",
+			"size": [100,100],
+			"fixedRotation": true,
+			"bodyType": "collider",
+			"sub_layer": 3,
+	  	"hitbox": {
+  			"type": "Arc",
+			  "size": 18
+	  	}
+		}
+	},
+	"resources": {
+		"bitmap": [
+			{
+				"name": "ChaserBitmap0",
+				"src": "player/weapons/chaser/SpriteAtlasTexture_Chaser-0.png",
+				"preload": false
+			},
+			{
+				"name": "ChaserEquipIconBitmap0",
+				"src": "player/weapons/chaser/SpriteAtlasTexture_ChaserEquipIcon-0.png"
+			}
+		],
+		"brush": [{
+			"name": "ChaserAtlas",
+			"bitmaps": ["ChaserBitmap0"],
+			"frames": "player/weapons/chaser/SpriteAtlasTexture_Chaser.csv",
+			"anims": "player/weapons/chaser/chaser.atlas.json"
+		},
+		{
+			"name": "chaser:WEAPON_EQUIP_ICON",
+			"bitmaps": ["ChaserEquipIconBitmap0"],
+			"frames": "player/weapons/chaser/SpriteAtlasTexture_ChaserEquipIcon.csv"
+		}],
+		"sound": [
+			{
+				"automatize": {
+					"name": "ChaserStartSfx%i",
+					"start": 1,
+					"end": 5,
+					"pad": 3,
+					"src": "player/weapons/chaser/sfx_player_weapon_homing_fire_start_###.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "ChaserImpactSfx%i",
+					"start": 1,
+					"end": 6,
+					"pad": 3,
+					"src": "player/weapons/chaser/sfx_player_weapon_homing_impact_###.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "ChaserLoopSfx%i",
+					"start": 1,
+					"end": 3,
+					"pad": 3,
+					"src": "player/weapons/chaser/sfx_player_weapon_homing_loop_###.ogg",
+					"reuse": false,
+					"loop": true,
+					"category": "sfx"
+				}
+			}
+    ]
+	}
+}

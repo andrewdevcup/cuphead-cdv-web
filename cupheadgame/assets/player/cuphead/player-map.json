@@ -1,0 +1,48 @@
+{
+	"sub_layer": 2,
+	"body": {
+		"boundHitbox": {
+			"type": "Arc",
+			"radius": 26,
+			"offset": [0,0]
+		},
+		"physicsBody": {
+			"shape": "TypeCircle",
+			"density": 1,
+			"friction": 0,
+			"radius": 26
+		}
+	},
+	"variables": {
+		"baseSpeed": 11,
+		"facingAngle": 90
+	},
+	"flags": {
+		"walking": false,
+		"inWood": false,
+		"controllable": true
+	},
+	"components": [
+		"MovementComponent.cup",
+		"AtlasAnimationsComponent.cup",
+		"HitboxesComponent.cup"
+	],
+	"resources": {
+		"bitmaps": [
+			{
+				"name": "CupheadMapBitmap0",
+				"src": "player/cuphead/map/SpriteAtlasTexture_Cuphead_Map-0.png"
+	  	}
+		],
+		"atlas": {
+			"name": "CupheadMapAtlas",
+			"frames": "player/cuphead/map/SpriteAtlasTexture_Cuphead_Map.csv",
+			"anims": "player/cuphead/map/cupheadMapAnims.atlas.json",
+			"offset": [0,0],
+			"centered": true,
+			"scale": 1.05
+		},
+		"alignment_frame": 0,
+		"sounds": []
+	}
+}

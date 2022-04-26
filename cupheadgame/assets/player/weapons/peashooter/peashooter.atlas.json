@@ -1,0 +1,30 @@
+{
+	"peashot_death": {
+		"frames":[0,1,2,3,4,5],
+		"speed":24
+	},
+	"ex_death": {
+		"frames":[6,7,8,9,10,11,12,13,14,15],
+		"speed":24
+	},
+	"ex_loop": {
+		"frames":[16,17,18,19,20,21,22,23],
+		"speed":24
+	},
+	"peashot_intro_a": {
+		"frames":[24],
+		"speed":42
+	},
+	"peashot_intro_b": {
+		"frames":[25],
+		"speed":42
+	},
+	"peashot_loop": {
+		"frames":[26,27,28,29,30,31],
+		"speed":24
+	},
+	"spark": {
+		"frames":[32,33,34,35],
+		"speed":24
+	}
+}

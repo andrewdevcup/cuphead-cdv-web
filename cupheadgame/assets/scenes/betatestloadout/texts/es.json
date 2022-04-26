@@ -1,0 +1,4 @@
+{
+	"selectweapon": "ELIGE TU ARMA\n&f[,,,,0.6,0.6](principal, secundaria)&f",
+	"selectcharm": "ELIGE TU AMULETO\n&f[,,,,0.6,0.6](se aplicará al reiniciar el nivel)&f"
+}

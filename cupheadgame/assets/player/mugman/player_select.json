@@ -1,0 +1,16 @@
+{
+	"bitmap": [
+		{
+			"name": "MugmanPlayerSelectBitmap",
+			"src": "player/mugman/SpriteAtlasTexture_PlayerSelectMugman-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "mugman:PLAYER_SELECT",
+			"bitmaps": ["MugmanPlayerSelectBitmap"],
+			"frames": "player/mugman/SpriteAtlasTexture_PlayerSelectMugman.csv",
+			"anims": "player/mugman/playerSelectMugman.anims.json"
+		}
+	]
+}

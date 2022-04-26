@@ -1,0 +1,480 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [-370,240],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 9,
+		"playerLayer": 8,
+		"playerSubLayer": 5,
+		"zoom": 1.05,
+		"world_depth": 1.7,
+		"cameraExtents": [-11,0,11,0],
+		"cameraRange": 0.022
+	},
+	"physicsObjects": [
+		{
+			"name": "LevelFloor",
+			"type": "RectActor",
+			"size": [2048, 10],
+			"detectionSize": [2048,12],
+			"pos": [0, 260],
+			"color": "blue",
+			"visible": false,
+			"layer": 3,
+			"sub_layer": 2,
+			"tags": ["floor"],
+			"detectionTags": ["floor"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [-630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 3,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["wall","ignoreBullets"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [640, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall","ignoreBullets"],
+			"detectionTags": [],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		}
+	],
+	"worldObjects": [{
+		"name": "BG",
+		"type": "",
+		"size": [10,10],
+		"pos": [0,0],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 11,
+		"tags": [],
+		"layer": 0,
+		"sub_layer": 0,
+		"scale": 1.3,
+		"fit": "FitSize"
+	},
+	{
+		"name": "BGCloudsBase",
+		"type": "",
+		"size": [0,0],
+		"pos": [0,0],
+		"atlas": "VeggieBackgroundsAtlas",
+		"tags": [],
+		"visible": false,
+		"layer": 0,
+		"sub_layer": 1,
+		"scale": 1,
+		"script": "Clouds.cup"
+	},
+	{
+		"name": "BGTree",
+		"type": "",
+		"size": [10,10],
+		"pos": [0,-140],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 9,
+		"tags": [],
+		"layer": 1,
+		"sub_layer": 1,
+		"scale": 1.4,
+		"color": "black"
+	},
+	{
+		"name": "BGTireswing",
+		"type": "",
+		"size": [10,10],
+		"pos": [-280,-135],
+		"visible": true,
+		"atlas": "TireswingAtlas",
+		"base_anim": "anim",
+		"anim_loop": true,
+		"tags": [],
+		"layer": 1,
+		"sub_layer": 0,
+		"scale": 0.98,
+		"color": "black"
+	},
+	{
+		"name": "BGLeaves",
+		"type": "",
+		"size": [10,10],
+		"pos": [0,0],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 10,
+		"tags": [],
+		"layer": 1,
+		"sub_layer": 0,
+		"scale": 1.4,
+		"color": "black"
+	},
+	{
+		"name": "BG1",
+		"type": "",
+		"size": [10,10],
+		"pos": [-40,50],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 8,
+		"tags": [],
+		"layer": 2,
+		"sub_layer": 0,
+		"scale": 1.3
+	},
+	{
+		"name": "BG2",
+		"type": "",
+		"size": [10,10],
+		"pos": [0,25],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 7,
+		"tags": [],
+		"layer": 3,
+		"sub_layer": 0,
+		"scale": 1.3
+	},
+	{
+		"name": "BG3",
+		"type": "",
+		"size": [10,10],
+		"pos": [10,30],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 6,
+		"tags": [],
+		"layer": 4,
+		"sub_layer": 0,
+		"scale": 1.3
+	},
+	{
+		"name": "BG4",
+		"type": "",
+		"size": [10,10],
+		"pos": [-40,65],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 5,
+		"tags": [],
+		"layer": 5,
+		"sub_layer": 0,
+		"scale": 1.3
+	},
+	{
+		"name": "BG5",
+		"type": "",
+		"size": [10,10],
+		"pos": [20,85],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 4,
+		"tags": [],
+		"layer": 6,
+		"sub_layer": 0,
+		"scale": 1.3
+	},
+	{
+		"name": "BG6",
+		"type": "",
+		"size": [10,10],
+		"pos": [5,115],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 3,
+		"tags": [],
+		"layer": 7,
+		"sub_layer": 0,
+		"scale": 1.3
+	},
+	{
+		"name": "GroundMain",
+		"type": "",
+		"size": [10,10],
+		"pos": [4,208],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 2,
+		"tags": [],
+		"layer": 8,
+		"sub_layer": 0,
+		"scale": [1.34,1.31]
+	},
+	{
+		"name": "Foreground1",
+		"type": "",
+		"size": [10,10],
+		"pos": [350,280],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 0,
+		"tags": [],
+		"layer": 9,
+		"sub_layer": 0,
+		"scale": 1.35
+	},
+	{
+		"name": "Foreground2",
+		"type": "",
+		"size": [10,10],
+		"pos": [-470,265],
+		"visible": true,
+		"atlas": "VeggieBackgroundsAtlas",
+		"base_frame": 1,
+		"tags": [],
+		"layer": 9,
+		"sub_layer": 0,
+		"scale": 1.35
+	},
+	{
+		"name": "BossObject",
+		"type": "",
+		"pos": [0,0],
+		"size": [0,0],
+		"tags": ["boss"],
+		"layer": 8,
+		"sub_layer": 0
+	}
+	],
+	"resources": {
+		"bitmap": [
+			{
+				"name": "VeggieBackgrounds",
+				"src": "scenes/veggies/SpriteAtlasTexture_Backgrounds-0.png"
+			},
+			{
+				"name": "Tireswing",
+				"src": "scenes/veggies/SpriteAtlasTexture_Tireswing-0.png"
+			},
+			{
+				"name": "DirtBurstBitmap",
+				"src": "scenes/veggies/SpriteAtlasTexture_VeggieDirtBurst-0.png"
+			},
+			{
+				"automatize": {
+					"name": "PotatoBitmap%i",
+					"start": 0,
+					"end": 2,
+					"pad": 1,
+					"src": "scenes/veggies/potato/SpriteAtlasTexture_Potato-#.png"
+				}
+			},
+			{
+				"name": "PotatoShootBitmap0",
+				"src": "scenes/veggies/potato/SpriteAtlasTexture_PotatoShoot-0.png"
+			},
+			{
+				"name": "PotatoMugshot",
+				"src": "scenes/veggies/death_card_mugshot_potato.png"
+			},
+			{
+				"automatize": {
+					"name": "CarrotBitmap%i",
+					"start": 0,
+					"end": 3,
+					"pad": 1,
+					"src": "scenes/veggies/psycarrot/SpriteAtlasTexture_Carrot-#.png"
+				}
+			},
+			{
+				"name": "CarrotBombBitmap",
+				"src": "scenes/veggies/psycarrot/SpriteAtlasTexture_CarrotBomb-0.png"
+			},
+			{
+				"name": "CarrotHypnoBitmap",
+				"src": "scenes/veggies/psycarrot/SpriteAtlasTexture_CarrotHypno-0.png"
+			},
+			{
+				"name": "CarrotMugshot",
+				"src": "scenes/veggies/death_card_mugshot_carrot.png"
+			}
+		],
+		"brush": [
+			{
+				"name": "VeggieBackgroundsAtlas",
+				"bitmaps": ["VeggieBackgrounds"],
+				"frames": "scenes/veggies/SpriteAtlasTexture_Backgrounds.csv"
+			},
+			{
+				"name": "TireswingAtlas",
+				"bitmaps": ["Tireswing"],
+				"frames": "scenes/veggies/SpriteAtlasTexture_Tireswing.csv",
+				"anims": "scenes/veggies/tireswing.anims.json"
+			},
+		  {
+		  	"name": "DirtBurstAtlas",
+		  	"bitmaps": ["DirtBurstBitmap"],
+		  	"frames": "scenes/veggies/SpriteAtlasTexture_VeggieDirtBurst.csv",
+		  	"anims": "scenes/veggies/veggieDirtBurst.anims.json"
+		  },
+			{
+				"name": "PotatoAtlas",
+				"bitmaps": {
+					"start": 0,
+					"end": 2,
+					"name-prefix": "PotatoBitmap%i"
+				},
+				"frames": "scenes/veggies/potato/SpriteAtlasTexture_Potato.csv",
+				"anims": "scenes/veggies/potato/Potato.anims.json"
+			},
+			{
+				"name": "PotatoShootAtlas",
+				"bitmaps": ["PotatoShootBitmap0"],
+				"frames": "scenes/veggies/potato/SpriteAtlasTexture_PotatoShoot.csv",
+				"anims": "scenes/veggies/potato/PotatoShoot.anims.json"
+			},
+			{
+				"name": "CarrotAtlas",
+				"bitmaps": {
+					"start": 0,
+					"end": 3,
+					"name-prefix": "CarrotBitmap%i"
+				},
+				"frames": "scenes/veggies/psycarrot/SpriteAtlasTexture_Carrot.csv",
+				"anims": "scenes/veggies/psycarrot/carrot.anims.json"
+			},
+			{
+				"name": "CarrotBombAtlas",
+				"bitmaps": ["CarrotBombBitmap"],
+				"frames": "scenes/veggies/psycarrot/SpriteAtlasTexture_CarrotBomb.csv",
+				"anims": "scenes/veggies/psycarrot/carrotBomb.anims.json"
+			},
+			{
+				"name": "CarrotHypnoAtlas",
+				"bitmaps": ["CarrotHypnoBitmap"],
+				"frames": "scenes/veggies/psycarrot/SpriteAtlasTexture_CarrotHypno.csv",
+				"anims": "scenes/veggies/psycarrot/carrotHypno.anims.json"
+			}
+		],
+		"sound": [
+			{
+				"name": "MUS_BotanicPanic",
+				"src": "scenes/veggies/MUS_BotanicPanic.mp3",
+				"category": "music",
+				"loop": true,
+				"options": {
+					"equalizer": true,
+					"limiter": true
+				}
+			},
+			{
+				"name": "PotatoRiseGroundSfx",
+				"src": "scenes/veggies/sfx_level_veggies_Potato_RiseGround.ogg",
+				"category": "sfx"
+			},
+			{
+				"automatize": {
+					"name": "PotatoSpitSfx%i",
+					"start": 1,
+					"end": 3,
+					"pad": 3,
+					"src": "scenes/veggies/sfx_level_veggies_Potato_Spit_###.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"name": "PotatoWormSfx1",
+				"src": "scenes/veggies/sfx_level_veggies_Potato_Spit_Worm_01.ogg",
+				"category": "sfx",
+				"reuse": true
+			},
+			{
+				"name": "PotatoWormSfx2",
+				"src": "scenes/veggies/sfx_level_veggies_Potato_Spit_Worm_02.ogg",
+				"category": "sfx",
+				"reuse": true
+			},
+			{
+				"name": "WormExplodeSfx1",
+				"src": "scenes/veggies/sfx_level_veggies_Potato_Worm_Explode_01.ogg",
+				"category": "sfx",
+				"reuse": true
+			},
+			{
+				"name": "WormExplodeSfx2",
+				"src": "scenes/veggies/sfx_level_veggies_Potato_Worm_Explode_02.ogg",
+				"category": "sfx",
+				"reuse": true
+			},
+			{
+				"name": "CarrotRiseSfx",
+				"src": "scenes/veggies/sfx_level_veggies_Carrot_Rise.ogg",
+				"category": "sfx",
+				"reuse": false
+			},
+			{
+				"automatize": {
+					"name": "CarrotBombExplodeSfx%i",
+					"start": 1,
+					"end": 4,
+					"pad": 2,
+					"src": "scenes/veggies/sfx_level_veggies_Carrot_Bomb_Explode_##.ogg",
+					"category": "sfx",
+			  	"reuse": true
+				}
+			},
+			{
+				"automatize": {
+					"name": "CarrotMindMeldBeamFireSfx%i",
+					"start": 1,
+					"end": 2,
+					"pad": 2,
+					"src": "scenes/veggies/sfx_level_veggies_Carrot_MindMeld_BeamFire_##.ogg",
+					"category": "sfx",
+				  "reuse": true
+				}
+			},
+			{
+				"name": "CarrotDieSfx",
+				"src": "scenes/veggies/sfx_level_veggies_Carrot_Die.ogg",
+				"category": "sfx",
+				"reuse": true
+			},
+			{
+				"name": "CarrotMindMeldLoopSfx",
+				"src": "scenes/veggies/sfx_level_veggies_Carrot_MindMeld_Loop.ogg",
+				"category": "sfx",
+				"reuse": true,
+				"loop": true
+			},
+			{
+				"name": "CarrotMindMeldStartSfx",
+				"src": "scenes/veggies/sfx_level_veggies_Carrot_MindMeld_Start.ogg",
+				"category": "sfx",
+				"reuse": false
+			}
+		]
+	}
+}

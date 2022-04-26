@@ -1,0 +1,39 @@
+{
+	"sound": [
+		{
+			"name": "WeaponDeathSfx",
+			"src": "player/weapons/common/weapon_death.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "ShootHitSfx",
+			"src": "player/weapons/common/sfx_player_shoot_hit.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		},
+		{
+			"name": "EXShotHitSfx",
+			"src": "player/weapons/common/sfx_player_weapon_peashoot_ex_impact_01.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
+		}
+	],
+	"bitmap": [
+		{
+			"name": "WeaponExSparkBitmap0",
+			"src": "player/weapons/common/SpriteAtlasTexture_EX_Spark-0.png",
+			"preload": false
+		}
+	],
+	"brush": [
+		{
+			"name": "WeaponEXSparkAtlas",
+			"bitmaps": ["WeaponExSparkBitmap0"],
+			"frames": "player/weapons/common/SpriteAtlasTexture_EX_Spark.csv"
+		}
+	]
+}

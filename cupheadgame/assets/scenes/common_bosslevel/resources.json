@@ -1,0 +1,106 @@
+{
+	"sound": [
+		{
+			"name": "AnnouncerGetReady1",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0001_a.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerGetReady2",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0001_b.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerGetReady3",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0001_c.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerGetReady4",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0001_d.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerGetReady5",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0001_e.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerFight1",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0002_a.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerFight2",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0002_b.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerFight3",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0002_c.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerFight4",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0002_d.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerFight5",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_0002_e.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "AnnouncerKnockout",
+			"src": "scenes/common_bosslevel/Announcer/sfx_level_announcer_knockout_0004.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "LevelBellIntro",
+			"src": "scenes/common_bosslevel/sfx_level_bell_intro.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "LevelBellKnockout",
+			"src": "scenes/common_bosslevel/sfx_level_knockout_bell.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		},
+		{
+			"name": "BossDefeatSting",
+			"src": "scenes/common_bosslevel/level_boss_defeat_sting_08.ogg",
+			"preload": false,
+			"reuse": false,
+			"category": "sfx"
+		}
+	],
+	"bitmap": [
+	],
+	"brush": [
+	]
+}

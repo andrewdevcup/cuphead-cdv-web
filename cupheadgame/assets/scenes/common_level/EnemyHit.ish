@@ -1,0 +1,18 @@
+[vertex]
+[/vertex]
+[fragment]
+varying vec2 vTextureCoord;
+	
+uniform sampler2D uSampler;
+uniform float ratio;
+	
+void main(void) {
+	vec4 color = texture2D(uSampler, vTextureCoord);
+	gl_FragColor = vec4( mix(color.rgb,vec3(1.),ratio) * color.a, color.a);
+}
+[/fragment]
+[uniforms]
+{
+	"ratio": 0.35
+}
+[/uniforms]

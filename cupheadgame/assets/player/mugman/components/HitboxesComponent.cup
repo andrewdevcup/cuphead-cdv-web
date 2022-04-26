@@ -1,0 +1,203 @@
+return function(thisPlayer, flags, input, world, scene, game, data) {
+	//Setup local variables here
+	//This function will be called when player is first created
+	//For executing actions when loading screen is being hidden,
+	//add the method thisPlayer.onLoadingScreenOut = function(){...}
+	//var myvar = flags.jumping
+	
+	var last_anim = "",
+	shootAngle = 0,
+	atlas = thisPlayer.findActor('AtlasImage',true),
+	descend = false;
+	
+	//Debug arc
+  var hb = new b5.ArcActor();
+	hb.radius = 15;
+	//thisPlayer.addActor(hb);
+	hb.fill_style = "aqua";
+	hb.opacity = 0.5;
+	
+	//List hitboxes
+	var hitboxes = (function() {
+		for(var i = 0, a = thisPlayer.hitboxes, h = {}; i < a.length; i++)
+		  h[a[i].name] = a[i];
+		return h;
+	})();
+	
+	//Parry hitbox detection
+	thisPlayer.parryObject = {};
+	
+	hitboxes.ParryHitbox.setInterval(function(task) {
+		var ol = task.data.A_overlaps; 
+		for(var i = 0; i < ol.length; i++)
+		  if(ol[i].tags.indexOf('Parryable') != -1 && flags.parryActive) {
+		  	var	l = ol[i];
+		  	
+		  	if(!game.Multiplayer.isGuest) {
+		  		thisPlayer.parry(l.parryScore);
+		  		l.onParry && l.onParry(thisPlayer);
+		  		
+		  		game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['objectparried',[l.id,thisPlayer.name]]);
+		  		//Spawn particles
+		  		data.spawnPlayerParticle('parrySpark',l);
+		  	}
+		  	break;
+		  }
+	},0);
+	
+	return function(thisPlayer, flags, input, world, scene, game, data) {
+		//This is a loop function
+		//It will be called consecutively when loadingScreenOut
+		var descending = thisPlayer.body.m_linearVelocity.y > 0;
+		
+    if(last_anim != atlas.current_anim || shootAngle != thisPlayer.data.shootAngle || (descend != descending && (descend = descending, descending))) {
+      last_anim = atlas.current_anim;
+      shootAngle = thisPlayer.data.shootAngle;
+      
+      var facing = thisPlayer.data.facing,
+      ca = atlas.current_anim;
+      //Set hitboxes and positions
+      
+      //Shooting position
+      switch(ca) {
+      	case 'shooting_straight':
+      	case 'shooting_straight_boil':
+      	case 'ex_straight_ground':
+      	case 'ex_straight_air':
+      		thisPlayer.data.shootOffset = [77*facing, -20];
+        	break;
+        case 'shooting_up':
+        case 'shooting_up_boil':
+        	thisPlayer.data.shootOffset = [25*facing, -113];
+        	break;
+        case 'shooting_diag_up':
+        case 'shooting_diag_up_boil':
+        case 'ex_diag_up_ground':
+      	case 'ex_diag_up_air':
+        	thisPlayer.data.shootOffset = [69*facing, -61];
+        	break;
+        case 'shooting_diag_down':
+        case 'shooting_diag_down_boil':
+       	case 'ex_diag_down_ground':
+      	case 'ex_diag_down_air':
+        	thisPlayer.data.shootOffset = [70*facing, 25];
+        	break;
+        case 'shooting_down':
+        case 'shooting_down_boil':
+        	thisPlayer.data.shootOffset = [29*facing, 59];
+        	break;
+        case 'shooting_duck':
+        case 'shooting_duck_boil':
+        	thisPlayer.data.shootOffset = [96*facing, 21];
+        	break;
+        case 'shooting_run':
+          thisPlayer.data.shootOffset = [67*facing, -1]; //Down by 6
+          break;
+        case 'shooting_run_diag':
+        	thisPlayer.data.shootOffset = [72*facing, -59]; //Dowm by 6
+        	break;
+        case 'jump':
+        case 'jump_parry':
+        case 'jump_parry_done':
+        	thisPlayer.data.shootOffset = [
+        		Math.cos(shootAngle)*50,
+        		Math.sin(shootAngle)*50
+        	];
+        	break;
+       	case 'ex_up_air':
+        case 'ex_up_ground':
+        	thisPlayer.data.shootOffset = [0, -113];
+        	break;
+        case 'ex_down_air':
+        case 'ex_down_ground':
+        	thisPlayer.data.shootOffset = [0, 59];
+        	break;
+      }
+       //   hb.setPosition(thisPlayer.data.shootOffset[0], thisPlayer.data.shootOffset[1])
+      
+      //Hurtboxes
+      
+      //Disable all
+      for(var i in hitboxes) {
+      	hitboxes[i].hitbox_active = false;
+      }
+      
+      //States
+      if((ca.indexOf('stand') > -1 || ca.indexOf('aim') > -1 || ca.indexOf('ground') > -1 || (ca.indexOf('shooting') > -1) && !flags.ducking && !flags.running)) hitboxes.StandingHitbox.hitbox_active = true;
+      else if(ca.indexOf('run') > -1) hitboxes.RunningHitbox.hitbox_active = true;
+      else if(ca.indexOf('duck') > -1) hitboxes.DuckingHitbox.hitbox_active = true;
+      else if(ca.indexOf('jump') > -1 || ca.indexOf('air') > -1) {
+      	hitboxes.JumpingHitbox.hitbox_active = true;
+      	ca == "jump_parry" && (hitboxes.ParryHitbox.hitbox_active = true);
+      }
+      else if(ca.indexOf('dash') > -1) thisPlayer.setInterval(task=>{
+      		if(atlas.current_frame>=hitboxes.DashingHitbox.activeTime[0]) {
+      			hitboxes.DashingHitbox.hitbox_active = true;
+      			thisPlayer.clearInterval(task.name);
+      		}
+      	},0);
+      
+      
+      //Set physicsBody Size
+      var pb = data[thisPlayer.name].body.physicsBody;
+      if(flags.inAir && !flags.dashing && !flags.inAir) thisPlayer.setBodySize(
+        pb.onJumping_size[0],
+      	pb.onJumping_size[1]
+      );
+      else if(flags.running) thisPlayer.setBodySize(
+      	pb.onRunning_size[0],
+      	pb.onRunning_size[1]
+      );
+      else if(flags.dashing) {
+      	flags.inAir && thisPlayer.setBodySize(
+        	pb.onDashing_size[0],
+        	pb.onDashing_size[1]
+        );
+        !flags.inAir && thisPlayer.setBodySize(
+        	pb.onDashing_size_ground[0],
+        	pb.onDashing_size_ground[1]
+        );
+      }
+      else thisPlayer.setBodySize(
+      	pb.size[0],
+      	pb.size[1]
+      );
+     // thisPlayer.setSize(thisPlayer._fixture.width,thisPlayer._fixture.height)
+      
+    }
+    
+    //Hit detection
+    var overlap = false;
+    
+    for(var i in hitboxes)
+      if(hitboxes[i].hitbox_active) {
+      	var ols = hitboxes[i].A_overlaps; 
+      	for(var a = 0; a < ols.length; a++) {
+      		var ol = ols[a];
+      		//Enemy overlap
+      	  if( ol.tags.indexOf("enemy") != -1 && !flags.intangible && hitboxes[i].name != "ParryHitbox") {
+      	  	overlap = true;
+      	  	flags.damageHit = flags.hittable;
+      	  	flags.damageHit && thisPlayer.onEnemyHit(ol);//ol.onPlayerHit && ol.onPlayerHit(thisPlayer);
+      	  	break;
+      	  }
+      	  //Npc overlap
+      	  else if(ol.tags.indexOf("NPC") != -1) {
+      	  	ol.player_focus = true;
+      	  	ol.player = thisPlayer.name;
+      	  	overlap = true;
+      	  	break;
+      	  }
+      	  //Coin overlap
+      	  else if(ol.tags.indexOf('Coin') != -1) {
+      	  	ol._onGrab();
+      	  	ol.player = thisPlayer.name;
+      	  	overlap = true;
+      	  	break;
+      	  }
+      	}
+      	if(overlap) break;
+      }
+
+	};
+};

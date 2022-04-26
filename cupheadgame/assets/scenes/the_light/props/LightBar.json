@@ -1,0 +1,83 @@
+{
+	"LightBarBase": {
+		"type": "Rect",
+		"size": [1,1],
+		"body": true,
+		"visible": false,
+		"bodyType": "collider",
+		"pos": [0,0],
+		"tags": ["LightBarBase"]
+	},
+	"LightBar0": {
+		"type": "Rect",
+		"size": [1100,27],
+		"body": true,
+		"filled": true,
+		"fill_style": "blue",
+		"bodyType": "collider",
+		"joints": [
+			{
+				"type": "weld",
+				"actor_b": "LightBarBase",
+				"anchor_a": { "x": 0, "y": 0 },
+				"anchor_b": { "x": 0, "y": 0 },
+				"self_collide": false
+			}
+		],
+		"rotation": 120,
+		"tags": ["enemy, hittableEnemy"],
+		"position": [550,952.6279],
+		"data": {
+			"hitbox_active": false,
+			"rotate": 1
+		}
+	},
+	"LightBar1": {
+		"type": "Rect",
+		"size": [1100,27],
+		"body": true,
+		"filled": true,
+		"fill_style": "blue",
+		"bodyType": "collider",
+		"joints": [
+			{
+				"type": "weld",
+				"actor_b": "LightBarBase",
+				"anchor_a": { "x": 0, "y": 0 },
+				"anchor_b": { "x": 0, "y": 0 },
+				"self_collide": false
+			}
+		],
+		"rotation": 120,
+		"tags": ["enemy, hittableEnemy"],
+		"position": [550,952.6279],
+		"data": {
+			"hitbox_active": false,
+			"rotate": 1
+		}
+	},
+	"LightBar2": {
+		"type": "Rect",
+		"size": [1100,27],
+		"body": true,
+		"filled": true,
+		"fill_style": "blue",
+		"bodyType": "collider",
+		"joints": [
+			{
+				"type": "weld",
+				"actor_b": "LightBarBase",
+				"anchor_a": { "x": 0, "y": 0 },
+				"anchor_b": { "x": 0, "y": 0 },
+				"self_collide": false
+			}
+		],
+		"rotation": 120,
+		"tags": ["enemy, hittableEnemy"],
+		"position": [550,952.6279],
+		"data": {
+			"hitbox_active": false,
+			"rotate": 1
+		}
+	}
+}

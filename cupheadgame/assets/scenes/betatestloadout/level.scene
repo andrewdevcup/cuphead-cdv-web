@@ -1,0 +1,215 @@
+
+b5.LoadScene = function(world, scene, data, game) {
+	//scene is the main scene where resources and actors will be added
+	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
+	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
+  
+  game.importObject('CreateLevel').init();
+  game.importObject('CreatePlayer');
+  
+  var weaponlabel = world.findActor('SelectWeaponText',true),
+  charmlabel = world.findActor('SelectCharmText',true);
+  
+  charmlabel.line_height = 30;
+  weaponlabel.line_height = 30;
+  
+  scene.findResource('BGM','sound').playback_speed = 0.7;
+  
+  //Weapon equip icon
+  data.levelData.weaponList = JSON.parse(scene.findResource('WeaponsList','raw').data);
+  data.levelData.charmList = JSON.parse(scene.findResource('CharmsList','raw').data);
+  
+  var p1Loadout = game.SlotUtils.getPlayerLoadouts('playerOne');
+
+  data.createWeaponSwitch = function(index,x,y) {
+  	var wpn = data.levelData.weaponList.indexOf(game.GameDefIDs.weapons[String(p1Loadout[index==0?'primaryWeapon':'secondaryWeapon'])]);
+  	data.levelData['wIcon'+index+'Index'] = wpn != -1 ? wpn : index;
+  	
+  	var weaponIcon = new b5.Actor();
+    world.Layer0.addActor(weaponIcon);
+    weaponIcon.frame_speed = 12;
+    weaponIcon._layer = 2;
+    weaponIcon._scale = 1.2;
+    weaponIcon.setPosition(x,y);
+    weaponIcon.name = "WeaponIcon-"+index;
+    weaponIcon.index = index;
+  
+    weaponIcon.updateWeaponIcon = function() {
+    	var n = 'wIcon'+this.index+'Index',
+    	weapon = data.levelData.weaponList[data.levelData[n]];
+      this.atlas = scene.findResource(weapon+':WEAPON_EQUIP_ICON','brush');
+    
+      this.rotation = -1;
+      this.TweenTo('_rotation',0,0.3,b5.Ease.quadout,true);
+    
+      data.levelData[n]++;
+      if(data.levelData[n] >= data.levelData.weaponList.length)
+        data.levelData[n] = 0;
+    };
+    
+    weaponIcon.updateWeaponIcon();
+    
+    return weaponIcon;
+  }
+  
+  data.createCharmSwitch = function(index,x,y) {
+  	var chm = data.levelData.charmList.indexOf(game.GameDefIDs.charms[p1Loadout.charm.toString()]);
+  	data.levelData['cIcon'+index+'Index'] = chm != -1 ? chm : index;
+  	var charmIcon = new b5.Actor();
+    world.Layer0.addActor(charmIcon);
+    charmIcon.frame_speed = 12;
+    charmIcon._layer = 2;
+    charmIcon._scale = 1.2;
+    charmIcon.setPosition(x,y);
+    charmIcon.name = "CharmIcon-"+index;
+    charmIcon.index = index;
+  
+    charmIcon.updateCharmIcon = function(dontUpdateIndex) {
+      var n = 'cIcon'+this.index+'Index';
+    
+      this.rotation = -1;
+      this.TweenTo('_rotation',0,0.3,b5.Ease.quadout,true);
+    
+    	data.levelData[n]++;
+  	  if(data.levelData[n] >= data.levelData.charmList.length)
+        data.levelData[n] = 0;
+    
+      var charm = data.levelData.charmList[data.levelData[n]];
+      
+      this.atlas = scene.findResource(charm+':CHARM_EQUIP_ICON','brush');
+      
+    };
+    
+    charmIcon.updateCharmIcon();
+    
+    return charmIcon;
+  }
+  
+  //Set icon
+  data.weapon1Icon = data.createWeaponSwitch(0,-320,-50);
+  data.weapon2Icon = data.createWeaponSwitch(1,-180,-50);
+  
+  data.charm1Icon = data.createCharmSwitch(0,180,-50);
+  
+  scene.events.once('resourcesloaded', a => data.charm1Icon.updateCharmIcon());
+  
+  //Icon for primaryWeapon
+  var wpnsw = world.findActor('ParryWeaponSwitch',true);
+  wpnsw.body.m_angularDamping = 3;
+  wpnsw.id = 300;
+  wpnsw.onParry = function(player) {
+  	this.body.m_angularVelocity = player.x > this.x ? 7 : -7;
+  	
+  	var weapon = data.levelData.weaponList[data.levelData['wIcon0Index']];
+  	player.setWeapon(weapon,0);
+  	data.weapon1Icon.updateWeaponIcon();
+  	
+  	//Save to slot
+  	game.SlotUtils.getPlayerLoadouts(player.id).primaryWeapon = b5.Game.GameDefIDs.weapons[weapon];
+  }
+  
+  //Icon for secondary Weapon
+  var wpnsw2 = world.findActor('ParryWeapon2Switch',true);
+  wpnsw2.body.m_angularDamping = 3;
+  wpnsw2.id = 301;
+  wpnsw2.onParry = function(player) {
+  	this.body.m_angularVelocity = player.x > this.x ? 7 : -7;
+  	
+  	var weapon = data.levelData.weaponList[data.levelData['wIcon1Index']];
+  	player.setWeapon(weapon,1);
+  	data.weapon2Icon.updateWeaponIcon();
+  	
+  	//Save to slot
+  	game.SlotUtils.getPlayerLoadouts(player.id).secondaryWeapon = b5.Game.GameDefIDs.weapons[weapon];
+  }
+  
+  //Icon for charm
+  var chsw = world.findActor('ParryCharmSwitch',true);
+  chsw.body.m_angularDamping = 3;
+  chsw.id = 302;
+  chsw.onParry = function(player) {
+  	this.body.m_angularVelocity = player.x > this.x ? 7 : -7;
+  	   
+    data.charm1Icon.updateCharmIcon();
+  	//Save to slot
+   	var charm = data.levelData.charmList[data.levelData['cIcon0Index']];
+  	game.SlotUtils.getPlayerLoadouts(player.id).charm = b5.Game.GameDefIDs.charms[charm];
+
+  }
+  
+  var tgt = world.findActor('targetTest',true);
+  tgt.onBulletHit = function() {
+  	this.opacity = 0.3;
+  	this.setTimeout(a => {
+  		a.data.opacity=0;
+  	},app.dt*2);
+  }
+  
+};
+b5.onAllResourcesLoaded = function(world,scene,data,game) {
+	//When scene has loaded all resources (a bit before onLoadingScreenOut)
+	
+	var swt = world.findActor('SelectWeaponText', true);
+  swt.setTextFmt(data.Texts.selectweapon);
+  
+  var sct = world.findActor('SelectCharmText', true);
+  sct.setTextFmt(data.Texts.selectcharm);
+  
+  scene.events.on('languagechanged', l => {
+  	swt.clearFormat();
+  	sct.clearFormat();
+  	swt.setTextFmt(data.Texts.selectweapon);
+  	sct.setTextFmt(data.Texts.selectcharm);
+  });
+};
+b5.onLoadingScreenOut = function(world, scene, data, game) {
+	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
+  
+  data.initializePlayers();
+  
+  //Initialize multiplayer
+  game.Multiplayer.Initialize(world,data);
+ 
+  scene.findResource('BGM','sound').play();
+
+};
+b5.addSceneResources = function(scene, data, game) {
+	//Resources that will be added to scene, this will be called before LoadScene
+  //Load weapons and charms
+  scene.addResource(
+  	new b5.Raw('WeaponsList', b5.Paths.player + 'weapons.json', true, ds => {
+  		var data = JSON.parse(ds);
+  		
+  		for(var i = 0; i < data.length; i++) {
+  			scene.addResource(
+  				new b5.Raw(data[i]+'-icondata', b5.Paths.player + 'weapons/'+data[i]+'/resources-worldmap.json', true, ds1 => {
+  					game.parseResources(ds1,scene);
+  				}),
+  			 'raw'
+  			);
+  		}
+  	},true),
+  	'raw'
+  );
+  
+  scene.addResource(
+  	new b5.Raw('CharmsList', b5.Paths.player + 'charms.json', true, ds => {
+  		var data = JSON.parse(ds);
+  		
+  		for(var i = 0; i < data.length; i++) {
+  			scene.addResource(
+  				new b5.Raw(data[i]+'-icondata', b5.Paths.player + 'charms/'+data[i]+'/resources-worldmap.json', true, ds1 => {
+  					game.parseResources(ds1,scene);
+  				}),
+  			 'raw'
+  			);
+  		}
+  	},true),
+  	'raw'
+  );
+};
+b5.onSceneUnload = function(world, scene, data, game, clearResources) {
+    //Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
+    //You can also remove created objects in b5.Game if they were created and used on the scene.
+
+};

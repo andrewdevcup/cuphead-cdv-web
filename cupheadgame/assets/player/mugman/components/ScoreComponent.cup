@@ -1,0 +1,30 @@
+return function(thisPlayer, flags, input, world, scene, game, data) {
+	//Setup local variables here
+	//This function will be called when player is first created
+	//For executing actions when loading screen is being hidden,
+	//add the method thisPlayer.onLoadingScreenOut = function(){...}
+	//var myvar = flags.jumping
+	
+	var stat = data.Statistics,
+	shootex = false;
+	
+	return function(thisPlayer, flags, input, world, scene, game, data) {
+		//This is a loop function
+		//It will be called consecutively when loadingScreenOut
+    
+    if(shootex != flags.shootingEX) {
+    	shootex = flags.shootingEX;
+    	if(shootex) {
+    		var hasSuper = thisPlayer.equipedSuper != "empty",
+    		max_score = thisPlayer.data.supermeter == thisPlayer.data.max_supermeter_score;
+    	
+    		//If has parried, add one to the super score every ex that's not super
+    		//Else add 5 points
+    		if(!max_score) data.addScore('super',1);
+    		else if(hasSuper) data.addScore('super',5);
+    		else data.addScore('super',1);
+    	}
+    }
+    
+	};
+};

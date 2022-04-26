@@ -1,0 +1,30 @@
+[vertex]
+[/vertex]
+[fragment]
+/* Written by AndrewDev */
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform vec4 tint;
+uniform float ratio;
+uniform int mode;
+
+void main(void) {
+	vec4 color = texture2D(uSampler, vTextureCoord);
+
+	if (color.a > 0.0001) {
+		if (mode == 0) color.rgb = mix(color.rgb, tint.rgb * color.a, ratio); //LINEAR
+		else if (mode == 1) color.rgb += tint.rgb * color.a * ratio; //ADD
+		else if (mode == 2) color.rgb *= ratio == 1. ? tint.rgb : tint.rgb - ((1. - tint.rgb) * (ratio - 1.)); //MULTIPLY
+
+		gl_FragColor = vec4(clamp(color.rgb, 0., 1.),tint.a*color.a);
+	}
+}
+[/fragment]
+[uniforms]
+{
+	"tint": [1,1,1,1],
+	"ratio": 1,
+	"mode": 2
+}
+[/uniforms]

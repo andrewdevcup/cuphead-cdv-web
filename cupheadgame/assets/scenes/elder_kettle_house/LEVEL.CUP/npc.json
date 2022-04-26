@@ -1,0 +1,37 @@
+{
+	"NPC_ElderKettle": {
+		"glyphTitle": "",
+		"playerTalkPosition": 183,
+		"playerFacing": 1,
+		"script": "scripts/ek.cup",
+		"dialogs": [
+			{ 
+				"texts": ["ek_dlg1","ek_dlg2","ek_dlg3","ek_dlg4","ek_dlg5","ek_dlg6","ek_dlg7","ek_dlg8","ek_dlg9","ek_dlg10","ek_dlg11"],
+				"times": [0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.7,2.5,0.2,0.2],
+				"data": ["McKellen","McKellen","McKellen","Laugh","ExcitedBurst","McKellen","ExcitedBurst","Laugh","McKellen","ExcitedBurst","ExcitedBurst"]
+			},
+			{
+				"texts": ["ek_dlg12","ek_dlg13","ek_dlg14"],
+				"times": [0.2,0.2,0.2],
+				"data": ["ExcitedBurst","McKellen","ExcitedBurst"]
+			},
+			{
+				"texts": ["ek_dlg15","ek_dlg16"],
+				"times": [0.2,0.2],
+				"data": ["ExcitedBurst","ExcitedBurst"]
+			}
+		]
+	},
+	"NPC_InkwellTutorial": {
+		"glyphTitle": "texts.tutorial",
+		"playerTalkPosition": false,
+		"dialogs": [],
+		"script": "scripts/tutorial.cup"
+	},
+	"NPC_Exit": {
+		"glyphTitle": "texts.exit",
+		"playerTalkPosition": -900,
+		"dialogs": [],
+		"script": "scripts/exit.cup"
+	}
+}

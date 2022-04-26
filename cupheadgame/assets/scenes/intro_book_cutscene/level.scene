@@ -1,0 +1,304 @@
+
+b5.LoadScene = function(world, scene, data, game) {
+	//scene is the main scene where resources and actors will be added
+	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
+	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
+  
+  //Show only A and B buttons
+  game.GUI.disableButtons('Pause,X,Y,L,R,DPAD');
+  
+  game.Flags.inSomeMenu = true;
+  game.Flags.pausingEnabled = false;
+  
+  var book = new b5.Actor;
+  book.atlas = scene.findResource('BookIntroAtlas', 'brush');
+  world.addActor(book);
+  book._scale = 1.58;
+  book.ignore_atlas_size = true;
+  book.fit = b5.Actor.FitSize;
+  book.setSize(816,480);
+  book.round_pixels = false;
+  book.name ="IntroBook";
+  
+  book.mov_x = b5.generateRandomMovement(23);
+  book.mov_y = b5.generateRandomMovement(23);
+  book.spd = 0.12;
+  book.p = 0;
+  
+  book.onTick = function() {
+  	this.p += this.spd * game.speed;
+  	this.setPosition(
+  		this.mov_x(this.p)*3,
+  		this.mov_y(this.p)*3
+  	);
+  };
+  
+  var book_arrow = new b5.Actor;
+  book_arrow.bitmap = scene.findResource('BookArrow', 'bitmap');
+  book_arrow.setSize(19,24);
+  book_arrow.setPosition(295,210);
+  book_arrow.rotation = b5.Maths.degToRad(-90);
+  book_arrow.round_pixels = false;
+  book_arrow.name = "BookArrow";
+  book_arrow.opacity = 0;
+  book.addActor(book_arrow);
+  book_arrow.time = 0;
+  book_arrow.spd = 3;
+  //Animate
+  book_arrow.onTick = function() {
+  	this.time += game.speed*0.1;
+  	this.x2 = Math.cos(this.time*this.spd)*3;
+  	this.dirty();
+  };
+  
+  //Book text
+  var text = new b5.LabelActor;
+  text.font = scene_GUI.findResource('CupheadMemphisFont', 'brush');
+  book.addActor(text);
+  text.fill_style = "#1e1e1e";
+  //text.setPosition(-287, 160);
+  text.setPosition(-295, 145);
+  text._scale = 0.4;
+  text.name = "BookIntroText";
+  text.text_align = "left";
+  text.indentation = true;
+  text.max_width = 585;
+  
+  text.line_height = 49;
+  text.update_text = true;
+  text.opacity = 0.001;
+  
+  text.onTick = function() {
+  	if(this.update_text) this.text = data.book_text[data.page];
+  };
+  
+  //Page manager
+  
+  book.pages = ["intro", "page1","page2","page3","page4","page5","page6","page7","page8","page9","page10"];
+  book.current_page = 0;
+  data.page = "intro";
+  data.book_text = {};
+  book.can_change_page = false;
+  book.play_sounds = false;
+  book.animating = false;
+  
+  //sfx
+  var bookpgturnsfx = [
+  	scene.findResource('BookPageTurn0', 'sound'),
+  	scene.findResource('BookPageTurn1', 'sound'),
+  	scene.findResource('BookPageTurn2', 'sound')
+  ],
+  bookconf = scene.findResource("SfxConfirm", 'sound');
+  
+  book.nextPage = function() {
+  	var changePage = function() {
+  		//Change page after text have been hidden
+  		book.playAnim(book.pages[book.current_page]);
+  		book.animating = true;
+    	book.current_page++;
+    	data.page = book.current_anim;
+    	book.play_sounds && bookpgturnsfx[b5.Maths.randomRange(0,2)].play();
+    	
+    	//Play book sound effects
+    	book.setTimeout(function() {
+    		switch(book.current_page) {
+    			case 4: scene.findResource('IntroDevilLaugh', 'sound').play(); break;
+    			case 6: scene.findResource('IntroDiceRoll', 'sound').play(); break;
+    			case 7: scene.findResource('IntroDevilSlam', 'sound').play(); break;
+    			case 10: scene.findResource('IntroDevilKick', 'sound').play();
+    		}
+    	},0.1);
+  	};
+  	
+  	//Fade text
+  	if(text.opacity > 0.95) {
+  		text.update_text = false; 
+  		text.TweenTo('opacity', 0, 0.25, b5.Ease.linear, true);
+  	}
+  	changePage();
+  	book_arrow.opacity = 0;
+  	this.play_sounds && bookconf.play();
+  	this.can_change_page = false;
+  
+  };
+  
+  book_arrow.onShow = function() {
+  	book.can_change_page= book.current_page != book.pages.length;
+  	book.play_sounds = true
+  }
+  
+  text.onShow = function() {
+  	//Animate arrow
+  	book_arrow.TweenToWithEnd('opacity', 1, 0.35, b5.Ease.linear, true, 0.5, book_arrow.onShow);
+  }
+  
+  book.onAnimEnd = function() {
+  	//When page turning animation ends
+  	//Show text after a bit
+  	text.update_text = true;
+  	this.animating = false;
+    text.TweenToWithEnd('opacity', 1, 0.25, b5.Ease.linear, true, 0, text.onShow);
+  }
+  
+  data.load_level = false;
+  data.cutscene_skippable = false;
+  
+  data.loadLevel = function(cutsceneSkipped) {
+  	if(!this.load_level) {
+  			//Load Elder Kettle's house level
+  			book.setTimeout(function() {game.GUI.disableButtons()},0.25);
+  			this.load_level = true;
+  			b5.Game.LoadScene(game.contents.levels[0], false, true, {music_fade_speed: 0.4, show_anim: 'fade', show_speed: cutsceneSkipped ? 0.35 : 0.6, hide_anim: 'open', hourglass:true});
+  		}
+  }
+  
+};
+b5.onLoadingScreenOut = function(world, scene, data, game) {
+	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
+ 
+  var book = world.findActor('IntroBook'),
+  text = book.findActor('BookIntroText');
+  
+  //Play music
+  scene.findResource('MusIntro', 'sound').play();
+  
+  //Play anim
+  book.setTimeout(function() {
+    book.nextPage();
+    text.TweenToWithEnd('opacity', 1, 1.5, b5.Ease.linear, true, 1);
+  },3);
+  
+  //Input
+  book.btnA_pressed = true;
+  book.btnB_pressed = true;
+  
+  world.onTick = function(a) {
+  	var btnA = game.Input.player1.A,
+  	btnB = game.Input.player1.B;
+  	
+  	//BUTTON A
+  	if(btnA && !book.btnA_pressed) {
+  		book.btnA_pressed = true;
+  		//Change page
+  		if(book.current_page != book.pages.length) book.can_change_page && book.nextPage();
+  		else if(!book.animating) data.loadLevel();
+  		
+  	}else if(!btnA) book.btnA_pressed = false;
+  	
+  	//BUTTON B
+  	if(btnB && !book.btnB_pressed) {
+  		book.btnB_pressed = true;
+  		//Skip cutscene
+  		data.loadLevel(true);
+  	}else if(!btnB) book.btnB_pressed = false;
+  };
+  
+};
+b5.addSceneResources = function(scene, data, game) {
+	//Resources that will be added to scene, this will be called before LoadScene
+  
+  //Book intro atlas
+  var book_intro_atlas = new b5.ImageAtlas('BookIntroAtlas', []);
+  scene.addResource(book_intro_atlas, 'brush');
+  
+  //List pages and images for automatization
+  var path = data.resourcePath + 'book/book-%i.jpg';
+  
+  //Add bitmaps for book intro
+  //Add frames to atlas
+  
+  for(var i = 0, bitmap; i <= 13; i++) {
+    	book_intro_atlas.bitmaps.push(scene.addResource(
+    		bitmap = new b5.Bitmap('BookBitmap-'+i, path.replace('%i',i)),
+    		'bitmap'
+    	));
+    	bitmap.resource.resolution = 1;
+    }
+    
+  scene.addResource(
+  	new b5.Raw('BookFrames', data.resourcePath + 'book/book.frames.json', true, frames => {
+  		book_intro_atlas.parseFrames(frames, true);
+  	},true),
+  'raw');
+  
+  //Add animations
+  scene.addResource(
+  	new b5.Raw('BookAnims', data.resourcePath + 'book_anims.atlas.json', true, anims => {
+  		book_intro_atlas.parseAnims(anims);
+  	},true),
+  'raw');
+  
+  //Book arrow
+  var book_arrow = new b5.Bitmap('BookArrow', data.resourcePath + 'book_arrow.png', false);
+  scene.addResource(book_arrow, 'bitmap');
+  
+  //Music
+  var mus_intro = new	b5.Sound('MusIntro', data.resourcePath + 'MUS_Intro.ogg', false, false, false, {limiter:true});
+  mus_intro.output_gain = game.Music.volume;
+  mus_intro.loop = true;
+  //This Music is so loud i better add a limiter to it
+  mus_intro.setCompressor(-30, 10, 14, 0.003, 0.18);
+  mus_intro.onload = function() { game.Music.add(mus_intro); };
+  mus_intro.onDestroy = game.Music.remove;
+  scene.addResource(mus_intro, 'sound');
+  
+  //Sound effects
+  
+  //Book page turn
+  var sfx_pageturn1 = new b5.Sound('BookPageTurn0', data.resourcePath + 'cutscene_pageturn_00.ogg', false);
+  sfx_pageturn1.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_pageturn1, 'sound');
+  
+  var sfx_pageturn2 = new b5.Sound('BookPageTurn1', data.resourcePath + 'cutscene_pageturn_01.ogg', false);
+  sfx_pageturn2.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_pageturn2, 'sound');
+  
+  var sfx_pageturn3 = new b5.Sound('BookPageTurn2', data.resourcePath + 'cutscene_pageturn_02.ogg', false);
+  sfx_pageturn3.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_pageturn3, 'sound');
+  
+  var sfx_confirm = new b5.Sound('SfxConfirm', b5.Paths.assets + 'sfx_PlayerSelect_Confirm.ogg', false);
+  sfx_confirm.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_confirm, 'sound');
+  
+  //Adding them to game.Sfx or game.Music doesn't matter, it's only for changing the volume in real time
+  
+  //Intro cutscene sfx
+  
+  var sfx_introdevillaugh = new b5.Sound('IntroDevilLaugh', data.resourcePath + 'intro_devil_laugh.ogg', false);
+  sfx_introdevillaugh.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_introdevillaugh, 'sound');
+  
+  var sfx_introdiceroll = new b5.Sound('IntroDiceRoll', data.resourcePath + 'intro_dice_roll.ogg', false);
+  sfx_introdiceroll.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_introdiceroll, 'sound');
+  
+  var sfx_introdevilslam = new b5.Sound('IntroDevilSlam', data.resourcePath + 'intro_devil_slam.ogg', false);
+  sfx_introdevilslam.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_introdevilslam, 'sound');
+  
+  var sfx_introdevilkick = new b5.Sound('IntroDevilKick', data.resourcePath + 'intro_devil_kick.ogg', false);
+  sfx_introdevilkick.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_introdevilkick, 'sound');
+  
+  //Texts
+  var txt_book = new b5.Raw('BookText', data.resourcePath + 'texts/' + game.cfg.Language.lang + '.json', true, text_strings => {
+  	data.book_text = JSON.parse(text_strings);
+  });
+  scene.addResource(txt_book, 'raw');
+  
+};
+b5.onSceneUnload = function(world, scene, data, game, clearResources) {
+    //Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
+    //You can also remove created objects in b5.Game if they were created and used on the scene.
+    
+    //Stop updating timeouts and animations
+    var book = world.findActor('IntroBook');
+    book.active = false;
+    book.play_sounds = false;
+};
+//DEPRECATED
+b5.UpdateScene = function(world, scene, data, game) {
+	//For updating actors and behaviors on your scene every frame
+
+};

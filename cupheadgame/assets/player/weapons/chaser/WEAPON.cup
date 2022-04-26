@@ -1,0 +1,469 @@
+return function(thisPlayer, flags, world, scene, game, wpnData) {
+	/* Setup */
+
+	var thisAtlas = scene.findResource('ChaserAtlas', 'brush'),
+	viewLayer = world.findActor(thisPlayer.parent.name, true),
+	body = wpnData.body,
+	shootTime = 0,
+	shootChange = false,
+	shootAngle = 0,
+	time = 0,
+	thisWeapon = null,
+	startTime = -2,
+	name = "chaser",
+	deg90 = b5.Maths.degToRad(90),
+	exShootCount = 0,
+
+	sfxBulletDeath = scene.findResource('WeaponDeathSfx', 'sound'),
+	sfxBulletHit = [
+		scene.findResource('ChaserImpactSfx1', 'sound'),
+		scene.findResource('ChaserImpactSfx2', 'sound'),
+		scene.findResource('ChaserImpactSfx3', 'sound'),
+		scene.findResource('ChaserImpactSfx4', 'sound'),
+		scene.findResource('ChaserImpactSfx5', 'sound'),
+		scene.findResource('ChaserImpactSfx6', 'sound')
+	],
+	sfxFireStart = [
+		scene.findResource('ChaserStartSfx1', 'sound'),
+		scene.findResource('ChaserStartSfx2', 'sound'),
+		scene.findResource('ChaserStartSfx3', 'sound'),
+		scene.findResource('ChaserStartSfx4', 'sound'),
+		scene.findResource('ChaserStartSfx5', 'sound')
+	],
+	sfxFireLoop = [
+		scene.findResource('ChaserLoopSfx1', 'sound'),
+		scene.findResource('ChaserLoopSfx2', 'sound'),
+		scene.findResource('ChaserLoopSfx3', 'sound')
+	],
+	sfxExHit = scene.findResource('EXShotHitSfx', 'sound');
+
+	/*Weapon behaviors*/
+	var weapon = {
+		Spawn: function(pos, angle) {
+			/*Spawning normal bullet(s)*/
+
+			//Angle variation
+			angle += b5.Maths.degToRad(b5.Maths.randomRange(-wpnData.angleDispersion, wpnData.angleDispersion, true));
+
+			//Actor with kinematic body
+			var bullet = new b5[wpnData.body.hitbox.type+'Actor'];
+			bullet.radius = wpnData.body.hitbox.size;
+			bullet.x = thisPlayer.x + pos[0];
+			bullet.y = thisPlayer.y + pos[1];
+			bullet.despawnTime = wpnData.despawnTime;
+			bullet.damage = wpnData.damage * thisPlayer.data.damageMultiplier;
+			bullet.time = 0;
+			bullet.rotation = angle || 0;
+			bullet.fill_style = 'transparent';
+			bullet.tags = ["playerBullet"];
+			bullet.tag = "playerBullet";
+			bullet.layer = thisPlayer.layer-1;
+			bullet.supermeter_score = wpnData.supermeter_score;
+
+			viewLayer.addActor(bullet);
+
+			bullet.destroyBullet = function(timeout) {
+				!timeout && thisWeapon.SpawnParticle('bulletDeath', [this.x, this.y], null, this.rotation);
+				this.release(true);
+			}
+			bullet.onOutScreen = o => bullet.setTimeout(t=>t.data.target === null && t.data.destroyBullet(true), 0.09);
+
+			bullet.initBody(body.bodyType, body.fixedRotation, true);
+
+			bullet.addFixture({
+				type: b5.Shape[body.shape],
+				width: body.size[0],
+				height: body.size[1],
+				friction: body.friction || 0,
+				restitution: body.restitution || 0,
+				density: body.density || 1,
+				is_sensor: true
+			});
+
+			//Homing hitbox
+			bullet.target = null;
+			bullet.enemyDetectionRange = wpnData.enemyDetectionRange * 1000;
+
+			//Attach atlas
+			var bAt = new b5.Actor;
+			bAt.atlas = thisAtlas;
+			bAt.rotation = deg90;
+			bullet.addActor(bAt);
+			bAt.use_parent_opacity = false;
+			bAt._scale = wpnData.scale;
+
+			//Attach trail
+			var bTr = new b5.Actor();
+			bTr.atlas = bAt.atlas;
+			bTr.ox = -25;
+			bullet.addActor(bTr);
+			bTr.use_parent_opacity = false;
+			bTr._scale = wpnData.scale;
+
+			bullet.body.m_linearVelocity.x = Math.cos(angle)*wpnData.speed;
+			bullet.body.m_linearVelocity.y = Math.sin(angle)*wpnData.speed;
+
+			//Play anims
+			bAt.playAnim('bullet_loop', true);
+			bTr.playAnim('bullet_trail', true);
+
+			bullet.onTick = function() {
+				this.time += app.dt;
+				if (this.time > this.despawnTime) {
+					this.destroyBullet(true);
+					return;
+				}
+
+				//Get target
+				if (this.target === null) {
+					var olhB = world.findActorsWithTagsName('hittableEnemy', true); //this.detectionHitbox.A_overlaps;
+					for (var i = 0, prevDistance = Number.MAX_VALUE, target = null; i < olhB.length; i++) {
+						var distance = b5.Maths.distanceFast(this.x, this.y, olhB[i].x, olhB[i].y);
+						if (distance < prevDistance && distance < this.enemyDetectionRange) {
+							prevDistance = distance;
+							target = olhB[i];
+						}
+					}
+					this.target = target;
+				} else if (this.target.destroyed) this.target = null;
+				else {
+					//Homing to target, smooth rotation
+					var targetAngle = b5.Maths.posAngle(this.x, this.y, this.target.x, this.target.y); //-Math.atan2(this.y-this.target.y,-(this.x-this.target.x));
+
+					this.setRotation(
+						b5.Maths.interpAngle(this.rotation, targetAngle, .15*game.speed)
+					);
+
+					var lv = this.body.m_linearVelocity;
+
+					lv.x = Math.cos(this.rotation) * wpnData.speed;
+					lv.y = Math.sin(this.rotation) * wpnData.speed;
+				}
+
+
+				//Check overlaps
+				var ols = this.A_overlaps;
+				for (var i = 0; i < ols.length; i++)
+					if (ols[i]) {
+					var l = ols[i];
+					if (ols[i].tags.indexOf("hittableEnemy") != -1) {
+						//Enemy was hit
+						if (!this.destroyed) {
+							this.destroyBullet();
+							l.onBulletHit && l.onBulletHit(this);
+							this.destroyed = true;
+							this.onEnemyHit && this.onEnemyHit(l);
+							sfxBulletHit[b5.Maths.randomRange(0, sfxBulletHit.length-1)].play();
+
+							//Add score to player
+							thisPlayer.data.supermeter < thisPlayer.data.max_supermeter_score && (thisPlayer.data.supermeter += this.supermeter_score);
+
+							//Add score to level
+							scene.data.Statistics.damage_given += this.damage;
+						}
+						return;
+					}
+					if (ols[i].tags.search(["wall", "floor"]) != -1 && ols[i].tags.indexOf('ignoreBullets') == -1) {
+						//Scenery was hit
+						this.destroyBullet();
+						sfxBulletHit[b5.Maths.randomRange(0, sfxBulletHit.length-1)].play();
+						return;
+					}
+				}
+			}
+
+		},
+		SpawnParticle: function(type, pos, optTarget, ...extraArgs) {
+			/*Bullet particle*/
+			switch (type) {
+				case "bulletSpawn":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
+					p.setPosition(pos[0], pos[1]);
+					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					thisPlayer.parent.addActor(p);
+					p._scale = 0.92;
+					p.playAnim('spark');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					p.spawned_when_running = flags.running;
+					p.facing = thisPlayer.data.facing;
+
+					//Follow player when running
+					p.onTick = function() {
+						var so = thisPlayer.data.shootOffset;
+						thisPlayer.data.facing == this.facing &&
+						this.spawned_when_running && flags.running &&
+						!flags.inAir && p.setPosition(thisPlayer.x + so[0], thisPlayer.y + so[1]);
+					}
+					break;
+				case "bulletDeath":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.setPosition(pos[0], pos[1]);
+					p.rotation = extraArgs[0] + deg90;
+					p.layer = thisPlayer.layer+1;
+					thisPlayer.parent.addActor(p);
+					p._scale = 0.92;
+					p.playAnim('bullet_death');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					break;
+				case "exBulletHit":
+					var p = new b5.Actor;
+					p.atlas = scene.findResource('WeaponEXSparkAtlas', 'brush');
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
+					p.setPosition(pos[0], pos[1]);
+					thisPlayer.parent.addActor(p);
+					p._layer = thisPlayer.layer+1;
+					p.frame_speed = 24;
+					p.frames_repeat = false;
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					break;
+				case "exBulletDeath":
+					if (optTarget) {
+						var p = new b5.Actor;
+						p.atlas = thisAtlas;
+						p.setPosition(pos[0], pos[1]);
+						p.layer = optTarget.layer;
+						optTarget.parent.addActor(p);
+						p._scale = 0.92;
+						p.playAnim('ex_death');
+						p.center_atlas = true;
+						p.tags = ["playerParticle"];
+						p.onAnimEnd = p.destroy;
+					}
+					break;
+			}
+		},
+		SpawnEX: function(pos, angle) {
+			/*Spawning EX bullet(s)*/
+			exShootCount++;
+			
+			var b_angle,
+			o = wpnData.ex.orbitOffset*thisPlayer.scale,
+			t_offset = [
+				[o,	0],
+				[0,	o],
+				[-o,0],
+				[0,	-o]
+			];
+			for (var i = 0, ang = 0; i < 4; i++) {
+				b_angle = b5.Maths.degToRad(b5.Maths.pos(-wpnData.ex.angleDispersion, wpnData.ex.angleDispersion, i/3));
+				var exb = new b5[wpnData.body.ex.hitbox.type+'Actor']();
+				exb.radius = wpnData.body.ex.hitbox.size;
+				exb.x = thisPlayer.x + pos[0];
+				exb.y = thisPlayer.y + pos[1];
+				exb.rotation = (angle || 0) + b_angle;
+				exb.despawnTime = wpnData.ex.despawnTime;
+				exb.damage = wpnData.ex.damage * thisPlayer.data.damageMultiplier;
+				exb.time = 0;
+				exb.fill_style = "transparent";
+				exb.tags = ["playerBullet"];
+				exb.tag = "playerBullet";
+				exb.id = i;
+				exb.layer = body.sub_layer;
+				exb.supermeter_score = 0;
+
+				exb.orbit = false;
+				exb.target = null;
+				exb.target_offset = t_offset[i];
+				exb.o_angle = ang;
+				exb.shotAt = exShootCount;
+				exb.enemyDetectionRange = wpnData.enemyDetectionRange*1000;
+				ang += deg90;
+
+				viewLayer.addActor(exb);
+				exb._layer = thisPlayer.layer+1;//wpnData.body.ex.sub_layer;
+
+				//Attach atlas
+				var bAt = new b5.Actor;
+				bAt.atlas = thisAtlas;
+				bAt.rotation = deg90;
+				exb.addActor(bAt);
+				bAt.use_parent_opacity = false;
+				bAt.center_atlas = true;
+				bAt._scale = wpnData.ex.scale;
+				bAt.playAnim('ex_loop', true);
+
+				//Attach trail
+				var bTr = new b5.Actor();
+				bTr.atlas = bAt.atlas;
+				bTr.ox = -40;
+				exb.addActor(bTr);
+				bTr.use_parent_opacity = false;
+				bTr.playAnim('ex_trail', true);
+
+				exb.destroyBullet = function(timeout) {
+					!timeout && thisWeapon.SpawnParticle('exBulletDeath', [this.x, this.y], this);
+					this.release(true);
+			}
+
+			exb.initBody(body.ex.bodyType, body.ex.fixedRotation, true);
+
+			exb.addFixture({
+				type: b5.Shape[wpnData.body.ex.shape],
+				width: body.ex.size[0],
+				height: body.ex.size[1],
+				friction: body.ex.friction || 0,
+				restitution: body.ex.restitution || 0,
+				density: body.ex.density || 1,
+				is_sensor: true
+		});
+
+		exb.body.m_linearVelocity.x = Math.cos(exb.rotation)*wpnData.ex.speed;
+		exb.body.m_linearVelocity.y = Math.sin(exb.rotation)*wpnData.ex.speed;
+
+		//Set target
+		exb.setTimeout(t=> {
+			if(!t.data.destroyed) t.data.target = thisPlayer;
+		}, 0.1);
+
+		exb.onTick = function() {
+			this.time += app.dt;
+			if (this.time > this.despawnTime) {
+				this.destroyBullet(true);
+				return;
+			}
+			
+			if(exShootCount != this.shotAt && this.orbit) {
+				this.target = null;
+				this.orbit = false;
+				this.target_offset[0] = this.target_offset[1] = 0;
+				this.despawnTime = wpnData.despawnTime+3;
+				this.time = 0;
+				//Restore speed
+				var lv = this.body.m_linearVelocity;
+				lv.x = Math.cos(this.rotation) * wpnData.speed;
+				lv.y = Math.sin(this.rotation) * wpnData.speed;
+			}
+
+			//Get target
+			if (this.target === null) {
+
+				if (!this.orbit) {
+					var olhB = world.findActorsWithTagsName('hittableEnemy', true); //this.detectionHitbox.A_overlaps;
+					for (var i = 0, prevDistance = Number.MAX_VALUE, target = null; i < olhB.length; i++) {
+						var distance = b5.Maths.distanceFast(this.x, this.y, olhB[i].x, olhB[i].y);
+						if (distance < prevDistance && distance < this.enemyDetectionRange) {
+							prevDistance = distance;
+							target = olhB[i];
+						}
+					}
+					this.target = target;
+				} else {
+					var angle = (this.time*wpnData.ex.orbitSpeed)+this.o_angle;
+					this.setPosition(
+						thisPlayer.x + (Math.cos(angle) * wpnData.ex.orbitOffset*thisPlayer.scale),
+						thisPlayer.y + (Math.sin(angle) * wpnData.ex.orbitOffset*thisPlayer.scale)
+					);
+					this.setRotation(angle+deg90);
+				}
+			} else if (this.target.destroyed) this.target = null;
+			else {
+				//Homing to target, smooth rotation
+				var targetAngle = b5.Maths.posAngle(this.x, this.y, this.target.x+this.target_offset[0], this.target.y+this.target_offset[1]); //-Math.atan2(this.y-this.target.y,-(this.x-this.target.x));
+
+				this.setRotation(
+					b5.Maths.interpAngle(this.rotation, targetAngle, .18*game.speed)
+				);
+
+				var lv = this.body.m_linearVelocity;
+
+				lv.x = Math.cos(this.rotation) * wpnData.speed;
+				lv.y = Math.sin(this.rotation) * wpnData.speed;
+			}
+
+			//Check overlaps
+			var ols = this.A_overlaps;
+			for (var a = 0, ol = null; a < ols.length; a++)
+				if (ol = ols[a], ol.tags.indexOf("hittableEnemy") != -1) {
+				//Enemy was hit
+				//Stun
+				ol.onBulletHit && ol.onBulletHit(this);
+				this.onEnemyHit && this.onEnemyHit(ol);
+				//Add score to level
+				scene.data.Statistics.damage_given += this.damage;
+
+				sfxExHit.play();
+				this.destroyBullet();
+				thisWeapon.SpawnParticle('exBulletHit', [this.x, this.y], this);
+			}
+			if(ol && ol.tag === thisPlayer.name + 'hitbox' && this.target === thisPlayer) {
+				this.orbit = true;
+				this.target = null;
+				
+				var lv = this.body.m_linearVelocity;
+				lv.x=0;lv.y=0;
+			}
+		}
+		
+	}
+
+},
+onTick: function(bullets, exBullets) {
+	/*Updating bullets behavior*/
+	time += app.dt;
+
+	//Shooting angle changed
+	if (shootAngle != thisPlayer.data.shootAngle) {
+		shootAngle = thisPlayer.data.shootAngle;
+		shootTime -= app.dt; //Delay shoot one frame to synchronize shooting angle and position
+	}
+
+	if (shootTime < wpnData.delay) shootTime += app.dt;
+	else if (!flags.dashing && !flags.damageHit) {
+		shootTime = 0;
+		thisPlayer.data.triggerShot = true;
+		!flags.inAir && (thisPlayer.updateAnimations = true);
+		var pos = [
+			thisPlayer.data.shootOffset[0],
+			thisPlayer.data.shootOffset[1]
+		];
+		thisWeapon.Spawn(pos, thisPlayer.data.shootAngle);
+		thisWeapon.SpawnParticle("bulletSpawn", [thisPlayer.x + thisPlayer.data.shootOffset[0], thisPlayer.y + thisPlayer.data.shootOffset[1]]);
+	}
+
+	//Shooting changed
+	if (shootChange != flags.shooting) {
+		shootChange = flags.shooting;
+
+		if (shootChange) {
+			time - startTime > 0.2 && sfxFireStart[b5.Maths.randomRange(0, 1)].play();
+			sfxFireLoop[b5.Maths.randomRange(0, 1)].play();
+			startTime = time;
+		}
+
+	}
+
+},
+onShootingStopped: function(playerDamaged) {
+	for (var i = 0; i < sfxFireLoop.length; i++) {
+		sfxFireLoop[i].location && sfxFireLoop[i].stop();
+	}
+
+	//If other players are shooting with the same weapon,
+	//Keep	playing the sound effect
+	//This only applies to those weapons with a looping sfx rather than playing one sfx per shot
+
+	/*	if(playerDamaged)*/ for (var i = 0, p = world.findActorsByTagName('player', true); i < p.length; i++) if (p[i] !== thisPlayer) {
+		var player = p[i],
+		w = player.equipedWeapons[player.flags.weaponIndex];
+
+		if (w === name && player.flags.shooting && player.flags.heartPoints > 0) {
+			var si = b5.Maths.randomRange(0, 1);
+			!sfxFireLoop[si].isPlaying() && sfxFireLoop[si].play();
+		}
+	}
+	shootChange = false;
+
+}
+};
+
+return thisWeapon = weapon;
+};

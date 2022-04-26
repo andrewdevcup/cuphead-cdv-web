@@ -1,0 +1,26 @@
+{
+	"0": {
+		"frames":[0],
+		"speed":0
+	},
+	"hand_cursor_boil": {
+		"frames":[0,1,2,3,4],
+		"speed":12
+	},
+	"hand_cursor_down_and_left": {
+		"frames":[5,6,7],
+		"speed":24
+	},
+	"hand_cursor_up_and_right": {
+		"frames":[8,9,10],
+		"speed":24
+	},
+	"speech_balloon_tails": {
+		"frames":[11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],
+		"speed":0
+	},
+	"speech_balloon_arrows": {
+		"frames":[34,35,36,37,38,39],
+		"speed":0
+	}
+}

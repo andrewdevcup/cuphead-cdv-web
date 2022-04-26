@@ -1,0 +1,16 @@
+{
+	"bullet_trail": {
+		"indices":[0,1,2,3,4,5,6,7,8,9,10,11],"speed":24
+	},"bullet_loop": {
+		"indices":[12,13,14,15,16,17,18,19],"speed":24
+	},"bullet_death": {
+		"indices":[20,21,22,23],"speed":24
+	},"ex_loop": {
+		"indices":[24,25,26,27,28,29,30,31],"speed":24
+	},"ex_death": {
+		"indices":[32,33,34,35],"speed":24
+	},"ex_trail": {
+		"indices":[36,37,38,39,40,41,42,43,44,45,46,47],"speed":24
+	},"spark": {
+		"indices":[48,49,50,51],"speed":24
+	}}

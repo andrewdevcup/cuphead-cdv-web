@@ -1,0 +1,13 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,378,57,0,0, world1_bride_main_back_top
+0,378,0,380,65,0,0, world1_bride_main_front_top
+0,0,57,280,286,0,0, world1_bridge_frogs
+0,280,65,176,187,0,0, world1_bridge_frogs_back_top
+0,456,65,155,193,0,0, world1_bridge_frogs_front_top
+0,611,65,236,213,0,0, world1_bridge_level_1-1
+0,0,343,215,64,0,0, world1_bridge_level_1-1_back_top
+0,215,343,223,56,0,0, world1_bridge_level_1-1_front_top
+0,438,278,380,190,0,0, world1_bridge_main
+0,0,407,232,367,0,0, world1_bridge_plane_tutorial
+0,232,619,211,52,0,0, world1_bridge_plane_tutorial_back_top
+0,443,541,205,56,0,0, world1_bridge_plane_tutorial_front_top

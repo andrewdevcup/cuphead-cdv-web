@@ -1,0 +1,70 @@
+{
+	"DEAD": {
+		"frames": [0],
+		"speed": 0
+	},
+	"1HP": {
+		"frames": [9,10],
+		"speed": 10
+	},
+	"2HP": {
+		"frames": [2],
+		"speed": 1
+	},
+	"3HP": {
+		"frames": [3],
+		"speed": 1
+	},
+	"4HP": {
+		"frames": [4],
+		"speed": 1
+	},
+	"5HP": {
+		"frames": [5],
+		"speed": 1
+	},
+	"6HP": {
+		"frames": [6],
+		"speed": 1
+	},
+	"7HP": {
+		"frames": [7],
+		"speed": 1
+	},
+	"8HP": {
+		"frames": [8],
+		"speed": 1
+	},
+	"CardFullIdle-cuphead": {
+		"frames": [16],
+		"speed": 1
+	},
+	"CardFull-cuphead": {
+		"frames": [11,12,13,14,15,16],
+		"speed": 24
+	},
+	"CardEmpty-cuphead": {
+		"frames": [16,15,14,13,12,11],
+		"speed": 24
+	},
+	"CardMax-cuphead": {
+		"frames": [11,12,13,14,15,16,15,14,13,12],
+		"speed":24
+	},
+	"CardFullIdle-mugman": {
+		"frames": [19],
+		"speed": 1
+	},
+	"CardFull-mugman": {
+		"frames": [11,12,13,17,18,19],
+		"speed": 24
+	},
+	"CardEmpty-mugman": {
+		"frames": [19,18,17,13,12,11],
+		"speed": 24
+	},
+	"CardMax-mugman": {
+		"frames": [11,12,13,17,18,19,18,17,13,12],
+		"speed": 24
+	}
+}

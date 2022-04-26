@@ -1,0 +1,546 @@
+b5.Game.Input = {};
+
+b5.Game.Input.reset = function(player) {
+	(player == 0 || !player) && (this.player1 = {
+		axis_x: 0,
+		axis_y: 0,
+		A: 0,
+		B: 0,
+		X: 0,
+		Y: 0,
+		L: 0,
+		R: 0,
+		Start: 0
+	});
+	(player == 1 || !player) && (this.player2 = {
+		axis_x: 0,
+		axis_y: 0,
+		A: 0,
+		B: 0,
+		X: 0,
+		Y: 0,
+		L: 0,
+		R: 0,
+		Start: 0
+	});
+	this.input_player = {
+		p1: "GUI",
+		p2: "Gamepad"
+	};
+};
+b5.Game.Input.configureGamepads = function() {
+	//Use custom gamepad indexes for players
+	var gamepadcfg = b5.Game.cfg.Gamepad;
+	this.Gamepad = {
+		player1: new b5.Gamepad(gamepadcfg.p1_gamepad),
+		player2: new b5.Gamepad(gamepadcfg.p2_gamepad)
+	};
+};
+
+b5.Game.Input.checkInput = function(type, player, key) {
+	switch (type) {
+		case 'keyboard':
+			var keycfg = b5.Game.cfg.Keyboard,
+			keyinput = keycfg[player + '_' + key];
+			keyinput == "space" && (keyinput = " ");
+			if (this.Keyboard.raw[keyinput]) return 1;
+			break;
+		case 'gamepad':
+			var gamepadcfg = b5.Game.cfg.Gamepad,
+			gamepadinput = gamepadcfg[player + '_' + key],
+			gamepad = this.Gamepad['player' + player.substr(1)],
+			gamepadbtn = gamepad.button[gamepadinput];
+			if (gamepadbtn || gamepadbtn === 0) return gamepadbtn;
+			else {
+				//Stick input
+				var stick = gamepadinput.split('.'); //Split sticks and axes
+				return gamepad.axis[stick[0]][stick[1]] * (gamepadcfg[player+'_axis_'+stick[1]+'_invert'] ? -1: 1); //Stick
+			}
+			break;
+	}
+	return 0;
+};
+
+b5.Game.Input.reset();
+b5.Game.Input.configureGamepads();
+
+b5.Game.Input.Keyboard = new b5.Keyboard();
+b5.Game.Input.Keyboard.lowercase_raw = true; //Support for appx keyboard api on windows
+
+b5.Game.Input.updateInput = function() {
+	//Player one, only on host
+	//Use gui, keyboard and gamepad as input.
+	//If player 2 joined, use only gui and keyboard
+	//._update(player,useGui,useKeyboard,useGamepad)
+	var mp = b5.Game.Multiplayer;
+	
+	//Get gamepads length, if more than one is present, use both for player 1 and 2 respectively
+	//Else gamepad on index 0 will be for player 2
+  for(var i = 0, g = 0; i < app.connected_gamepads.length; i++) app.connected_gamepads[i] !== null && g++;
+  this.gamepadLength = g;
+
+	!mp.isGuest && this._update(0, true, true, !mp.player2Joined || (this.gamepadLength > 1));
+	//Player two: controller on local, gui/controller/gamepad on host
+  (mp.isPlayer2 || mp.player2Joined) && !mp.isHosting && this._update(1, mp.isGuest, mp.isGuest, mp.player2Joined || mp.isGuest);
+};
+
+b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
+	var player = pl ? 'p2': 'p1',
+	gamepadcfg = b5.Game.cfg.Gamepad,
+  gamepadplayer = this.Gamepad['player'+player.substr(1)],
+	inputplayer = pl ? this.player2: this.player1,
+	input = function(key, type) {
+		return b5.Game.Input.checkInput(type ? 'gamepad': 'keyboard', player, key);
+	};
+  
+  //Use gamepad for second player on local (disable if two players has gamepads)
+  b5.Game.Multiplayer.player2Joined && pl && this.gamepadLength < 2 && (gamepadplayer.gamepad_index = 0);
+  
+	//Update last registered input from device
+	//Gui
+	if (this.input_player[player] != "GUI" && useGUI) for (var i in b5.Game.GUI.buttons) if (b5.Game.GUI.buttons[i].name != "HideShow" && b5.Game.GUI.buttons[i].touching) {
+		this.input_player[player] = "GUI";
+		break;
+	}
+	//Keyboard
+	if (this.input_player[player] != "Keyboard" && useKeyboard) for (var i in this.Keyboard.raw) if (this.Keyboard.raw[i]) {
+		this.input_player[player] = "Keyboard";
+		break;
+	}
+	//Gamepad
+	if (this.input_player[player] != "Gamepad" && gamepadplayer.connected && useGamepad) {
+		for (var i in gamepadplayer.button) if (gamepadplayer.button[i] != 0) {
+			this.input_player[player] = "Gamepad";
+			break;
+		}
+		for (var i in gamepadplayer.axis) if (Math.abs(gamepadplayer.axis[i].x) > 0.6 || Math.abs(gamepadplayer.axis[i].y) > 0.6) {
+			this.input_player[player] = "Gamepad";
+			break;
+		}
+	}
+
+	switch (this.input_player[player]) {
+		case "Keyboard":
+			//Keyboard controls
+			inputplayer.axis_x = -input('key_left', 0) || input('key_right', 0);
+			inputplayer.axis_y = -input('key_up', 0) || input('key_down', 0);
+
+			//Use escape and enter buttons to navigate in menus
+			var keyboardplayer = this.Keyboard.raw,
+			inMenu = b5.Game.Flags.inSomeMenu || b5.Game.Flags.inPauseMenu;
+
+			inputplayer.A = input('key_jump', 0) || (inMenu && keyboardplayer.enter);
+			inputplayer.B = inMenu ? keyboardplayer.escape: input('key_shoot', 0);
+			inputplayer.X = input('key_dash', 0);
+			inputplayer.Y = input('key_ex', 0);
+			inputplayer.L = input('key_wpn', 0);
+			inputplayer.R = input('key_lock', 0);
+			inputplayer.Start = input('key_pause', 0);
+			break;
+		case "Gamepad":
+			//Use standard gamepad dpad to navigate in menus
+			var inMenu = b5.Game.Flags.inSomeMenu || b5.Game.Flags.inPauseMenu;
+			inputplayer.axis_x = input('axis_x', 1) || (inMenu && gamepadplayer.axis.HAT.x) || 0;
+			inputplayer.axis_y = input('axis_y', 1) || (inMenu && gamepadplayer.axis.HAT.y) || 0;
+
+			inputplayer.A = input('btn_jump', 1);
+			//Use standard gamepad B button to navigate back in menus
+			inputplayer.B = inMenu ? gamepadplayer.button.B: input('btn_shoot', 1);
+			inputplayer.X = input('btn_dash', 1);
+			inputplayer.Y = input('btn_ex', 1);
+			inputplayer.L = input('btn_lock', 1);
+			inputplayer.R = input('btn_wpn', 1);
+			inputplayer.Start = input('btn_pause', 1);
+			
+			if(!b5.Game.Multiplayer.player2Joined && !b5.Game.Multiplayer.isGuest) gamepadplayer.button.SELECT > 0.5 && b5.Game.Multiplayer.addPlayer2();
+
+			break;
+		case "GUI":
+			var guibtns = b5.Game.GUI.buttons;
+			//GUI Controls
+			inputplayer.axis_x = guibtns.DPAD.axis.x;
+			inputplayer.axis_y = guibtns.DPAD.axis.y;
+
+			inputplayer.A = guibtns.A.value;
+			inputplayer.B = guibtns.B.value;
+			inputplayer.X = guibtns.X.value;
+			inputplayer.Y = guibtns.Y.value;
+			inputplayer.L = guibtns.L.value;
+			inputplayer.R = guibtns.R.value;
+			inputplayer.Start = guibtns.Pause.value;
+
+		}
+	};
+
+	//Controls GUI for phones
+	(function() {
+		var gui = new b5.Actor();
+		scene_GUI.addActor(gui);
+		gui.name = "gui";
+		gui._layer = 5;
+		gui.touchable = true;
+		
+		gui.buttonDefs = {
+			jump: "A",
+			shoot: "B",
+			dash: "X",
+			ex: "Y",
+			lock: "R",
+			wpn: "L"
+		};
+
+		//Load gui atlas
+	/*	var guiBtnBitmap = new b5.Bitmap('guiBtnBitmap', b5.Paths.assets + 'gui.png', false);
+		scene_GUI.addResource(guiBtnBitmap, "bitmap");*/
+
+		var guiBtnAtlas = new b5.ImageAtlas('guiBtnAtlas', [
+			scene_GUI.addResource( new b5.Bitmap('GuiButtonsBitmap', b5.Paths.assets + 'buttons.png'), 'bitmap'),
+			scene_GUI.addResource( new b5.Bitmap('GuiDPADBitmap', b5.Paths.assets + 'dpad.png'), 'bitmap')
+		]);
+		guiBtnAtlas.parseFrames(b5.File.readSync(b5.Paths.assets + 'gui_buttons.csv'));
+
+		//buttons
+		var createBtn = b5.Game.importObject('gui_button_common').createButton;
+
+		//Create control buttons (A, B, X, Y, L, R, PAUSE, GUI HIDE/SHOW)
+		var btnA = createBtn('A', 94, 94);
+		btnA.atlas = guiBtnAtlas;
+		btnA.current_frame = 1; //A-menu
+		btnA.onBeginTouch = function() {
+		  this.tint_colour = "#ff0000";
+			this.value = 1;
+		};
+		btnA.onEndTouch = function() {
+		  this.tint_colour = "#ffffff"
+			this.value = 0;
+		};
+		btnA.updateStyle = function(inLevel, player) {
+			this.current_frame = inLevel ? 0 : 1;
+		}
+		gui.addActor(btnA);
+
+		var btnB = createBtn('B', 60, 60);
+		btnB.atlas = guiBtnAtlas;
+		btnB.current_frame = 7; //B-menu
+		btnB.pressed = false;
+		btnB.onBeginTouch = function() {
+			if (b5.Game.Flags.inLevel && !b5.Game.Flags.inPauseMenu) {
+				//Hold only when on a level
+				this.pressed = !this.pressed;
+				this.touching = this.pressed;
+				this.value = this.touching ? 1: 0;
+				this.tint_colour = this.touching ? "#fff109" : "white";
+			} else {
+				this.tint_colour = "#fff109";
+				this.value = 1;
+			}
+		};
+		btnB.onEndTouch = function() {
+			if (b5.Game.Flags.inLevel && !b5.Game.Flags.inPauseMenu) this.touching = this.pressed;
+			else {
+				this.tint_colour = "white";
+				this.value = 0;
+				this.pressed = false;
+			}
+		};
+		btnB.releasePush = function() {
+			this.tint_colour = "white";
+			this.value = 0;
+			this.pressed = false;
+		};
+		btnB.updateStyle = function(inLevel, player) {
+			if(!inLevel) this.current_frame = 7;
+			else if(player) {
+				var w = player.equipedWeapons[player.flags.weaponIndex];
+				this.current_frame = this.atlas.getFrameByName('B-level-'+w, true) || 7;
+			}
+		}
+		gui.addActor(btnB);
+
+		var btnX = createBtn('X', 60, 60);
+		btnX.atlas = guiBtnAtlas;
+		btnX.current_frame = 14; //X-menu
+		btnX.onBeginTouch = function() {
+			this.tint_colour = "blue";
+			this.value = 1;
+		};
+		btnX.onEndTouch = function() {
+			this.tint_colour = "white";
+			this.value = 0;
+		};
+		btnX.updateStyle = function(inLevel, player) {
+			if(!inLevel) this.current_frame = 14;
+			else if(player) this.current_frame = this.atlas.getFrameByName('X-level-'+player.name, true) || 14;
+		}
+		gui.addActor(btnX);
+
+		var btnY = createBtn('Y', 60, 60);
+		btnY.atlas = guiBtnAtlas;
+		btnY.current_frame = 20; //Y-menu
+		btnY.onBeginTouch = function() {
+			this.tint_colour = "green";
+			this.value = 1;
+		};
+		btnY.onEndTouch = function() {
+			this.tint_colour = "white";
+			this.value = 0;
+		};
+		btnY.updateStyle = function(inLevel, player) {
+			if(!inLevel) this.current_frame = 20;
+			else if(player) {
+				var w = player.equipedWeapons[player.flags.weaponIndex];
+				this.current_frame = this.atlas.getFrameByName('Y-level-'+w, true) || 20;
+			}
+		}
+		gui.addActor(btnY);
+
+		var btnL = createBtn('L', 60, 60);
+		btnL.atlas = guiBtnAtlas;
+		btnL.current_frame = 9; //L-menu
+		btnL.onBeginTouch = function() {
+			this.tint_colour = "gray";
+			this.value = 1;
+		};
+		btnL.onEndTouch = function() {
+			this.tint_colour = "white";
+			this.value = 0;
+		};
+		btnL.updateStyle = function(inLevel, player) {
+			this.current_frame = inLevel ? 8 : 9;
+		}
+		gui.addActor(btnL);
+
+		var btnR = createBtn('R', 60, 60);
+		btnR.atlas = guiBtnAtlas;
+		btnR.current_frame = 11; //R-menu
+		btnR.onBeginTouch = function() {
+			this.tint_colour = "gray";
+			this.value = 1;
+		};
+		btnR.onEndTouch = function() {
+			this.tint_colour = "white";
+			this.value = 0;
+		};
+		btnR.updateStyle = function(inLevel, player) {
+			this.current_frame = inLevel ? 10 : 11;
+		}
+		gui.addActor(btnR);
+
+		var btnPause = createBtn('Pause', 60, 60);
+		btnPause.atlas = guiBtnAtlas;
+		btnPause.current_frame = 21; //Pause
+		btnPause.use_parent_opacity = false;
+		btnPause.opacity = 0.8
+		btnPause.onBeginTouch = function() {
+			!gui.hidden && (this.opacity = 0.45);
+			this.value = 1;
+		};
+		btnPause.onEndTouch = function() {
+			!gui.hidden && (this.opacity = 0.8);
+			this.value = 0;
+		};
+		btnPause.onTick = function() {
+			this.visible = b5.Game.Flags.pausingEnabled && !b5.Game.Multiplayer.isGuest;
+		}
+		gui.addActor(btnPause);
+
+		var btnHideShow = createBtn('HideShow', 87, 30);
+		btnHideShow.atlas = guiBtnAtlas;
+		btnHideShow.current_frame = 23;
+		btnHideShow.pressed = false;
+		btnHideShow.center_atlas = true;
+		btnHideShow.onBeginTouch = function() {
+			this.pressed = !this.pressed;
+			this.current_frame = this.pressed ? 24 : 23;
+			this.touching = this.pressed;
+			this.pressed ? gui.hide(): gui.show();
+		};
+		btnHideShow.onEndTouch = function() {
+			this.touching = this.pressed;
+		};
+		gui.addActor(btnHideShow);
+		btnHideShow._layer = 3;
+
+		var btnDpad = createBtn('Dpad', 243, 243);
+		btnDpad.atlas = guiBtnAtlas;
+		btnDpad.current_frame = 22; //Dpad
+		btnDpad.pad = new b5.Actor();
+	//	btnDpad.pad.radius = 30;
+	//	btnDpad.pad.fill_style = "black";
+	  btnDpad.pad.atlas = btnDpad.atlas;
+		btnDpad.pad.opacity = 0.4;
+		btnDpad.pad.name = "btnDpad"
+		btnDpad.pad.current_frame = 26;
+		btnDpad.pad._scale = 0.9;
+		btnDpad.addActor(btnDpad.pad);
+		btnDpad.pad.onTick = function() {
+			var p2 = b5.Game.Multiplayer.isPlayer2;
+		//	this.current_frame = b5.Game.Flags.inMainGame ? b5.Game.SaveSlots.currentSaveSlot.isPlayer1Mugman ? p2?16:17: p2?17:16: 18;
+		}
+		btnDpad.axis = {
+			x: 0,
+			y: 0
+		};
+		btnDpad.range = 72;
+		btnDpad.onBeginTouch = function(pos) {
+			var tpx = (pos.x-this.x)/this.scale_x,
+			tpy = (pos.y-this.y)/this.scale_y;
+			this.axis.x = b5.Maths.cap(tpx/this.range, -1, 1);
+			this.axis.y = b5.Maths.cap(tpy/this.range, -1, 1);
+			this.pad.setPosition(tpx, tpy);
+		};
+		btnDpad.onMoveTouch = function(pos) {
+			var tpx = b5.Maths.cap((pos.x-this.x)/this.scale_x,-(btnDpad.w/2)*btnDpad.scale,(btnDpad.w/2)*btnDpad.scale),
+			tpy = b5.Maths.cap((pos.y-this.y)/this.scale_y,-(btnDpad.h/2)*btnDpad.scale,(btnDpad.h/2)*btnDpad.scale);
+			this.axis.x = b5.Maths.cap(tpx/this.range, -1, 1);
+			this.axis.y = b5.Maths.cap(tpy/this.range, -1, 1);
+			this.pad.setPosition(tpx, tpy);
+			
+			var dx = -tpx,
+	  	dy = -tpy;
+		
+		this.pad.current_frame = 25;
+		if(Math.abs(dx) > .1 && Math.abs(dy) > .1) {
+			var s = Math.sign(dx);
+			this.pad._rotation = -Math.atan2(dy*s,-Math.abs(dx));
+	  	s && (this.pad._scale_x = s);
+		}
+		
+		this.pad.last_pos = {x:this.pad.x,y:this.pad.y};
+		}
+		btnDpad.onEndTouch = function() {
+			this.axis.x = 0;
+			this.axis.y = 0;
+			this.pad.setPosition(0, 0);
+			this.pad.current_frame = 26;
+		};
+		gui.addActor(btnDpad);
+
+		gui.buttons = {
+			A: btnA,
+			B: btnB,
+			X: btnX,
+			Y: btnY,
+			L: btnL,
+			R: btnR,
+			DPAD: btnDpad,
+			Pause: btnPause,
+			HideShow: btnHideShow
+		};
+		gui.hide = function(hideAll) {
+			for (var i in this.buttons) i != "HideShow" && (this.buttons[i].opacity = 0);
+			hideAll && (this.buttons.HideShow.opacity = 0);
+			this.hidden = true;
+		  b5.Game.cfg.GUI.hidden = true;
+		};
+		gui.show = function() {
+			for (var i in this.buttons)this.buttons[i].opacity = 1;
+			this.hidden = false;
+			b5.Game.cfg.GUI.hidden = false;
+		};
+		gui.disableButtons = function(buttons) {
+			var btns = buttons && buttons.split(",");
+			if (btns == [] || btns == undefined) for (var i in this.buttons) {
+				var btn = this.buttons[i];
+				btn._av = false,
+				btn.onEndTouch();
+				i == "B" && btn.releasePush();
+			} else {
+				for (var i = 0; i < btns.length; i++) {
+					var btn = this.buttons[btns[i]];
+					btns[i] != "HideShow" && btn && (btn._av = false, btn.onEndTouch());
+				}
+			}
+		};
+		gui.enableAllButtons = function() {
+			for (var i in this.buttons) {
+				var btn = this.buttons[i];
+				btn._av = true;
+			}
+		};
+		
+		gui.updateButtonStyles = function() {
+			var il = b5.Game.Flags.inLevel,
+			pl = sceneMain.view.findActorsByTagName('player',true),
+			tw = b5.Game.Multiplayer.isGuest;
+			
+			pl = tw ? pl[1] : pl[0];
+			
+			for(var i in this.buttons) {
+				this.buttons[i].updateStyle && this.buttons[i].updateStyle(il,pl);
+			}
+		}
+		
+		app.setInterval(() => {
+			gui.updateButtonStyles();
+		},1/20);
+
+		//Parse margins config
+		gui.setConfig = function() {
+			var guicfg = b5.Game.cfg.GUI,
+			btn_scale = guicfg.button_scale;
+			this.margins = {};
+			for (var a in guicfg)
+				if (a.endsWith('_pos')) {
+				var b = guicfg[a].split(',');
+				this.margins[a] = [+b[0] * btn_scale,
+					+b[1] * btn_scale,
+					+b[2] * btn_scale,
+					+b[3] * btn_scale];
+			}
+			
+		}
+
+		gui.setConfig();
+		
+		//Update config (from alpha 1.1 to 1.2, will be removed on 1.3)
+		b5.Game.cfg.GUI.width === undefined && (b5.Game.cfg.GUI.width = 0);
+
+		gui.organize = function() {
+			var guicfg = b5.Game.cfg.GUI,
+			X_docking = guicfg.left_handed ? b5.Actor.Dock_Right: b5.Actor.Dock_Left,
+			X_docking_reverse = guicfg.left_handed ? b5.Actor.Dock_Left: b5.Actor.Dock_Right,
+			opacity = guicfg.opacity,
+			btn_scale = guicfg.button_scale,
+			btn_spacing = guicfg.button_spacing,
+			dpad_scale = guicfg.dpad_scale,
+			width = guicfg.width,
+			lh = guicfg.left_handed;
+
+			this.opacity = opacity;
+			//Layout set for buttons
+			var margins = {
+				A: [],
+				B: [],
+				X: [],
+				Y: [],
+				L: [],
+				R: [],
+				Pause: [],
+				DPAD: [],
+				HideShow: []}
+			for (var a in guicfg)
+				if (a.endsWith('_pos')) {
+				margins[a.replace('_pos', '')] = [
+					this.margins[a][lh?1: 0] * btn_scale * btn_spacing * (lh?-1: 1) + (width*100),
+					this.margins[a][1] * btn_scale * btn_spacing - (width*100),
+					this.margins[a][2] * btn_scale * btn_spacing,
+					this.margins[a][3] * btn_scale * btn_spacing
+				];
+			}
+			//buttons
+			for (var i in this.buttons) {
+				i != "HideShow" && (i == "DPAD" || i == "Pause"? this.buttons[i].setScale(dpad_scale, dpad_scale): this.buttons[i].setScale(btn_scale, btn_scale));
+
+				//Adjust margins
+				this.buttons[i].dock_x = i != "DPAD" && i != "Pause" ? X_docking_reverse: i != "Pause" ? X_docking: b5.Actor.Dock_None;
+				this.buttons[i].dock_y = i != "Pause" ? b5.Actor.Dock_Bottom: b5.Actor.Dock_Top;
+				this.buttons[i].margin = margins[i];
+			};
+
+		}
+		b5.Game.GUI = gui;
+		gui.organize();
+		
+		b5.Game.cfg.GUI.hidden && btnHideShow.onBeginTouch();
+	})();

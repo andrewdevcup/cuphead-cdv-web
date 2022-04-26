@@ -1,0 +1,10 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,561,556,0,0, player_hitFXa_0001
+0,561,0,561,556,0,0, player_hitFXa_0002
+0,1122,0,561,556,0,0, player_hitFXa_0003
+0,0,556,561,556,0,0, player_hitFXa_0004
+0,561,556,561,556,0,0, player_hitFXa_0005
+0,1122,556,561,556,0,0, player_hitFXa_0006
+0,0,1112,561,556,0,0, player_hitFXa_0007
+0,561,1112,561,556,0,0, player_hitFXa_0008
+0,1122,1112,561,556,0,0, player_hitFXa_0009

@@ -1,0 +1,130 @@
+{
+	"health": 1300,
+	"maxHealth": 1300,
+	"difficultyAndPhases": [
+		{
+			"damageMultiplier": 1.28,
+			"data": {
+				"potato": {
+					"shoot1Count": 3,
+					"shoot2Count": 3,
+					"shoot3Count": 3,
+					"shoot1Rythm": 1.2,
+					"waitAndShoot2Delay": 1.9,
+					"shoot2Rythm": 1.05,
+					"waitAndShoot3Delay": 1.9,
+					"shoot3Rythm": 0.9,
+					"waitAndShoot1Delay": 1.9,
+					"projectileSpeed": 25,
+					"projectileSpeedFast": 29,
+					"maxHp": 650
+				},
+				"carrot": {
+					"rings": 5,
+					"ringsShoot": 2,
+					"ringSpeed": 30,
+					"carrotBombSpeed": 9,
+					"carrotBombRandomTimeRanges": [
+						[1.9,3], [1.5,4]
+					],
+					"carrotFireBeamTimeRanges": [5.5,7],
+					"carrotHypnoRingRythm": 2,
+					"maxHp": 650
+				}
+			},
+			"phases": [
+				{
+					"health": 0,
+					"deathCardMessage": "potato",
+					"mugshot": {
+						"bitmap": "PotatoMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 650,
+					"deathCardMessage": "carrot",
+					"mugshot": {
+						"bitmap": "CarrotMugshot",
+						"offset": [0,0]
+					}
+				}
+			]
+		},
+  	{
+  		"damageMultiplier": 1,
+  		"data": {
+				"potato": {
+					"shoot1Count": 4,
+					"shoot2Count": 4,
+					"shoot3Count": 4,
+					"shoot1Rythm": 1.1,
+					"waitAndShoot2Delay": 1.9,
+					"shoot2Rythm": 0.82,
+					"waitAndShoot3Delay": 1.9,
+					"shoot3Rythm": 0.66,
+					"waitAndShoot1Delay": 1.9,
+					"projectileSpeed": 34,
+					"projectileSpeedFast": 37,
+					"maxHp": 400
+				},
+				"onion": {
+					"maxHp": 425,
+					"turnsCountBashful": 6,
+					"tearsRandomTimeRanges": [
+						[0.9, 1.3], [0.6,1], [0.7, 0.8]
+					],
+					"tearSpeed": 28,
+					"TearSpawnRanges": [[-610, -230],[230, 610]],
+					"SpawnPinkTearBetweenNSpawns": [6,9],
+					"cryingSequence": [0.55, 1.3, 0.7, 10, 0.7, 20, 0.7, 20, 0.7]
+				},
+				"raddish": {
+					"maxHp": 300,
+					"speed": 31,
+					"acceleration": 410
+				},
+				"carrot": {
+					"rings": 5,
+					"ringsShoot": 3,
+					"ringSpeed": 35,
+					"carrotBombSpeed": 10,
+					"carrotBombRandomTimeRanges": [
+						[1.4,3], [1.6,4]
+					],
+					"carrotFireBeamTimeRanges": [5.5,6],
+					"carrotHypnoRingRythm": 1.8,
+					"maxHp": 475,
+					"extraHpSecret": 275
+				}
+			},
+			"phases": [
+				{
+					"health": 0,
+					"deathCardMessage": "potato",
+					"mugshot": {
+						"bitmap": "PotatoMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 400,
+					"deathCardMessage": "onion",
+					"mugshot": {
+						"bitmap": "OnionMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 825,
+					"deathCardMessage": "carrot",
+					"mugshot": {
+						"bitmap": "CarrotMugshot",
+						"offset": [0,0]
+					}
+				}
+			]
+		},
+		{}
+	]
+}

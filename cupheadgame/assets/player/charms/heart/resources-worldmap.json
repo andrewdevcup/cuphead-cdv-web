@@ -1,0 +1,15 @@
+{
+	"bitmap": [
+		{
+			"name": "HeartEquipIcon",
+			"src": "player/charms/heart/SpriteAtlasTexture_Heart-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "heart:CHARM_EQUIP_ICON",
+			"bitmaps": ["HeartEquipIcon"],
+			"frames": "player/charms/heart/SpriteAtlasTexture_Heart.csv"
+		}
+	]
+}

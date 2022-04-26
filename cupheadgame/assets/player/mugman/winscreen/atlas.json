@@ -1,0 +1,6 @@
+{
+	"bitmaps": ["SpriteAtlasTexture_MugmanWinScreen-0.png"],
+	"frames": "SpriteAtlasTexture_MugmanWinScreen.csv",
+	"anims": "mugmanWinScreen.atlas.json",
+	"facing": -1
+}

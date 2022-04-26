@@ -1,0 +1,20 @@
+{
+	"ek_house": {
+		"indices":[21,22,23],"speed":12
+	},"veggies": {
+		"indices":[24,25,26],"speed":12
+	},"slime": {
+		"indices":[18,19,20],"speed":12
+	},"zeppelin": {
+		"indices":[0,1,2],"speed":12
+	},"flower": {
+		"indices":[3,4,5],"speed":12
+	},"frogs": {
+		"indices":[6,7,8],"speed":12
+	},"mausoleum": {
+		"indices":[9,10,11],"speed":12
+	},"plane-blueprint": {
+		"indices":[12,13,14],"speed":12
+	},"shop": {
+		"indices":[15,16,17],"speed":12
+	}}

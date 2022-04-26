@@ -1,0 +1,228 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [570,0],
+			"facing": -1
+		}
+	},
+	"view": {
+		"layers": 2,
+		"playerLayer": 1,
+		"zoom": 1,
+		"world_depth": 1.0,
+		"cameraExtents": [0,0,0,0],
+		"cameraRange": 0
+	},
+	"physicsObjects": [{
+		"name": "LevelFloor",
+		"type": "RectActor",
+		"size": [2048, 10],
+		"detectionSize": [2048,12],
+		"pos": [0, 232],
+		"color": "blue",
+		"visible": false,
+		"layer": 1,
+		"sub_layer": 2,
+		"tags": ["floor"],
+		"detectionTags": ["floor"],
+		"body": {
+			"friction": 1,
+			"fixedRotation": true,
+			"bodyType": "static"
+		}
+	},
+	{
+		"name": "LevelCeiling",
+		"type": "RectActor",
+		"size": [2048, 10],
+		"detectionSize": [2048,12],
+		"pos": [0, -360],
+		"color": "blue",
+		"visible": false,
+		"layer": 1,
+		"sub_layer": 2,
+		"tags": ["floor"],
+		"detectionTags": ["floor"],
+		"body": {
+			"friction": 1,
+			"fixedRotation": true,
+			"bodyType": "static"
+		}
+	},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 600],
+			"detectionSize": [10,600],
+			"pos": [-640, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 600],
+			"detectionSize": [10,600],
+			"pos": [630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+				"bodyType": "static"
+			}
+		}],
+	"worldObjects": [{
+		"name": "BG",
+		"type": "",
+		"size": [1280,720],
+		"pos": [0,0],
+		"visible": true,
+		"layer": 0,
+		"bitmap": "Background",
+		"sub_layer": 0,
+		"scale": 1
+	},
+	{
+		"name": "SelectWeaponText",
+		"type": "Label",
+		"size": [0,0],
+		"pos": [-245,-160],
+		"visible": true,
+		"atlas": "CupheadVogueExtraBoldFont",
+		"color": "#413720",
+		"text": "Texts.selectweapon",
+		"scale": 0.9,
+		"layer": 0,
+		"sub_layer": 1
+	},
+	{
+		"name": "SelectCharmText",
+		"type": "Label",
+		"size": [0,0],
+		"pos": [168,-160],
+		"visible": true,
+		"atlas": "CupheadVogueExtraBoldFont",
+		"color": "#413720",
+		"text": "Texts.selectcharm",
+		"scale": 0.9,
+		"layer": 0,
+		"sub_layer": 1
+	},
+	{
+		"name": "ParryWeaponSwitch",
+		"type": "",
+		"size": [60,60],
+		"pos": [-320,-50],
+		"tags": ["Parryable"],
+		"add_collider": true,
+		"visible": true,
+		"bitmap": "ParryArrow",
+		"scale": 1.45,
+		"layer": 0,
+		"sub_layer": 3
+	},
+	{
+		"name": "ParryWeapon2Switch",
+		"type": "",
+		"size": [60,60],
+		"pos": [-180,-50],
+		"tags": ["Parryable"],
+		"add_collider": true,
+		"visible": true,
+		"bitmap": "ParryArrow",
+		"scale": 1.45,
+		"layer": 0,
+		"sub_layer": 3
+	},
+	{
+		"name": "ParryCharmSwitch",
+		"type": "",
+		"size": [60,60],
+		"pos": [180,-50],
+		"tags": ["Parryable"],
+		"add_collider": true,
+		"visible": true,
+		"bitmap": "ParryArrow",
+		"scale": 1.45,
+		"layer": 0,
+		"sub_layer": 3
+	},
+	{
+		"name": "targetTest",
+		"type": "Rect",
+		"size": [100,275],
+		"pos": [-565,-50],
+		"tags": ["hittableEnemy"],
+		"add_collider": true,
+		"visible": true,
+		"opacity": 0,
+		"scale": 1,
+		"layer": 0,
+		"sub_layer": 1,
+		"color": "white"
+	},
+	{
+		"name": "FG",
+		"type": "",
+		"size": [1280,234.66],
+		"pos": [0,243],
+		"visible": true,
+		"layer": 2,
+		"bitmap": "Background-Top",
+		"sub_layer": 0,
+		"scale": 1
+	},
+	{
+		"name": "FG-Lights",
+		"type": "",
+		"size": [964,421],
+		"pos": [-25,-100],
+		"visible": true,
+		"layer": 1,
+		"bitmap": "Lights",
+		"sub_layer": 2,
+		"scale": 1
+	}],
+	"resources": {
+		"bitmap": [{
+			"name": "Background",
+			"src": "scenes/betatestloadout/background.jpg"
+		},
+		{
+			"name": "Background-Top",
+			"src": "scenes/betatestloadout/top_layer.png"
+		},
+		{
+			"name": "Lights",
+			"src": "scenes/betatestloadout/lights.png"
+		},
+		{
+			"name": "ParryArrow",
+			"src": "scenes/betatestloadout/switch.png"
+		}],
+		"sound": [{
+			"name": "BGM",
+			"src": "scenes/betatestloadout/thriftshop-macklemore_coverinstrumental.mp3",
+			"loop": true,
+			"category": "music",
+			"options": {
+				"equalizer": true,
+				"limiter": true
+			}
+		}]
+	}
+}

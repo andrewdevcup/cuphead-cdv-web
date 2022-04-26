@@ -1,0 +1,27 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,158,33,0,0, tutorial_arrow_dash
+0,158,0,275,163,0,0, tutorial_arrow_duck
+0,433,0,115,79,0,0, tutorial_arrow_jump
+0,548,0,263,294,0,0, tutorial_arrow_lock
+0,811,0,42,106,0,0, tutorial_arrow_parry_1
+0,853,0,39,100,0,0, tutorial_arrow_parry_2
+0,892,0,39,102,0,0, tutorial_arrow_parry_3
+0,931,0,168,107,0,0, tutorial_arrow_parry_bounce
+0,1099,0,111,65,0,0, tutorial_arrow_revive
+0,1210,0,224,192,0,0, tutorial_cube
+0,1434,0,232,195,0,0, tutorial_cube_2
+0,1666,0,224,393,0,0, tutorial_cylinder_1
+0,0,163,393,386,0,0, tutorial_cylinder_2
+0,393,294,320,273,0,0, tutorial_exit_door
+0,713,294,71,71,0,0, tutorial_pink_sphere_1
+0,784,294,73,71,0,0, tutorial_pink_sphere_2
+0,857,107,288,321,0,13, tutorial_plynth_after_pyramid_is_destroyed
+0,1145,192,288,294,0,0, tutorial_plynth_before_pyramid_is_destroyed
+0,1433,195,226,190,0,0, tutorial_pyramid_topper
+0,1659,393,48,46,0,0, tutorial_sphere_1
+0,1707,393,45,48,0,0, tutorial_sphere_2
+0,1752,393,76,87,0,0, tutorial_target_0001
+0,1828,393,77,91,0,0, tutorial_target_0002
+0,1905,196.5,77,90,0,0, tutorial_target_0003
+1,0,0,1404,1455,0,0, tutorial_cylinder_and_platform
+2,0,0,19,24,0,0, tutorial_descend_arrow

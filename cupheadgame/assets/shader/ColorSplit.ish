@@ -1,0 +1,46 @@
+[vertex]
+[/vertex]
+[fragment]
+/* Written by AndrewDev */
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform float resolution;
+
+uniform vec2 unfocus;
+uniform vec3 positiveColor;
+uniform vec3 positiveColor2;
+uniform float mixStrength;
+
+vec3 negativeColor = 1. - positiveColor;
+vec3 negativeColor2 = 1. - positiveColor2;
+
+void main(void) {
+  
+  vec4 color;
+  
+  //Split1
+  color.rgb += texture2D(uSampler, vTextureCoord + vec2(-unfocus.x,0.)).rgb * positiveColor2;
+  
+  //Split2
+  color.rgb += texture2D(uSampler, vTextureCoord + vec2(unfocus.x,0.)).rgb * negativeColor2;
+  
+  color.rgb *= .65; //Dominant
+  //Split3
+  color.rgb += .35 * texture2D(uSampler, vTextureCoord + vec2(0.,-unfocus.y)).rgb * positiveColor;
+  
+  //Split4
+  color.rgb += .35 * texture2D(uSampler, vTextureCoord + vec2(0.,unfocus.y)).rgb * negativeColor;
+  
+  vec4 origColor = texture2D(uSampler,vTextureCoord);
+  gl_FragColor = vec4(mix(origColor.rgb, color.rgb, mixStrength), origColor.a);
+}
+[/fragment]
+[uniforms]
+{
+  "unfocus": [0.0014,0.002488888],
+  "positiveColor": [1,0,0],
+  "positiveColor2": [1,1,0],
+  "mixStrength": 1.2
+}
+[/uniforms]

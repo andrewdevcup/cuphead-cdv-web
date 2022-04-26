@@ -1,0 +1,451 @@
+/*
+* This will create level layers (background, foreground aswell as
+* a camera, physics and boundaries for the level
+* Level data must be stored in the folder inside the scene data folder called 'LEVEL.CUP'
+* this can have the level camera zoom, camera extents, walls, floors,
+* also	npc and boss data.
+* Set importData to configure the level:
+*
+* camera_bounds: [x1,y1,x2,y2] from where to where the camera will pan.
+* camera_zoom: [number] the camera zoom. (Higher values mean higher scale)
+*
+* Resources and actors must be added to the respective layers:
+* backround elements on lower layers, foreground elements on higher layers.
+* Player layer is always 5
+*/
+b5.export = function(world, scene, sceneData, game, importData) {
+	var myexports = {
+		createdList: []
+	};
+	game.Flags.inWorldmap = false;
+	game.Flags.inLevel = true;
+	game.Flags.pausingEnabled = true;
+	game.Flags.inSomeMenu = false;
+
+	//Reset
+	world.reset();
+
+	game.importObject('CreateCommonResources');
+	game.importObject('CreateCommonLevelResources');
+	myexports.fightTextsObject = game.importObject('CreateFightTexts');
+	game.importObject('CreateDeathCard');
+	var initNpcs = game.importObject('CreateNPC').initNpcs;
+	//Level data directory
+	sceneData.levelDataPath = sceneData.resourcePath + 'LEVEL.CUP/';
+
+	//Read level data
+	var data = JSON.parse(b5.File.readSync(sceneData.levelDataPath + 'level.json'));
+
+	//Set view data
+	sceneData.view = data.view;
+	sceneData.player = data.player;
+	world.camera_extents = data.view.cameraExtents;
+	world._scale = data.view.zoom;
+	world.camera_range = data.view.cameraRange;
+
+	//Create layers
+	for (var i = 0; i <= data.view.layers; i++) {
+		var a = new b5.Actor;
+		a.round_pixels = false;
+		a.name = "Layer" + i;
+		world.addActor(a);
+		world[a.name] = a;
+		i == data.view.playerLayer && (world.PlayerLayer = a);
+		a._layer = i;
+	}
+	
+  //Add resources
+	data.resources && game.parseResources(data.resources, scene);
+
+	//Update camera layers (parallax effect)
+	world.actors[0].onTick = function() {
+		
+		if(data.view.world_depth > 0) { for (var i = data.view.playerLayer, a = 1; i < world.actors.length; i++) {
+			//Move faster on higher layers (closer to the camera)
+			world.actors[i].x2 = world.ox * a;
+			world.actors[i].y2 = world.oy * a;
+			world.actors[i].dirty();
+			a *= data.view.world_depth;
+		}
+		for (var i = data.view.playerLayer-1, a = 1; i > 0; i--) {
+			//Move slower on lower layers (farther to the camera)
+			world.actors[i].x2 = world.ox * a;
+			world.actors[i].y2 = world.oy * a;
+			world.actors[i].dirty();
+			a = i/(data.view.playerLayer-1)*(data.view.world_depth / data.view.world_depth);// * (data.view.background_depth||1);
+		}
+		}
+
+		//Follow players
+		var plys = sceneData.players ? sceneData.getActivePlayers(): [];
+
+		//Get average position of players for target
+		//if(plys.length != 0 || !data._cameraLastPos) {
+			for (var a = 0, avgx = 0, avgy = 0; a < plys.length; a++) {
+				var p = plys[a];
+				avgx += p.x / plys.length;
+				avgy += p.y / plys.length;
+			}
+		//	data._cameraLastPos = [avgx,avgy];
+	//	}
+
+		world.camera_range = data.view.freeCamera ? world.scale/2: data.view.cameraRange/world.scale;
+
+		world.target_x = (world.camera_offset_x + avgx) * world.camera_range;
+		world.target_y = (world.camera_offset_y + avgy) * world.camera_range;
+
+	}
+
+	sceneData.shakeCamera = function(amount, speed, time) {
+		var u,
+		/*shakeXPat = b5.generateRandomMovement(8),
+  	shakeYPat = b5.generateRandomMovement(8),*/
+		taskId = 'cameraShake-'+amount+'-'+app.now,
+		shtime = 0,
+		lspeedx = world.camera_speed_x,
+		lspeedy = world.camera_speed_y,
+		sm = 0,
+		end = app.now + time;
+		
+		amount *= .7;
+
+		world.addTask(taskId, 0, Infinity, function() {
+			shtime += speed * game.speed;
+			world.camera_shake_x = (0.5-Math.random())*amount;
+			world.camera_shake_y = (0.5-Math.random())*amount;
+
+			amount -= sm*.5;
+
+			app.now >= end && (sm = (speed || 0.5)*game.speed);
+
+			if (amount <= 0) {
+				world.camera_shake_y = 0;
+				world.camera_shake_x = 0;
+				world.camera_speed_y = lspeedy;
+				world.camera_speed_x = lspeedx;
+				world.removeTask(taskId);
+			}
+		//	world._x2 = world.camera_offset_x;
+		//	world._y2 = world.camera_offset_y;
+		});
+	};
+
+	//Read physics world data
+	var physicsworld = JSON.parse(b5.File.readSync(sceneData.levelDataPath + 'physicsWorld.json'));
+
+	//Initialize world
+	scene.initWorld(physicsworld.gravity.x,
+		physicsworld.gravity.y,
+		false);
+
+	//Create physics objects
+	for (var i = 0, objs = data.physicsObjects; i < objs.length; i++) {
+		var o = objs[i],
+		a = new b5[o.type.replace('Actor', '') + 'Actor'];
+
+		a.type === b5.Actor.Type_Rect ? a.setSize(o.size[0], o.size[1]): a.radius = o.radius;
+		a.name = o.name;
+		a.fill_style = o.color;
+		a.tags = o.tags;
+		a.tag = o.tags[0];
+		a.visible = game.Flags.debugShowHitboxes || o.visible;
+		o.visible && (a.round_pixels = false);
+
+		a.collider = {};
+		a.drop_cooldown = .2;
+		a.drop_cooldown_c = 0;
+
+		//Add to world
+		world.findActor("Layer" + o.layer).addActor(a);
+		a._layer = o.sub_layer;
+
+		//Initialize body
+		a.initBody(o.body.bodyType, o.body.fixedRotation, false);
+
+		//Add fixture
+		a.addFixture({
+			type: a.getShapeType(),
+			width: o.size[0],
+			height: o.size[1],
+			vertices: o.body.vertices,
+			restitution: o.body.restitution || 0,
+			density: o.body.density || 1,
+			friction: o.body.friction || 1,
+			is_bullet: false
+		});
+		//Set physics position
+		a.setPosition(o.pos[0], o.pos[1]);
+
+		if (o.body.weldTo) a.addJoint({
+			type: "weld",
+			actor_b: world.findActor(o.body.weldTo, true),
+			anchor_a: {
+				x: 0, y: 0
+			},
+			anchor_b: {
+				x: 0, y: 0
+			},
+			self_collide: false
+		});
+	
+		//Hit detection collider
+		if(o.detectionSize !== void 0) {
+			var c = new b5[o.type.replace('Actor', '') + 'Actor'];
+			c.type === b5.Actor.Type_Rect ? c.setSize(o.detectionSize[0], o.detectionSize[1]): c.radius = o.radius;
+			c.name = o.name+"-collider";
+		  c.tags = o.detectionTags;
+			c.tag = o.detectionTags[o.detectionTags.indexOf('platform')];
+			c.visible = (o.colliderVisible !== void 0 ? o.colliderVisible && o.visible : false) || game.Flags.debugShowHitboxes;
+			world.findActor("Layer" + o.layer).addActor(c);
+			c.layer=9;
+			c.fill_style="yellow";
+			c.opacity=.8;
+			
+	    c.playersOver = {};
+			
+			//Initialize body
+		  c.initBody('collider', o.body.fixedRotation, false);
+
+			//Add fixture
+			c.addFixture({
+				type: c.getShapeType(),
+				width: o.detectionSize[0],
+				height: o.detectionSize[1],
+				vertices: o.body.vertices,
+				restitution: 0,
+				density: 1,
+				friction: 1,
+				is_bullet: false,
+				is_sensor: true
+			});
+			//Set physics position
+	 	  c.setPosition(o.pos[0], o.pos[1]);
+			
+			a.collider = c;
+			c.platform = a;
+		}
+
+		//Platform behavior
+		if (a.collider.tag == "platform") {
+			a.onTick = function() {
+				var ols = this.parent.findActorsByTagName('player', true),
+				playersOver = this.collider.playersOver;
+				
+				var pfs = this.findActorsByTagName('platform',true);
+				
+				
+				//Disable collisions when	player is under
+				for (var b = 0; b < ols.length; b++) if (ols[b].body) {
+					var v = Math.round(ols[b].body.m_linearVelocity.y);
+					if(!ols[b].flags.droppingPlatform && this.drop_cooldown_c == 0) {
+					  
+					 // !ols[b].flags.inPlatform && (ols[b].data.platform = null);
+					 
+					 this.A_overlaps.indexOf(ols[b]) > -1 && (ols[b].data.platform = this);
+					  
+						if (v < 0 && playersOver[ols[b].name]) {
+							playersOver[ols[b].name] = false;
+							this.disableCollision(ols[b]);
+						} else if (v >= 0 && !playersOver[ols[b].name] && ols[b].y < this.y) { //&& ols[b].y > this.y-(this.h+ols[b].h)
+							playersOver[ols[b].name] = true;
+							this.enableCollision(ols[b]);
+						}
+					}
+					else {
+						if(this.drop_cooldown_c < this.drop_cooldown) this.drop_cooldown_c+=app.dt;
+						else {
+							this.drop_cooldown_c = 0;
+							ols[b].flags.droppingPlatform=false
+						}
+					}
+
+				}
+				
+			};
+			a.drop = function(p) {
+				this.disableCollision(p);
+			  p.flags.droppingPlatform = true;
+				this.collider.playersOver[p.name] = false;
+				this.drop_cooldown_c = 0;
+			};
+
+		}
+
+		//Script
+		if(o.script) a.onCreate = Function('return '+b5.File.readSync(sceneData.levelDataPath + 'scripts/' + o.script))();
+		myexports.createdList.push(a);
+	}
+
+	//Create world objects (non physics objects such as backgrounds and decorations)
+	for (var i = 0, objs = data.worldObjects; i < objs.length; i++) {
+		var o = objs[i],
+		a = new b5[o.type.replace('Actor', '') + 'Actor'];
+
+		a.type === b5.Actor.Type_Rect || a.type === b5.Actor.Type_Image ? a.setSize(o.size[0], o.size[1]): a.radius = o.radius;
+		a.name = o.name;
+		a.id = o.id || -1;
+		a.setPosition(o.pos[0], o.pos[1]);
+		a.fill_style = o.color;
+		o.tags && (
+			a.tags = o.tags,
+			o.tags.indexOf('NPC') != -1 && (a.player_focus = false),
+			a.tag = o.tags[0]
+		);
+		o.parryScore != null && (a.parryScore = o.parryScore);
+		a.opacity = o.opacity === undefined || game.Flags.debugShowHitboxes? 1: o.opacity;
+		a.round_pixels = false;
+		a.visible = o.visible !== void 0 ? o.visible : true;
+		Array.isArray(o.scale) ? a.setScale(o.scale[0], o.scale[1]): a._scale = o.scale;
+		o.bitmap && (a.bitmap = app.findResource(o.bitmap,"bitmap"));
+		o.atlas && (a[a.type==1?'font':'atlas'] = app.findResource(o.atlas,"brush"));
+		a.center_atlas = o.center_atlas === void 0 ? true : o.center_atlas;
+		a.ignore_atlas_size = o.ignore_atlas_size === void 0 ? false : o.ignore_atlas_size;
+		a.cull = o.cull !== void 0 ? o.cull : true;
+		o.base_frame && a.atlas && (a.current_frame = o.base_frame);
+		o.base_anim && a.atlas && (a.playAnim(o.base_anim,o.anim_loop));
+		o.text === void 0 ? "" : a.setTextFmt(o.text);
+		a.fit = o.fit !== void 0 ? b5.Actor[o.fit] : b5.Actor.FitNone;
+		if(o.properties !== void 0) for(var k in o.properties) a[k] = o.properties[k];
+		//Add to world
+		//If no layer specified, appendTo an existing actor
+		//If you want to add to another actor that hasn't been created yet,
+		//add the actor to a layer temporarily, then use the method changeParent(newParent)
+		if (o.layer != null) world.findActor("Layer" + o.layer).addActor(a);
+		else {
+			if (o.appendTo != "scene") var aa = scene.findActor(o.appendTo, true);
+			else var aa = scene;
+			aa && aa.addActor(a);
+		}
+		a._layer = o.sub_layer;
+		
+		//Collider
+		if(o.add_collider) {
+			a.initBody("collider");
+			var ac = a.getFixtureSelf();
+			o.detectionSize !== void 0 && (
+				ac.width = o.detectionSize[0],
+				ac.height = o.detectionSize[1]
+			);
+			a.addFixture(ac);
+		}
+
+		//Script
+		if(o.script) a.onCreate = Function('return '+b5.File.readSync(sceneData.levelDataPath + 'scripts/' + o.script))();
+		myexports.createdList.push(a);
+	}
+
+	//Load NPC data
+	sceneData.npc = null;
+
+	if (b5.File.exists(sceneData.levelDataPath + 'npc.json'))
+		sceneData.npc = JSON.parse(b5.File.readSync(sceneData.levelDataPath + 'npc.json'));
+  
+  //Boss data failsafe
+  sceneData.bossData = {};
+  
+  sceneData.levelData === void 0 && (sceneData.levelData = {});
+	
+	//Statistics (for results screen)
+	sceneData.updateStatistics = false;
+	sceneData.Statistics = {
+		time: 0,
+		hp: 3,
+		parry: 0,
+		super: 0,
+		coins: 0,
+		skill: sceneData.loadData.difficulty !== void 0 ? sceneData.loadData.difficulty : 1,
+		damage_given: 0
+	}
+	sceneData.Max_Scores = {
+		time: 599, //9:59 mins
+		hp: 3,
+		parry: 3,
+		super: 6,
+		coins: 5,
+		skill: 2, //easy-0,normal-1,hard-2
+		damage_given: Number.MAX_VALUE
+	}
+	
+	//Update hp Statistics
+	scene.events.on('playerhit', d => {
+		//Get HP score from max between players
+		for(var i = 0, p = world.findActorsByTagName('player',true), hp = 0; i < p.length; i++) {
+			hp = Math.max(p[i].flags.heartPoints, hp);
+		}
+		scene.data.Statistics.hp = hp - 1;
+	});
+	
+	//Update texts
+	var lang = "";
+	
+	sceneData.Texts = {};
+
+	world.onTick = function() {
+		//On language changed
+		if (lang != game.cfg.Language.lang) {
+			lang = game.cfg.Language.lang;
+			
+			var txts;
+			
+			new b5.Raw('texts',sceneData.resourcePath+'texts/'+lang+'.json',true, raw => {
+				txts = raw;
+			},true);
+			
+			//Load default EN if language is not present
+		  if(!txts) new b5.Raw('texts',sceneData.resourcePath+'texts/en.json',true, raw => {
+				txts = raw;
+			},true);
+			
+			txts = JSON.secParse(txts);
+			
+	    for(var i in txts) sceneData.Texts[i] = txts[i];
+	    
+	    scene.events.dispatch('languagechanged',lang);
+		}
+		
+		var stats = sceneData.Statistics;
+		if(stats && sceneData.updateStatistics) stats.time += app.dt;
+		
+	};
+	
+	sceneData.addScore = function(name, score) {
+		if(this.updateStatistics) {
+			this.Statistics[name] += score;
+			if(this.Statistics[name] > this.Max_Scores[name]) this.Statistics[name] = this.Max_Scores[name];
+			return this.Statistics[name];
+		}
+	}
+
+  myexports.loadFightTextsResources = function() {
+		this.fightTextsObject.loadResources();
+		return this;
+	}
+	
+	myexports.init = function() {
+	  for (; this.createdList.length > 0;) {
+	  	this.createdList[0].onCreate && this.createdList[0].onCreate(world, scene, sceneData, game);
+	  	this.createdList.shift();
+		}
+		//Setup npcs
+    initNpcs();
+    
+    return this;
+	};
+	
+	//Multiplayer syncs
+	scene.events.on('objectparried', evtdata => {
+		if(game.Multiplayer.isGuest) {
+	  	var obj = world.findActorById(evtdata[0],true),
+	  	byplyr = world.findActor(evtdata[1],true);
+	  	if(obj && !obj.destroyed && byplyr && obj.onParry) obj.onParry(byplyr);
+		}
+	});
+	scene.events.on('enemydeath', evtdata => {
+		if(game.Multiplayer.isGuest) {
+	  	var obj = world.findActorById(evtdata[0],true);
+	  	if(obj && !obj.destroyed && obj.onDeath) obj.onDeath();
+		}
+	});
+
+	return myexports;
+};

@@ -1,0 +1,168 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [-490,150],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 2,
+		"playerLayer": 1,
+		"zoom": 1.07,
+		"world_depth": 1.37,
+		"cameraExtents": [-28, -10, 10, -10],
+		"cameraRange": 0.028
+	},
+	"physicsObjects": [
+		{
+			"name": "LevelFloor",
+			"type": "RectActor",
+			"size": [3000, 10],
+			"detectionSize": [3000,12],
+			"pos": [0, 221],
+			"color": "blue",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["floor"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [-650, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [615, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		}
+	],
+	"worldObjects": [
+		{
+			"name": "HouseBG",
+			"type": "",
+			"size": [10,10],
+			"pos": [-90,0],
+			"scale": 0.95,
+			"layer": 1,
+			"sub_layer": 0
+		},
+		{
+			"name": "HouseVignette",
+			"type": "",
+			"size": [10,10],
+			"pos": [-90,0],
+			"scale": 0.94,
+			"layer": 2,
+			"sub_layer": 2
+		},
+		{
+			"name": "ChairBG",
+			"type": "",
+			"size": [10,10],
+			"pos": [-380,250],
+			"scale": 0.95,
+			"layer": 2,
+			"sub_layer": 0
+		},
+		{
+			"name": "CouchBG",
+			"type": "",
+			"size": [10,10],
+			"pos": [375,218],
+			"scale": 0.98,
+			"layer": 2,
+			"sub_layer": 1
+		},
+		{
+			"name": "MusicNotes",
+			"type": "",
+			"size": [10,10],
+			"pos": [8,-119],
+			"scale": 1,
+			"appendTo": "HouseBG",
+			"sub_layer": 0,
+			"center_atlas": false
+		},
+		{
+			"name": "FirePlaceGlow",
+			"type": "",
+			"size": [10,10],
+			"pos": [420,139],
+			"scale": 1,
+			"appendTo": "HouseBG",
+			"sub_layer": 1
+		},
+		{
+			"name": "NPC_InkwellTutorial",
+			"type": "Rect",
+			"size": [110,160],
+			"pos": [-75,125],
+			"scale": 1,
+			"layer": 1,
+			"tags": ["NPC"],
+			"add_collider": true,
+			"sub_layer": 0,
+			"opacity": 0.5,
+			"color": "transparent"
+		},
+		{
+			"name": "NPC_ElderKettle",
+			"type": "",
+			"size": [80,120],
+			"pos": [388,93],
+			"scale": 0.92,
+			"layer": 1,
+			"tags": ["NPC"],
+			"add_collider": true,
+			"sub_layer": 0,
+			"opacity": 1,
+			"color": "transparent"
+		},
+		{
+			"name": "NPC_Exit",
+			"type": "Rect",
+			"size": [7,160],
+			"pos": [-580,125],
+			"scale": 1,
+			"layer": 1,
+			"tags": ["NPC"],
+			"add_collider": true,
+			"sub_layer": 0,
+			"opacity": 0.5,
+			"color": "transparent"
+		}
+	]
+}

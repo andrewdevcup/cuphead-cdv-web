@@ -1,0 +1,927 @@
+return {
+	BossObject: function(thisActor, world, scene, data, game) {
+		
+		var difficulty = scene.data.Statistics.skill,
+		currentPhase = data.bossData.difficultyAndPhases[difficulty];
+		
+		//Explosions after Knockout
+		thisActor.onDeath = function() {
+			scene.events.on('after-knockout',()=>{
+			//	scene.data.createBossExplosionsEmitter(400,0,250,4);
+			});
+		};
+		
+		var enemyHitShader = scene.findResource('EnemyHitShader','shader');
+		
+		data.levelData.currentMiniBoss = "PotatoBoss";
+		
+		//After sting, load winscreen or any other scene
+		//If winscreen, pass statistics and players to evaluate grade
+		scene.events.once('onfightwin:nextscene', ()=>{
+			
+			!b5.Game.Multiplayer.isGuest && b5.Game.LoadScene('winscreen', 0, 1, {
+				show_anim: 'fade',
+				show_speed: 2,
+				hide_anim: 'fade',
+				hide_speed: 0.35,
+				hourglass: false
+			}, {
+				stats: Object.clone(scene.data.Statistics),
+				players: scene.data.players.activePlayers,
+				fromLevelID: data.levelID
+			});
+		});
+		
+		scene.events.on('playEvent',e =>data.playEvent(e[0],e[1],true));
+		
+		//Event system to synchronize host and guest
+		
+		data.levelData.id = 0;
+		data.getId = function() {
+			//Generate and increment an id for enemies
+			//It'll be used to identify objects on local mp
+			return data.levelData.id++;
+		}
+		
+		data.playEvent = function(evt, evtData, eventFromHost) {
+			if(game.Multiplayer.isHosting)
+				game.Multiplayer.sendToGuest('PLAY_EVENT',[evt,evtData]);
+				
+			if(!game.Multiplayer.isGuest || eventFromHost) switch(evt) {
+				case "PotatoIntro":
+					if(data.PotatoBoss) return;
+					var dirtBurst = data.createDirtBurst();
+					dirtBurst.setPosition(390,230);
+					dirtBurst.visible = dirtBurst.back.visible = false;
+					world.setTimeout(t => {
+						dirtBurst.visible = dirtBurst.back.visible = true;
+						dirtBurst.play();
+						scene.findResource('PotatoRiseGroundSfx','sound').play();
+					},1);
+					
+					//Potato
+				  var potato = data.PotatoBoss = new b5.Actor();
+				  
+				  potato.data = currentPhase.data.potato;
+				  
+				  potato.hp = potato.data.maxHp;
+				  potato.maxHp = potato.hp;
+				  potato.dirt = dirtBurst;
+				  
+				  potato.atlas = scene.findResource('PotatoAtlas','brush');
+				  world.PlayerLayer.addActor(potato);
+				  potato.setPosition(365,10);
+				  potato._scale = 1.25;
+				  potato.layer = 2;
+				  potato.visible = false;
+				  
+				  //Hitboxes
+				  var potatoHitbox = new b5.RectActor();
+				  potatoHitbox.setSize(310,420);
+				  potatoHitbox.visible = false;
+				  potatoHitbox.setPosition(370,5);
+				  potatoHitbox.tags = ["enemy","hittableEnemy"];
+				  world.PlayerLayer.addActor(potatoHitbox);
+				  potatoHitbox.initBody('collider');
+				  potatoHitbox.addFixtureSelf();
+				  
+				  potato.hitbox = potatoHitbox;
+				  
+				  potato.addSpitParticle = function() {
+				  	var p = new b5.Actor();
+				  	p.atlas = scene.findResource('PotatoShootAtlas','brush');
+				  	p.playAnim('potato_shoot_fx');
+				  	p.onAnimEnd = p.destroy;
+				  	this.parent.addActor(p);
+				  	p.layer = this.layer+1;
+				  	p.setPosition(this.x-210,this.y+180);
+				  	p.setScale(1,[-1,1][b5.Maths.randomRange(0,1)]);
+				  }
+				  
+				  
+				  potato.onDeath = function() {
+				  	data.playEvent('PotatoDie')
+				  }
+				  potatoHitbox.onBulletHit = function(bullet) {
+				  	potato.addFilter(enemyHitShader.filter);
+				  	potato.setTimeout(t=>{
+				  		t.data.removeFilter(enemyHitShader.filter);
+				  	},app.dt*4);
+				  	
+				  	var dmg = bullet.damage * currentPhase.damageMultiplier;
+				  	
+				  	potato.hp -= dmg;
+				  	data.bossData.health -= dmg;
+				  	
+				  	potato.hp <= 0 && (potato.current_anim == "idle" || (potato.current_anim == "shoot" && potato.current_frame >=20) ) && potato.onDeath();
+				  }
+				  
+				  world.setTimeout(t => {
+				  	potato.visible = true;
+				  	potato.playAnimWithEnd('intro', a => {
+				  		a.playAnim('idle',true);
+				  	});
+				  },1.92);
+				  
+				  potato.startShooting = function(pattern) {
+				  	switch(pattern) {
+				  		case 0:
+				  			var shoot = 0;
+				  			this.setInterval(t=>{
+				  				shoot++;
+				  				if(shoot == this.data.shoot1Count) {
+				  					data.playEvent('PotatoShootProjectile',[pattern,true, data.getId()]);
+				  					t.data.clearInterval(t.name);
+				  					
+				  					//Wait and shoot pattern 2
+				  					t.data.setTimeout(a=>{
+				  						t.data.startShooting(1);
+				  					},potato.data.waitAndShoot2Delay);
+				  				}
+				  				else {
+				  					data.playEvent('PotatoShootProjectile',[pattern,false, data.getId()]);
+				  				}
+				  			},potato.data.shoot1Rythm);
+				  		break;
+				  		case 1:
+				  			var shoot = 0;
+				  			this.setInterval(t=>{
+				  				shoot++;
+				  				if(shoot == this.data.shoot2Count) {
+				  					data.playEvent('PotatoShootProjectile',[pattern,true, data.getId()]);
+				  					t.data.clearInterval(t.name);
+				  					
+				  					//Wait and shoot pattern 2
+				  					t.data.setTimeout(a=>{
+				  						t.data.startShooting(2);
+				  					},potato.data.waitAndShoot3Delay);
+				  				}
+				  				else {
+				  					data.playEvent('PotatoShootProjectile',[pattern,false, data.getId()]);
+				  				}
+				  			},potato.data.shoot2Rythm);
+				  		break;
+				  		case 2:
+				  			var shoot = 0;
+				  			this.setInterval(t=>{
+				  				shoot++;
+				  				if(shoot == this.data.shoot3Count) {
+				  					data.playEvent('PotatoShootProjectile',[pattern,true, data.getId()]);
+				  					t.data.clearInterval(t.name);
+				  					
+				  					//Wait and shoot pattern 2
+				  					t.data.setTimeout(a=>{
+				  						t.data.startShooting(0);
+				  					},potato.data.waitAndShoot1Delay);
+				  				}
+				  				else {
+				  					data.playEvent('PotatoShootProjectile',[pattern,false, data.getId()]);
+				  				}
+				  			},potato.data.shoot3Rythm);
+				  		break;
+				  	}
+				  }
+				  
+				  //Once fight started
+				  scene.events.once('fightstarted', u => {
+				  	potato.startShooting(0);
+				  });
+				  
+				  //If players dead stop attacking
+				  potato.allplayersdeadevent = scene.events.once('allplayersdead', u => {
+				  	potato.tasks.clear();
+				  	potato.removeFilter();
+				  	potato.dirt._layer = 3;
+				  });
+				  
+					break;
+				case 'PotatoShootProjectile':
+					var potato = scene.data.PotatoBoss,
+					shootSpeed = evtData[0],
+					worm = evtData[1],
+					id = evtData[2],
+					projectileSpeed = 0,
+					shootTriggerDelay,
+					shootSfx = worm ? scene.findResource('PotatoWormSfx'+b5.Maths.randomRange(1,2),'sound')
+					  : scene.findResource('PotatoSpitSfx'+b5.Maths.randomRange(1,3),'sound');
+			
+					projectileSpeed = potato.data.projectileSpeed;
+
+					potato.onAnimEnd = null;
+					potato.dirt._layer = 3;
+					
+					var prev_anim = potato.current_anim;
+			  	potato.playAnimWithEnd('shoot', p => {
+						p.playAnim('idle',true);
+					});
+				
+					switch(shootSpeed) {
+						case 0: 
+							potato.frame_speed = 22;
+							shootTriggerDelay = 0.45;
+							break;
+						case 1:
+							shootTriggerDelay = 0.4;
+							break;
+						case 2: 
+						  difficulty == 1 && prev_anim == "shoot" &&(potato.current_frame = 2);
+							projectileSpeed = potato.data.projectileSpeedFast;
+							shootTriggerDelay = 0.3;
+							//If doing shoot anim previously, jump to frame 2
+					}
+		
+					
+					potato.setTimeout(t => {
+						potato.dirt._layer = 1;
+						var proj = scene.data.createEnemy(worm?'projectileWorm':'projectile1',200,180,1,{speed:projectileSpeed,id:id});
+						proj.layer = 3;
+						potato.addSpitParticle();
+					},shootTriggerDelay);
+					
+					potato.setTimeout(t => shootSfx.play(), shootTriggerDelay-.05);
+					
+					potato.setTimeout(t => {
+						potato.dirt._layer = 3;
+					},0.7);
+				  break;
+				case 'PotatoDie':
+					var potato = data.PotatoBoss;
+					scene.data.createBossExplosionsEmitter(400,0,250,4.2);
+				 	potato.playAnim('death',true);
+				  potato._y += 10;
+				  potato.hitbox.tags = [];
+				  potato.removeFilter();
+				 	potato.dirt._layer = 3;
+				  	
+				 	potato.tasks.clear();
+				 	
+				 	//Remove event
+				 	scene.events.off(potato.allplayersdeadevent);
+				  	
+				 	//Use hitbox as mask
+				 	potato.hitbox.setSize(500,555);
+				 	potato.hitbox._y -= 1
+			  	potato.hitbox.visible = true;
+				 	potato.setMask(potato.hitbox);
+				  	
+				 	potato.TweenTo('_y',590,1.9,b5.Ease.sinin,true,1);
+				 	
+				 	//Emulate from original
+				 	potato.setTimeout(s => potato.setInterval(s => {
+				 		potato.y2 = 13 + Math.cos(app.now*.05)*13;
+				 	},1/12),1);
+				 	world.setTimeout(t=>{
+				 		potato.dirt.TweenToWithEnd('opacity',0,0.6,b5.Ease.linear,false,0,o=>potato.dirt.destroy());
+				 		potato.dirt.back.TweenToWithEnd('opacity',0,0.6,b5.Ease.linear,false,0,o=> {
+				  		
+				  		//Free video memory
+				  		b5.Utils.DisposeAtlasTextures(potato.atlas);
+				  		
+				  		potato.dirt.back.destroy();
+				  		potato.destroy();
+				 	  	potato.hitbox.release(true);
+				 	  	
+				 	  	//Add onion / carrot depending on the difficulty
+				 	  	!data.players_dead && world.setTimeout(m => {
+				 	  		if(difficulty == 0) data.playEvent("CarrotIntro");
+				 	  		else data.playEvent("OnionIntro");
+				 	  	},0.8);
+				  	});
+				 	},3.8);
+				  break;
+				
+				case 'OnionIntro':
+					if(data.OnionBoss) return;
+					data.levelData.currentMiniBoss = "OnionBoss";
+					
+					var dirtBurst = data.createDirtBurst("Layer8");
+					dirtBurst.setPosition(34,235);
+					dirtBurst.play();
+					scene.findResource('OnionRiseSfx','sound').play();
+					
+					var onion = data.OnionBoss = new b5.Actor();
+					
+					onion.data = currentPhase.data.onion;
+					
+					onion.hp = onion.data.maxHp;
+					onion.maxHp = onion.hp;
+					onion.dirt = dirtBurst;
+					
+					onion.atlas = scene.findResource('OnionAtlas','brush');
+				  world.PlayerLayer.addActor(onion);
+				  onion.setPosition(20,5);
+				  onion._scale = 0.91;
+				  onion._layer = 2;
+				  onion.visible = false;
+				  onion.facing = 0;
+				  onion.delay_end = false;
+				  
+				  var onionHitbox = new b5.ArcActor();
+				  onionHitbox.radius = 185;
+				  onionHitbox.visible = false;
+				  onionHitbox.setPosition(25,110);
+				  world.PlayerLayer.addActor(onionHitbox);
+				  onionHitbox.initBody('collider');
+				  onionHitbox.addFixtureSelf();
+				  
+				  var onionMask = new b5.RectActor();
+				  onionMask.setPosition(21,-50);
+				  onionMask.setSize(510,600);
+				  onionMask.visible = false;
+				  world.PlayerLayer.addActor(onionMask);
+				  
+				  //Tears
+				  var onionTA = new b5.Actor();
+				  onionTA.atlas = scene.findResource('OnionTearsAtlas','brush');
+				  onionTA.visible = false;
+				  world.PlayerLayer.addActor(onionTA);
+				  onionTA._layer = 3;
+				  onionTA._scale = .9;
+				  onionTA.setPosition(60,-53);
+				  
+				  var onionTB = new b5.Actor();
+				  onionTB.atlas = onionTA.atlas;
+				  onionTB.visible = false;
+				  world.PlayerLayer.addActor(onionTB);
+				  onionTB._layer = 3;
+				  onionTB._scale = .95;
+				  onionTB.scale_x = -0.95;
+				  onionTB.setPosition(-22,-50);
+				  
+				  //Dirt
+				  var dirtAnim = new b5.Actor();
+				  dirtAnim.atlas = onion.atlas;
+				  dirtAnim.visible = false;
+				  dirtAnim.onAnimEnd = dirtAnim.destroy;
+				  onion.dirtA = dirtAnim;
+				  
+				  onion.parent.addActor(dirtAnim);
+				  
+				  dirtAnim._layer = 4;
+				  dirtAnim.setPosition(20,85);
+				  
+				  onion.tearsA = onionTA;
+				  onion.tearsB = onionTB;
+				  onion.mask = onionMask;
+				  onion.hitbox = onionHitbox;
+				  
+				  onion.onDeath = function() {
+				  	data.playEvent('OnionDie')
+				  }
+				  
+				  //If players dead stop attacking
+				  onion.allplayersdeadevent = scene.events.on('allplayersdead', u => {
+				  	onion.tasks.clear();
+				  	//world.tasks.clear();
+				  	onion.removeFilter();
+				  });
+				  
+				  onion.setTimeout(t => {
+				  	onion.visible = true;
+				  	onion.turns = 0;
+				  	onion.hitbox.tags = ["enemy","hittableEnemy"];
+				  	onion.setTimeout(a => {
+				  		onion.dirtA.visible = true;
+				  		onion.dirtA.playAnim('onion_dirt');
+				  	},0.6);
+				  	onion.playAnimWithEnd('intro', a => {
+				  		data.playEvent('OnionTurnLeft',[0]);
+				  		a.current_frame = 1;
+				  		
+				  		var turns = 0;
+				  		//Look
+				  		!data.players_dead && onion.setInterval(r => {
+				  			r.wait = 0.85;
+				  			turns++;
+				  			if(turns <= onion.data.turnsCountBashful) {
+				  				turns == onion.data.turnsCountBashful && (r.wait = 0.35); //Faster
+				  				return void data.playEvent('OnionTurn' + (onion.facing > 0 ? 'Left':'Right'),[onion.facing]);
+				  			}
+				  			data.playEvent('OnionBashful');
+				  			
+				  		},0.65);
+				  	});
+				  },0.92);
+				  
+				  onionHitbox.onBulletHit = function(bullet) {
+				  	onion.addFilter(enemyHitShader.filter);
+				  	onion.setTimeout(t=>{
+				  		t.data.removeFilter(enemyHitShader.filter);
+				  	},app.dt*4);
+				  	
+				  	var dmg = bullet.damage * currentPhase.damageMultiplier;
+				  	
+				  	onion.hp -= dmg;
+				  	data.bossData.health -= dmg;
+				  	
+				  	onion.hp <= 0 && onion.onDeath();
+				  }
+					
+					break;
+				case 'OnionTurnLeft':
+					var onion = data.OnionBoss,
+					facing = evtData[0];
+					
+					if(facing == 0) onion.playAnimWithEnd('look_left_from_center',f => onion.playAnim('left_loop',true));
+					else {
+						onion.playAnimWithEnd('look_center_from_right', e => {
+							onion.hp < onion.maxHp && onion.delay_end ? data.playEvent('OnionCryPrepare') :
+								onion.playAnimWithEnd('look_left_from_center',f => onion.playAnim('left_loop',true));
+						});
+					}
+					onion.facing = -1;
+					break;
+				case 'OnionTurnRight':
+					var onion = data.OnionBoss,
+					facing = evtData[0];
+					
+					if(facing == 0) onion.playAnimWithEnd('look_right_from_center',f => onion.playAnim('right_loop',true));
+					else {
+						onion.playAnimWithEnd('look_center_from_left', e => {
+							onion.hp < onion.maxHp && onion.delay_end ? data.playEvent('OnionCryPrepare') :
+								onion.playAnimWithEnd('look_right_from_center',f => onion.playAnim('right_loop',true));
+							onion.delay_end = true;
+						});
+					}
+					onion.facing = 1;
+					break;
+				case 'OnionBashful':
+					var onion = data.OnionBoss;
+					onion.removeFilter();
+					onion.tasks.clear();
+					onion.onAnimEnd = null;
+					
+					onion.hitbox.tags = [];
+					
+					//Remove event
+				 	scene.events.off(onion.allplayersdeadevent);
+					
+					//In secret phase
+					data.levelData.bossSecretPhase = true;
+					
+					onion.playAnimWithEnd('look_center_from_'+(onion.facing>0?'right':'left'), o => {
+						scene.findResource('OnionExitBashfulSfx','sound').play();
+						onion.setTimeout( f => onion.playAnimWithEnd('bashful_start',e => {
+							onion.playAnim('bashful_loop',true);
+							onion.setTimeout( f => data.playEvent('OnionBashfulExit'), 0.9);
+						}), 0.06);
+					});
+					break;
+				case 'OnionBashfulExit':
+					var onion = data.OnionBoss;
+					onion.removeFilter();
+					onion.tasks.clear();
+					onion.onAnimEnd = null;
+					
+					onion.hitbox.tags = [];
+					
+					onion.TweenToWithEnd('_y',500,1.55,b5.Ease.sinin,true,0, y => {
+						onion.dirt.TweenTo('opacity',0,0.5,b5.Ease.linear);
+						onion.dirt.back.TweenToWithEnd('opacity',0,0.5,b5.Ease.linear,true,0, i => {
+							onion.dirt.destroy();
+							onion.dirt.back.destroy();
+							onion.destroy();
+							onion.mask.destroy();
+							onion.hitbox.release(true);
+						});
+						world.setTimeout( e => {
+							data.playEvent('CarrotIntro',[currentPhase.data.carrot.extraHpSecret]);
+						},.2);
+					});
+					
+					onion.setTimeout(e => {
+						var target = data.getActivePlayers();
+						target = target[b5.Maths.randomRange(0,target.length-1)].name;
+						data.playEvent('RaddishIntro',[target]);
+					},1.2);
+					
+					onion.mask.visible = true;
+					onion.setMask(onion.mask);
+					break;
+				case 'OnionCryPrepare':
+					var onion = data.OnionBoss;
+					
+					onion.tasks.clear();
+					onion.onAnimEnd = null;
+					onion.removeFilter();
+					
+					onion.cry = function(startstop) {
+						if(data.players_dead) return;
+						onion.cry_current > onion.data.cryingSequence.length - 1 && (onion.cry_current = 1);
+						data.playEvent('Onion' + (startstop?'':'Stop')+'Cry');
+						this.setTimeout(f => onion.cry(!startstop),
+							onion.data.cryingSequence[onion.cry_current]
+						);
+					}
+					
+					onion.cry_current = 0;
+					onion.playAnimWithEnd('cry_trans', o => {
+						onion.playAnim('cry_prepare',true);
+						onion.setTimeout(e => onion.cry(true),onion.data.cryingSequence[0]);
+					});
+					
+					//Task
+					onion.tearNextTime = 0.1;
+					onion.tearCount = 0;
+					
+					onion.setInterval(e => {
+						
+						var rndX1 = onion.data.TearSpawnRanges[0],
+						rndX2 = onion.data.TearSpawnRanges[1],
+						pink = 0;
+						
+						rndX1 = b5.Maths.randomRange(rndX1[0],rndX1[1]);
+						rndX2 = b5.Maths.randomRange(rndX2[0],rndX2[1]);
+						
+						if(onion.tearsA.current_anim == "tears_loop") {
+							onion.tearCount++;
+							if(onion.tearCount >= onion.data.SpawnPinkTearBetweenNSpawns[b5.Maths.randomRange(0,1)]) {
+								onion.tearCount = 0;
+								pink = 1;
+							}
+							data.playEvent('SpawnOnionTear',[rndX1,rndX2,pink,data.getId(),data.getId()]);
+							
+							if(onion.tearCount == 1) {
+								e.wait = 0.3; //Fix for mini-tutorial
+								return;
+							}
+							
+							onion.tearNextTime = onion.data.tearsRandomTimeRanges[b5.Maths.randomRange(0,onion.data.tearsRandomTimeRanges.length-1)];
+				    	onion.tearNextTime = onion.tearNextTime[b5.Maths.randomRange(0,onion.tearNextTime.length-1)];
+					 
+				  		e.wait = onion.tearNextTime;
+						}
+						
+					},onion.tearNextTime);
+					
+					break;
+				case 'OnionCry':
+					var onion = data.OnionBoss;
+					onion.playAnimWithEnd('cry_'+(onion.cry_current == 0 ? 'start':'resume'), o => {
+						o.playAnim('cry_loop',true);
+						o.tearsA.visible = o.tearsB.visible = true;
+						o.tearsA.playAnimWithEnd('tears_intro', t => t.playAnim('tears_loop',true));
+						o.tearsB.playAnimWithEnd('tears_intro', t => t.playAnim('tears_loop',true));
+					});
+					onion.cry_current++;
+					scene.findResource('OnionCryingSfx','sound').play();
+					
+					break;
+				case 'OnionStopCry':
+					var onion = data.OnionBoss;
+					scene.findResource('OnionCryingSfx','sound').stop();
+					onion.playAnim('cry_pause',false);
+					onion.tearsA.playAnimWithEnd('tears_outro', o => {o.visible = false});
+					onion.tearsB.playAnimWithEnd('tears_outro', o => {o.visible = false});
+					onion.cry_current++;
+					onion.tearCount = 1;
+					break;
+				case 'SpawnOnionTear':
+					var posx1 = evtData[0],
+					posx2 = evtData[1],
+					is_pink = evtData[2],
+					id1 = evtData[3],
+					id2 = evtData[4];
+					
+					scene.data.createEnemy('onionTear',posx1,-400,1,{speed:currentPhase.data.onion.tearSpeed,pink:is_pink,id:id1});
+					scene.data.createEnemy('onionTear',posx2,-400,1,{speed:currentPhase.data.onion.tearSpeed,pink:is_pink,id:id2});
+					
+					break;
+				case 'OnionDie':
+					var onion = data.OnionBoss;
+					
+					onion.removeFilter();
+					onion.tasks.clear();
+					onion.hitbox.tags = [];
+					onion.onAnimEnd = null;
+					scene.findResource('OnionCryingSfx','sound').stop();
+				
+				 	scene.events.off(onion.allplayersdeadevent);
+					
+					onion.playAnim('death',true);
+					onion.tearsA.visible ? onion.tearsA.playAnimWithEnd('tears_outro',t => t.destroy()) : onion.tearsA.destroy();
+					onion.tearsB.visible ? onion.tearsB.playAnimWithEnd('tears_outro',t => {
+						//Free video memory
+				  	b5.Utils.DisposeAtlasTextures(t.atlas);
+						t.destroy();
+					}) : (b5.Utils.DisposeAtlasTextures(onion.tearsB.atlas), onion.tearsB.destroy());
+					
+					scene.data.createBossExplosionsEmitter(0,30,250,4.2);
+					onion.setTimeout(e => data.playEvent('OnionDieExit'),1.5);
+					scene.findResource('OnionDieSfx','sound').play();
+					break;
+				case 'OnionDieExit':
+					var onion = data.OnionBoss;
+					onion.removeFilter();
+					onion.tasks.clear();
+					onion.onAnimEnd = null;
+					
+					onion.hitbox.tags = [];
+	
+					onion.TweenToWithEnd('_y',700,1.2,b5.Ease.sinin,true,0, y => {
+						onion.dirt.TweenTo('opacity',0,0.5,b5.Ease.linear);
+						onion.dirt.back.TweenToWithEnd('opacity',0,0.5,b5.Ease.linear,true,0, i => {
+							//Free video memory
+				  		b5.Utils.DisposeAtlasTextures(onion.atlas);
+							onion.dirt.destroy();
+							onion.dirt.back.destroy();
+							onion.destroy();
+							onion.mask.destroy();
+							onion.hitbox.release(true);
+						});
+						!data.players_dead && world.setTimeout( e => {
+							data.playEvent('CarrotIntro');
+						},1.9);
+					});
+					
+					onion.mask.visible = true;
+					onion.setMask(onion.mask);
+					break;
+					
+				case 'RaddishIntro':
+					var target = world.findActor(evtData[0],true),
+					facing = Math.sign(target.x);
+					
+					data.createEnemy('raddish',200*facing,200,2,{facing:facing,target:target,hp:currentPhase.data.raddish.maxHp,maxspeed:currentPhase.data.raddish.speed,accel:currentPhase.data.raddish.acceleration});
+					break;
+					
+				case 'CarrotIntro':
+					if(data.CarrotBoss) return;
+					data.levelData.currentMiniBoss = "CarrotBoss";
+					
+				  var dirtBurst = data.createDirtBurst("Layer6");
+					dirtBurst.setPosition(0,150);
+					
+					dirtBurst.play();
+					scene.findResource('CarrotRiseSfx','sound').play();
+					
+					//Carrot
+				  var carrot = data.CarrotBoss = new b5.Actor();
+
+				  carrot.data = currentPhase.data.carrot;
+				  
+				  var extraHealth = (evtData && (
+				  	data.bossData.health -= 425,
+				  	evtData[0])) || 0;
+				  
+				  carrot.hp = carrot.data.maxHp + extraHealth;
+				  carrot.maxHp = carrot.hp;
+				  carrot.dirt = dirtBurst;
+				  
+				  carrot.atlas = scene.findResource('CarrotAtlas','brush');
+				  world.Layer6.addActor(carrot);
+				  carrot.setPosition(0,-120);
+				  carrot._scale = 1.25;
+				  carrot._layer = 2;
+				  carrot.visible = false
+				  
+				  //Hitboxes
+				  var carrotHitbox = new b5.RectActor();
+				  carrotHitbox.setSize(150,130);
+				  carrotHitbox.visible = false;
+				  carrotHitbox.setPosition(0,-195);
+				 // carrotHitbox.tags = [hittableEnemy"];
+				  world.PlayerLayer.addActor(carrotHitbox);
+				  carrotHitbox.initBody('collider');
+				  carrotHitbox.addFixtureSelf();
+				  
+				  carrot.hitbox = carrotHitbox;
+				  
+				  //Eyes
+				  carrot.eyes = new b5.Actor();
+				  carrot.eyes.atlas = carrot.atlas;
+				  world.Layer6.addActor(carrot.eyes);
+				  carrot.eyes._scale = 1.25;
+				  carrot.eyes._layer = 3;
+				  carrot.eyes.visible = false;
+				  carrot.eyes._y = -190;
+				  
+				  carrot.onDeath = function() {
+				  	data.playEvent('CarrotDie')
+				  }
+				  
+				  //If players dead stop attacking
+				  carrot.allplayersdeadevent = scene.events.on('allplayersdead', u => {
+				  	carrot.tasks.clear();
+				  	carrot.removeFilter();
+				  });
+				  
+				  carrot.addHypnoChargeParticle = function() {
+				  	var p = new b5.Actor();
+				  	p.atlas = scene.findResource('CarrotHypnoAtlas','brush');
+				  	p.playAnim('hypno_charge');
+				  	this.parent.addActor(p);
+				  	p.layer = this.eyes.layer+1;
+				  	p.setPosition(this.x+1,this.y-138);
+				  	
+				  	const o = {onEnd:null};
+				  	p.onAnimEnd = function() {
+				  		o.onEnd && o.onEnd(p.absPos.x,p.absPos.y);
+				  		p.destroy();
+				  	}
+				  	return o; //Use for later
+				  }
+				  
+				  carrot.spawnCarrotBomb = function() {
+				  	var player = data.getActivePlayers(),
+				  	pos = b5.Maths.randomRange(-3,3,true)*200;
+				  	player = (player[b5.Maths.randomRange(0,player.length-1)] || {}).name;
+				  	
+				  	(difficulty == 2 || (difficulty < 2 && !carrot.hypno_fire)) && scene.data.playEvent('SpawnCarrotBomb',[pos,player,data.getId()]);
+				  	
+				  	var rtr = this.data.carrotBombRandomTimeRanges;
+				  	rtr = rtr[b5.Maths.randomRange(0,rtr.length-1)];
+				  	rtr = rtr[b5.Maths.randomRange(0,rtr.length-1)];
+				  	
+				  	this.setTimeout(t => {
+				  		t.data.hp > 0 && t.data.spawnCarrotBomb();
+				  	},rtr);
+				  }
+				  
+				  carrotHitbox.onBulletHit = function(bullet) {
+				  	carrot.addFilter(enemyHitShader.filter);
+				  	carrot.eyes.tint_colour = "#55eeee";
+				  	carrot.setTimeout(t=>{
+				  		t.data.removeFilter(enemyHitShader.filter);
+				  		t.data.eyes.tint_colour = "white";
+				  	},app.dt*4);
+				  	
+				  	var dmg = bullet.damage * currentPhase.damageMultiplier;
+				  	
+				  	carrot.hp -= dmg;
+				  	data.bossData.health -= dmg;
+				  	
+				  	carrot.hp <= 0 && carrot.onDeath();
+				  }
+				  
+				  world.setTimeout(t => {
+				  	carrot.visible = true;
+				  	carrot.hitbox.tags = ["hittableEnemy"];
+				  	carrot.playAnimWithEnd('intro', a => {
+				  		a.playAnim('idle',true);
+				  		//Spawn carrots
+				  		a.setTimeout(t => carrot.spawnCarrotBomb(),0.78);
+				  
+				  		//Wait then prepare shoot beam anim
+						  !data.players_dead && a.setTimeout(t => data.playEvent('CarrotPrepareShoot'),
+				  			b5.Maths.randomRange(
+							 		carrot.data.carrotFireBeamTimeRanges[0],
+						  		carrot.data.carrotFireBeamTimeRanges[1],
+				    	  true));
+				  	});
+				  	
+				  	scene.findResource('CarrotMindMeldStartSfx','sound').play();
+				  	var mml = scene.findResource('CarrotMindMeldLoopSfx','sound');
+				  	mml.play();
+				  },0.92);
+				  
+				  break;
+				case 'SpawnCarrotBomb':
+					var pos_x = +evtData[0];
+					target = world.findActor(evtData[1],true),
+					id = evtData[2];
+					
+					var carrot_small = new b5.Actor();
+					carrot_small.atlas = scene.findResource('CarrotBombAtlas','brush');
+					carrot_small.playAnim('carrot_bomb_small',true);
+					carrot_small.setPosition(pos_x*0.95,100);
+					carrot_small.cull = false;
+					
+					carrot_small.layer = 2;
+					world.Layer0.addActor(carrot_small);
+					
+					carrot_small.vy = -390;
+					carrot_small.setTimeout(t => {
+						carrot_small.destroy();
+						
+						//Spawn chaser carrot bomb
+						scene.data.createEnemy('carrotBomb',carrot_small.x,-400,1,{speed:currentPhase.data.carrot.carrotBombSpeed,target:target,id:id});
+						
+					},1.9);
+					
+					break;
+				case 'CarrotPrepareShoot':
+					var carrot = data.CarrotBoss;
+				  carrot.hypno_fire = true;
+					carrot.playAnimWithEnd('shoot_transition', c => {
+						c.playAnim('shoot_body',true);
+						c.eyes.playAnim('eyes',true);
+						c.eyes.visible = true;
+						//scene.findResource('CarrotMindMeldLoopSfx','sound').stop();
+					});
+					
+					var timesShoot = 0,
+					target = data.getActivePlayers();
+			
+					target = target[b5.Maths.randomRange(0,target.length-1)];
+					
+					carrot.setInterval(t=>{
+						timesShoot++;
+					  if(timesShoot <= carrot.data.ringsShoot) {
+							var particle = carrot.addHypnoChargeParticle();
+							particle.onEnd = (ax,ay) => carrot.hp > 0 && data.playEvent('CarrotShootBeam',[ax,ay,target.x,target.y, timesShoot == carrot.data.ringsShoot?1:0]);
+					  }
+					  else carrot.clearInterval(t.name);
+					},carrot.data.carrotHypnoRingRythm);
+					
+					break;
+				case 'CarrotShootBeam':
+					var carrot = data.CarrotBoss,
+					shootPos = [evtData[0],evtData[1]],
+					target = [evtData[2],evtData[3]]
+					last_one = evtData[4],
+					shoot = 0;
+					
+					!target && (target = {x:0,y:999988});
+					
+					carrot.setInterval(t => {
+						shoot++;
+						if(shoot <= carrot.data.rings) {
+							scene.findResource('CarrotMindMeldBeamFireSfx'+b5.Maths.randomRange(1,2),'sound').play();
+							scene.data.createEnemy('hypnoLoop',shootPos[0],shootPos[1],1,{speed:carrot.data.ringSpeed,target:target});
+							if(shoot == carrot.data.rings && last_one) data.playEvent('CarrotFinishShoot');
+						}
+						else carrot.clearInterval(t.name);
+					},0.1);
+					
+					break;
+				case 'CarrotFinishShoot':
+					var carrot = data.CarrotBoss;
+					//Back to idle
+					carrot.hypno_fire = false;
+				 	carrot.eyes.visible = false;
+				 	carrot.playAnimWithEnd('shoot_transition_back', c => {
+						c.playAnim('idle',true);
+						scene.findResource('CarrotMindMeldStartSfx','sound').play();
+						
+						//Next fire
+						!data.players_dead && c.setTimeout(t => data.playEvent('CarrotPrepareShoot'),
+				  		b5.Maths.randomRange(
+								carrot.data.carrotFireBeamTimeRanges[0],
+						   	carrot.data.carrotFireBeamTimeRanges[1],
+				      true));
+				  	});
+					break;
+				case 'CarrotDie':
+					var carrot = data.CarrotBoss;
+					carrot.tasks.clear();
+					carrot.eyes.visible = false;
+					
+					//Remove event
+				 	scene.events.off(carrot.allplayersdeadevent);
+				  
+				  scene.findResource('CarrotMindMeldLoopSfx','sound').stop();
+				  scene.findResource('CarrotDieSfx','sound').play();
+				  scene.data.createBossExplosionsEmitter(0,-80,250,14.2);
+				 	carrot.playAnim('death',true);
+				  carrot.hitbox.tags = [];
+				  carrot.removeFilter();
+				 	
+					break;
+					
+				case 'Knockout':
+					thisActor.onDeath && thisActor.onDeath();
+					scene.data.onBossDeath && scene.data.onBossDeath();
+					
+					bossData.health = 0;
+					
+					var miniboss = data[data.levelData.currentMiniBoss];
+					miniboss && (miniboss.hp = 0);
+					break;
+			}
+		}
+		
+		//If guest joins before battle started, start normally (assuming load screens have been synchronized)
+		//Else manage what boss to spawn on event
+		if(!data.levelData.fightStarted) data.playEvent("PotatoIntro");
+		else {
+			switch(data.levelData.currentMiniBoss) {
+				case 'PotatoBoss': data.playEvent('PotatoIntro'); break;
+				case 'OnionBoss': data.playEvent('OnionIntro'); break;
+				case 'CarrotBoss': data.playEvent('CarrotIntro'); break;
+			}
+		}
+		
+		//Basic defeat manager
+		var dead = false;
+
+		thisActor.onTick = function() {
+			bossData = scene.data.bossData; //Fix object error in guest
+			
+			if (scene.data.levelData.fightStarted) {
+				//Do things
+				
+				var miniboss = data[data.levelData.currentMiniBoss];
+				
+				if (bossData.health <= 0 && (miniboss?miniboss.hp <= 0:true) && !dead) {
+					dead = true;
+					
+					data.playEvent('Knockout');
+					
+				}
+			}
+			
+		}
+		
+	}
+};

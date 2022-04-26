@@ -1,0 +1,10 @@
+{
+	"NPC_ExitDoor": {
+		"glyphTitle": "",
+		"onInteract": "action:BackToEKHouse",
+		"playerTalkPosition": false,
+		"onPlayerReachedPosition": "",
+		"script": "scripts/exitDoor.cup",
+		"dialogs": []
+	}
+}

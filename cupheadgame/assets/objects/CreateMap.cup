@@ -1,0 +1,232 @@
+/*
+* This will create level layers (background, foreground aswell as
+* a camera, physics and boundaries for the level
+* Level data must be stored in the folder inside the scene data folder called 'LEVEL.CUP'
+* this can have the level camera zoom, camera extents, walls, floors,
+* also	npc and boss data.
+* Set importData to configure the level:
+*
+* camera_bounds: [x1,y1,x2,y2] from where to where the camera will pan.
+* camera_zoom: [number] the camera zoom. (Higher values mean higher scale)
+*
+* Resources and actors must be added to the respective layers:
+* backround elements on lower layers, foreground elements on higher layers.
+* Player layer is always 5
+*/
+b5.export = function(world, scene, sceneData, game, importData) {
+	var myexports = {
+		createdList: []
+	};
+	game.Flags.inWorldmap = true;
+	game.Flags.inLevel = false;
+	game.Flags.pausingEnabled = true;
+	game.Flags.inSomeMenu = false;
+
+	//Reset camera
+	world.reset();
+	
+	game.GUI.disableButtons('L,R,Y');
+
+	game.importObject('CreateCommonResources');
+	game.importObject('CreateCommonWorldmapResources');
+	
+	var initNpcs = game.importObject('CreateNPC').initNpcs;
+	//Level data directory
+	sceneData.levelDataPath = sceneData.resourcePath + 'MAP.CUP/';
+
+	//Read level data
+	var data = JSON.parse(b5.File.readSync(sceneData.levelDataPath + 'map.json'));
+
+	//Set view data
+	sceneData.view = data.view;
+	sceneData.mapId = data.id;
+	sceneData.worldScale = data.WorldScale;
+	world.camera_extents = data.view.cameraExtents;
+	world._scale = data.view.zoom;
+	world.camera_range = 1;
+	
+	//Add resources
+	game.parseResources(data.resources, scene);
+
+	//Create layers
+		var l1 = new b5.Actor;
+		l1.round_pixels = false;
+		l1.name = "Layer0";
+		world.addActor(l1);
+		l1._layer = 0;
+
+	//Update camera
+	l1.onTick = function() {
+
+		//Follow players
+		var plys = sceneData.players ? sceneData.players.activePlayers: [];
+
+		//Get average position of players for target
+		for (var a = 0, avgx = 0, avgy = 0; a < plys.length; a++) {
+			var p = world.findActor(plys[a], true);
+			avgx += p.x / plys.length;
+			avgy += p.y / plys.length;
+		}
+
+		world.target_x = (world.camera_offset_x + avgx) * world.scale;
+		world.target_y = (world.camera_offset_y + avgy) * world.scale;
+
+	}
+	
+	sceneData.levelData === void 0 && (sceneData.levelData = {});
+
+	//Initialize world
+	scene.initWorld(0, 0, false);
+
+	//Create physics objects
+	for (var i = 0, objs = data.physicsObjects; i < objs.length; i++) {
+		var o = objs[i],
+		a = new b5[o.type.replace('Actor', '') + 'Actor'];
+
+		a.type === b5.Actor.Type_Rect ? a.setSize(o.detectionSize[0], o.detectionSize[1]): a.radius = o.radius;
+		a.name = o.name;
+		a.fill_style = o.color;
+		a.tags = o.tags;
+		a.tag = o.tags[0];
+		a.visible = o.visible;
+		o.visible && (a.round_pixels = false);
+		
+		
+		//Add to world
+		world.findActor("Layer0").addActor(a);
+		a._layer = o.layer;
+
+		//Initialize body
+		a.initBody(o.body.bodyType, o.body.fixedRotation, false);
+
+		//Add fixture
+		a.addFixture({
+			type: a.getShapeType(),
+			width: o.size[0],
+			height: o.size[1],
+			vertices: o.body.vertices,
+			restitution: o.body.restitution || 0,
+			density: o.body.density || 1,
+			friction: o.body.friction || 1,
+			is_bullet: false,
+			is_sensor: !!o.body.sensor
+		});
+		//Set physics position
+		a.setPosition(o.pos[0], o.pos[1]);
+
+		if (o.body.weldTo) a.addJoint({
+			type: "weld",
+			actor_b: world.findActor(o.body.weldTo, true),
+			anchor_a: {
+				x: 0, y: 0
+			},
+			anchor_b: {
+				x: 0, y: 0
+			},
+			self_collide: false
+		});
+
+		//Script
+		if(o.script) a.onCreate = Function(b5.File.readSync(sceneData.levelDataPath + 'scripts/' + o.script))();
+		myexports.createdList.push(a);
+	}
+
+	//Create world objects (non physics objects such as backgrounds and decorations)
+	for (var i = 0, objs = data.worldObjects; i < objs.length; i++) {
+		var o = objs[i],
+		a = new b5[o.type.replace('Actor', '') + 'Actor'];
+
+		a.type === b5.Actor.Type_Rect || a.type === b5.Actor.Type_Image ? a.setSize(o.size[0], o.size[1]): a.radius = o.radius;
+		a.name = o.name;
+		a.setPosition(o.pos[0], o.pos[1]);
+		a.fill_style = o.color;
+		o.tags && (
+			a.tags = o.tags,
+			o.tags.indexOf('NPC') != -1 && (a.player_focus = false),
+			a.tag = o.tags[0]
+		);
+		a.opacity = o.opacity === undefined ? 1: o.opacity;
+		a.round_pixels = false;
+		Array.isArray(o.scale) ? a.setScale(o.scale[0], o.scale[1]): a._scale = o.scale;
+		o.bitmap && (a.bitmap = scene.findResource(o.bitmap,"bitmap"));
+		o.atlas && (a.atlas = scene.findResource(o.atlas,"brush"));
+		a.center_atlas = true;
+		a.ignore_atlas_size = o.ignore_atlas_size === void 0 ? false : o.ignore_atlas_size;
+		a.cull = o.cull !== void 0 ? o.cull : true;
+		o.base_frame && a.atlas && (a.current_frame = o.base_frame);
+		o.base_anim && a.atlas && (a.playAnim(o.base_anim,o.anim_loop));
+		a.text = o.text === void 0 ? "" : o.text;
+		if(o.properties !== void 0) for(var k in o.properties) a[k] = o.properties[k];
+
+		//Add to world
+		//If no layer specified, appendTo an existing actor
+		//If you want to add to another actor that hasn't been created yet,
+		//add the actor to a layer temporarily, then use the method changeParent(newParent)
+		if (!isNaN(o.layer)) world.findActor("Layer0").addActor(a);
+		else {
+			if (o.appendTo != "scene") var aa = scene.findActor(o.appendTo, true);
+			else var aa = scene;
+			aa && aa.addActor(a);
+		}
+		a._layer = isNaN(o.layer) ? (o.sub_layer || 0) : o.layer;
+		
+		//Collider
+		if(o.add_collider) {
+			a.initBody("collider");
+			var ac = a.getFixtureSelf();
+			o.detectionSize !== void 0 && (
+				ac.width = o.detectionSize[0],
+				ac.height = o.detectionSize[1]
+			);
+			a.addFixture(ac);
+		}
+		//Scripts
+		if(o.script) a.onCreate = Function(b5.File.readSync(sceneData.levelDataPath + 'scripts/' + o.script))();
+		myexports.createdList.push(a);
+	}
+
+	//Load NPC data
+	sceneData.npc = null;
+
+	if (b5.File.exists(sceneData.levelDataPath + 'npc.json'))
+		sceneData.npc = JSON.parse(b5.File.readSync(sceneData.levelDataPath + 'npc.json'));
+
+	//Update texts
+	var lang = "";
+	
+	sceneData.Texts = {};
+
+	world.onTick = function() {
+		//On language changed
+		if (lang != game.cfg.Language.lang) {
+			lang = game.cfg.Language.lang;
+
+			var txts;
+			new b5.Raw('texts',sceneData.resourcePath+'texts/'+lang+'.json',true, raw => {
+				txts = raw;
+			},true);
+			
+			//Load default EN if language is not present
+		  if(!txts) new b5.Raw('texts',sceneData.resourcePath+'texts/en.json',true, raw => {
+				txts = raw;
+			},true);
+			
+			txts = JSON.secParse(txts);
+			
+	    for(var i in txts) sceneData.Texts[i] = txts[i];
+		}
+	};
+
+
+	myexports.init = function() {
+		for (; this.createdList.length > 0;) {
+			this.createdList[0].onCreate && this.createdList[0](world, scene, sceneData, game);
+			this.createdList.shift();
+		}
+
+		//Setup npcs
+    initNpcs();
+	};
+
+	return myexports;
+};

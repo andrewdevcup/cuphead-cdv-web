@@ -1,0 +1,94 @@
+{
+	"speed": 80,
+	"speedSmall": 55,
+	"damage": 1.24,
+	"supermeter_score": 0.74,
+	"delay": 0.12,
+	"scale": 0.85,
+	"despawnTime": 0.23,
+	"despawnTimeSmall": 0.32,
+	"bulletCount": 5,
+	"exBulletCount": 8,
+	"angleRange": [31,-31],
+	"exAngleRange": [-180,180],
+	"ex": {
+		"speed": 28,
+		"damage": 4.3,
+		"multiHit": 1,
+		"hitDelay": 5,
+		"scale": 0.95,
+		"despawnTime": 3.5,
+		"consumption": 100
+	},
+	"body": {
+		"shape": "TypeBox",
+		"size": [40,25],
+		"fixedRotation": true,
+		"sub_layer": 0,
+		"bodyType": "collider",
+		"hitbox": {
+			"type": "Arc",
+			"size": 17
+		},
+		"ex": {
+			"shape": "TypeBox",
+			"size": [100,100],
+			"fixedRotation": true,
+			"bodyType": "collider",
+			"sub_layer": 3,
+			"hitbox": {
+				"type": "Arc",
+				"size": 60
+			}
+		}
+	},
+	"resources": {
+		"bitmap": [{
+			"name": "SpreadBitmap0",
+			"src": "player/weapons/spread/SpriteAtlasTexture_Spread-0.png"
+		},
+		{
+			"name": "SpreadEquipIconBitmap",
+			"src": "player/weapons/spread/SpriteAtlasTexture_Spread_EquipIcon-0.png"
+		}],
+		"brush": [{
+			"name": "SpreadAtlas",
+			"bitmaps": ["SpreadBitmap0"],
+			"frames": "player/weapons/spread/SpriteAtlasTexture_Spread.csv",
+			"anims": "player/weapons/spread/spreadshot.atlas.json"
+		},
+		{
+			"name": "spread:WEAPON_EQUIP_ICON",
+			"bitmaps": ["SpreadEquipIconBitmap"],
+			"frames": "player/weapons/spread/SpriteAtlasTexture_Spread_EquipIcon.csv"
+		}],
+		"sound": [{
+			"name": "SpreadLoopSfx1",
+			"src": "player/weapons/spread/sfx_player_spreadshot_fire_loop.ogg",
+			"reuse": true,
+			"loop": true,
+			"category": "sfx"
+		},
+			{
+				"name": "SpreadLoopSfx2",
+				"src": "player/weapons/spread/sfx_player_spreadshot_fire_loop_002.ogg",
+				"reuse": true,
+				"loop": true,
+				"category": "sfx"
+			},
+			{
+				"name": "SpreadLoopSfx3",
+				"src": "player/weapons/spread/sfx_player_spreadshot_fire_loop_003.ogg",
+				"reuse": true,
+				"loop": true,
+				"category": "sfx"
+			},
+			{
+				"name": "SpreadLoopSfx4",
+				"src": "player/weapons/spread/sfx_player_spreadshot_fire_loop_004.ogg",
+				"reuse": true,
+				"loop": true,
+				"category": "sfx"
+			}]
+	}
+}

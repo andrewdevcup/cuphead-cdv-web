@@ -1,0 +1,135 @@
+return function(thisPlayer, flags, input, world, scene, game, data) {
+	//Setup local variables here
+	//This function will be called when player is first created
+	//For executing actions when loading screen is being hidden,
+	//add the method thisPlayer.onLoadingScreenOut = function(){...}
+	//var myvar = flags.jumping
+	
+	var baseVol = 3,
+	launchF = 7.9,
+	intTime = 0,
+	optime = 0,
+	hitSfx = [
+		scene.findResource('PlayerHitSfx0', 'sound'),
+		scene.findResource('PlayerHitSfx1', 'sound'),
+		scene.findResource('PlayerHitSfx2', 'sound'),
+		scene.findResource('PlayerHitSfx3', 'sound'),
+		scene.findResource('PlayerHitSfx4', 'sound')
+	],
+	crackSfx = [
+		scene.findResource('PlayerDamageCrack0', 'sound'),
+		scene.findResource('PlayerDamageCrack1', 'sound'),
+		scene.findResource('PlayerDamageCrack2', 'sound'),
+		scene.findResource('PlayerDamageCrack3', 'sound')
+	],
+	deathSfx = [
+		scene.findResource('PlayerDeathSfx1', 'sound'),
+		scene.findResource('PlayerDeathSfx2', 'sound')
+	],
+	dead = function() {
+		deathSfx[b5.Maths.randomRange(0,1)].play();
+		flags.controllable = false;
+		flags.intangible = true;
+		thisPlayer.stopShooting(true);
+		thisPlayer.data.diedAt = data.bossData.maxHealth - data.bossData.health;
+		thisPlayer.body.SetActive(false);
+		thisPlayer.data.times_died++;
+ 		thisPlayer.setTimeout(function() {
+ 			thisPlayer.visible = false;
+ 			var dbp = data.spawnPlayerParticle('playerDeathBody', thisPlayer);
+ 			dbp.playAnimWithEnd('cuphead_vanish', _this => {
+ 				_this.destroy();
+ 			});
+ 			data.spawnPlayerParticle('playerExplodeFX',thisPlayer);
+			thisPlayer.spawnGhost(-7 - (thisPlayer.data.times_died*1.3));
+			
+		}, 0.4);
+	};
+	
+	thisPlayer.data.anim_intangible_opacity = true;
+	
+	thisPlayer.setIntangible = function(forever) {
+		this.opacity = 1;
+		intTime = forever ? -999999 : 0;
+		this.data.anim_intangible_opacity = !forever;
+		flags.intangible = true;
+	};
+	
+	thisPlayer.onEnemyHit = function(enemy) {
+		enemy && enemy.onPlayerHit && enemy.onPlayerHit(this);
+	};
+	
+	//Stop damage on guest
+	game.Multiplayer.isGuest && (flags.hittable = false);
+	
+	scene.events.on('playerhit', evtdata => {
+		if(evtdata[2] && game.Multiplayer.isGuest && thisPlayer.name == evtdata[0]) {
+			flags.intangible = false;
+			flags.heartPoints = evtdata[1];
+			flags.damageHit = true;
+			thisPlayer.onEnemyHit();
+		}
+	});
+	
+	return function(thisPlayer, flags, input, world, scene, game, data) {
+		//This is a loop function
+		//It will be called consecutively when loadingScreenOut
+     if(flags.damageHit && !flags.intangible && flags.heartPoints > 0) {
+     	optime = 0;
+     	intTime = 0;
+     	flags.controllable = false;
+     	thisPlayer.setIntangible();
+     	flags.parryActive = false;
+     	flags.dashing = false;
+     	thisPlayer.onEXAnimEnded(true);
+     	
+     	scene.events.dispatch('playerhit',[thisPlayer.name, flags.heartPoints,0]);
+     	//Sync
+     	game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['playerhit',[thisPlayer.name,flags.heartPoints,1]]);
+     	
+     	data.spawnPlayerParticle('playerHitFX',thisPlayer);
+     	
+     	thisPlayer.body.m_gravityScale.y = 0.7;
+     	thisPlayer.body.m_gravityScale.x = 0.1;
+     	thisPlayer.body.m_linearVelocity.x = Math.sign(thisPlayer.data.facing)*launchF*-thisPlayer.data.baseSpeed;
+     	thisPlayer.body.m_linearVelocity.y =-thisPlayer.data.baseSpeed*(launchF*0.2);
+      thisPlayer.stopShooting(true);
+     	
+     	hitSfx[b5.Maths.randomRange(0,4)].play();
+     	
+     	!flags.invincible && flags.heartPoints--;
+     	//Set volume and play crack sfx
+     	var vol = b5.Maths.cap(baseVol / flags.heartPoints, 0, 1),
+     	snd = b5.Maths.randomRange(1,2);//flags.heartPoints > 3 ? 1 :1
+     	
+     	if(flags.heartPoints > 0) {
+       	crackSfx[snd].setGain(vol);
+       	crackSfx[snd].play();
+     	}
+     	
+     	thisPlayer.updateAnimations = true;
+     	
+     	//Shake camera
+     	data.shakeCamera(15,0.5, 0.55);
+     	
+     	if(flags.heartPoints <= 0) dead();
+     	
+     	//Check if dead
+     	for(var i = 0, p = data.players.activePlayers, l = 0; i < p.length; i++) 
+     		data[p[i]].flags.heartPoints <= 0 && l++;
+     	if(l >= p.length) data.allPlayersDead();
+    }
+     
+     
+    if(flags.intangible && flags.heartPoints > 0) {
+    	optime += game.speed*0.21;
+    	intTime += app.dt;
+    	thisPlayer.data.anim_intangible_opacity && thisPlayer.Sprite.current_anim != "enemy_hit" && (thisPlayer.opacity = 0.2 + Math.abs(Math.cos(optime)*0.8));
+    	if(intTime > thisPlayer.data.intangibleDuration) {
+    		flags.intangible = false;
+    		thisPlayer.opacity = 1;
+    	}
+    }
+    
+	};
+};

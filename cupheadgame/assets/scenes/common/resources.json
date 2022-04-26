@@ -1,0 +1,32 @@
+{
+	"sound": [],
+	"bitmap": [
+		{
+			"name": "SpeechDialogsBitmap",
+			"src": "scenes/common/DialogsAtlas.png",
+			"preload": false
+		},
+		{
+			"name": "SpeechBubbleBoxBitmap",
+			"src": "scenes/common/speech_bubble_box.png",
+			"preload": false
+		},
+		{
+			"name": "CupheadFelixRegularBitmap",
+			"src": "fonts/CupheadFelix-Regular-merged-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "SpeechDialogsAtlas",
+			"bitmaps": ["SpeechDialogsBitmap"],
+			"frames": "scenes/common/DialogsAtlas.csv",
+			"anims": "scenes/common/dialogs_frames.atlas.json"
+		},
+		{
+			"name": "CupheadFelixRegularFont",
+			"bitmaps": ["CupheadFelixRegularBitmap"],
+			"frames": "fonts/CupheadFelix-Regular-merged.bft"
+		}
+	]
+}

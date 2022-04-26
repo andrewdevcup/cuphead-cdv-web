@@ -1,0 +1,19 @@
+{
+	"sound": [
+	],
+	"bitmap": [
+		{
+			"name": "MugmanGhostBitmap0",
+			"src": "player/mugman/ghost/SpriteAtlasTexture_MugmanGhost-0.png",
+			"preload": false
+		}
+	],
+	"brush": [
+		{
+			"name": "MugmanGhostAtlas",
+			"bitmaps": ["MugmanGhostBitmap0"],
+			"frames": "player/mugman/ghost/SpriteAtlasTexture_MugmanGhost.csv",
+			"anims": "player/mugman/ghost/MugmanGhost.atlas.json"
+		}
+	]
+}

@@ -1,0 +1,270 @@
+b5.Game.SceneLoader = {
+	sceneId: 0,
+	load_scene: false,
+	is_loading_scene: false,
+	resources_loaded: false,
+	script_ready: false,
+	scene_loaded: false,
+	trig: false,
+	active: false,
+	delay: false,
+	available: true,
+	reload: false,
+	bundle: false,
+	update_scene: false,
+	mpSyncTask: "",
+	loading_screen: {
+		show_anim: 'close',
+		hide_anim: 'open',
+		hide_speed: 1,
+		show_speed: 1
+	}
+};
+
+b5.Game.SceneList = b5.Game.contents.scene;
+
+b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenProperties, loadData, reload, bundle) {
+	//Parse Scene
+	
+	if (this.SceneLoader.available) {
+		
+		app.events.dispatch('loadscene');
+		
+		app.clearInterval(this.SceneLoader.mpSyncTask);
+		
+		//Reset
+		b5.Game.Multiplayer.hostReady = false;
+		b5.Game.Multiplayer.guestReady = false;
+		
+		var lsp = loadingScreenProperties || {};
+
+		stopMusic && this.Music.stopAll(!reload);
+		fadeOutMusic && this.Music.fade_out(lsp.music_fade_speed, !reload);
+		reload && this.Sfx.stopAll();
+		//	this.Sfx.fade_out(0, true, true);
+		this.SceneLoader.stopMusic = stopMusic;
+		this.SceneLoader.fadeOutMusic = fadeOutMusic;
+		
+		console.log('Load scene: '+id);
+	  id = (isNaN(id) ? id : b5.Game.SceneList[id]);//.replace(/\.scene/g, '');
+
+		this.SceneLoader.sceneId = id;
+		this.SceneLoader.available = false;
+		this.SceneLoader.scene_loaded = false;
+		
+		this.SceneLoader.bundle = !!bundle;
+		this.SceneLoader.reload = !!reload;
+		
+		this.SceneLoader.loading_screen = lsp;
+		
+		//Load scene on guest too
+		if (this.Multiplayer.isHosting) this.Multiplayer.sendToGuest('LOAD_SCENE', loadData);
+
+		lsp && !this.loadingScreen.closed && this.ShowLoadingScreen(lsp.show_anim || 'close', lsp.hourglass, lsp.show_speed || 1);
+		this.SceneLoader.loading_screen.hide_anim = lsp.hide_anim || 'open';
+		this.SceneLoader.loading_screen.hide_speed = lsp.hide_speed || 1;
+		
+		delete b5.onLoadingScreenOut;
+		delete b5.onAllResourcesLoaded;
+
+		this.SceneLoader.active = true;
+		this.SceneLoader.delay = true;
+		this.SceneLoader.script_ready = false;
+
+		app.setTimeout(function() {
+			b5.Game.SceneLoader.delay = false;
+		}, 0.5);
+		
+		this.SceneLoader.AllLoaded = function(syncState) {
+			this.scene_loaded = true;
+			app.clearInterval(this.mpSyncTask);
+			app.events.dispatch('allresourcesloaded');
+			b5.onAllResourcesLoaded && b5.onAllResourcesLoaded(sceneMain.view, sceneMain, sceneMain.data, b5.Game);
+			
+			sceneMain.active = true;
+			b5.Game.HideLoadingScreen(this.loading_screen.hide_anim, this.loading_screen.hide_speed, true);
+			b5.Game.SceneLoader.available = true;
+			
+			//Hide loading screen on host/guest
+			if(syncState) {
+		  	if(b5.Game.Multiplayer.isGuest) {
+		  		b5.Game.Multiplayer.guest.send('9Ξ1'); //Hide
+		  	}
+	  		else if(b5.Game.Multiplayer.isHosting) b5.Game.Multiplayer.sendToGuest('HIDE_LS',1);
+			}
+		};
+
+		this.SceneLoader.load = function() {
+			//Reset filters
+			b5.Game.Music.resetFilters();
+			
+			//Initialize scene
+			this.resources_loaded = false;
+			this.update_scene = false;
+			sceneMain.tasks.clear();
+			sceneMain.timelines.remove();
+			sceneMain.events.clear();
+			for(var i = 0; i < sceneMain.actors.length; i++) sceneMain.actors[i].tasks.clear();
+			sceneMain.active = false;
+			
+			//Unload textures
+			for(var i = 0; i < sceneMain.bitmaps.length; i++) sceneMain.bitmaps[i].unload(); 
+			
+			app.events.dispatch('scene_loader:unload');
+			app.events.dispatch('sceneunload');
+	
+			b5.onSceneUnload && b5.onSceneUnload(sceneMain.view, sceneMain, sceneMain.data, b5.Game);
+			delete b5.onSceneUnload;
+			
+			//Terminate physics world
+			sceneMain.release();
+			sceneMain.view.removeAllActors();
+			sceneMain.view.timelines.remove();
+			sceneMain.view.cleanupDestroyedActors();
+			
+			sceneMain.background.removeAllActors();
+			sceneMain.background.timelines.remove();
+			sceneMain.background.cleanupDestroyedActors();
+
+			for (var a = 0, acts = []; a < sceneMain.actors.length; a++) {
+				var b = sceneMain.actors[a];
+				b.name != "scene_background" && b.name != "scene_camera" && acts.push(b);
+			}
+
+			for(var a = 0; a < acts.length; a++) acts[a].destroy();
+
+			sceneMain.cleanupDestroyedActors();
+			
+			!reload && sceneMain.destroyAllResources();
+
+			sceneMain.view.reset();
+
+			delete b5.addSceneResources;
+			delete b5.LoadScene;
+			
+	  	//Set load data
+  		var tempLoadData = sceneMain.data.loadData;
+	  	//Clear temporary scene variables
+  		sceneMain.data = {
+  			resourcePath: b5.Paths[bundle ? 'modSceneRes' : 'sceneRes'] + id +'/',
+	  		loadData: loadData || (reload?tempLoadData:{})
+		  };
+  		sceneMain.data.levelData = sceneMain.data.loadData.levelData || {};
+	  	tempLoadData = null;
+			
+			//Function(b5.File.readSync(b5.Paths.scenes + b5.Game.SceneList[id]))();
+			document.getElementById('CurrentScene') && document.head.removeChild(document.getElementById('CurrentScene'));
+
+			var s = b5.Utils.loadJS(sceneMain.data.resourcePath + 'level.scene');
+			s.id = 'CurrentScene';
+			s.onload = function() {
+				var loadres = b5.addSceneResources;
+				!reload && loadres && loadres(sceneMain, sceneMain.data, b5.Game);
+				b5.Game.SceneLoader.active = true;
+
+				b5.Game.GUI.enableAllButtons();
+				//Disable pause button on multiplayer
+				b5.Game.Multiplayer.isGuest && b5.Game.GUI.disableButtons('Pause');
+				
+				b5.LoadScene(sceneMain.view, sceneMain, sceneMain.data, b5.Game);
+				app.focus_scene2 = sceneMain;
+				b5.Game.SceneLoader.script_ready = true;
+				sceneMain.loadResources();
+				
+				//If reload, set ready right away
+				if(reload) {
+					b5.Game.Multiplayer.hostReady = true;
+		      b5.Game.Multiplayer.guestReady = true;
+				}
+				
+			}
+		}
+
+		b5.Game.SceneLoader.load_scene = true;
+	}
+};
+
+b5.Game.SceneLoader.update = function() {
+	if (this.active) {
+		this.resources_loaded = sceneMain.areResourcesLoaded();
+		//Start loading scene when loading screen is fully shown.
+		if (this.load_scene && b5.Game.loadingScreen.closed && !this.delay) {
+			app.events.dispatch('loadingscreenin');
+			app.texture_state = "reading";
+			this.load();
+			b5.Game.Flags.inPauseMenu && b5.Game.PauseMenu.hide(true);
+			b5.Game.GUI.disableButtons();
+			this.is_loading_scene = true;
+			this.load_scene = false;
+			this.active = false;
+		}
+		
+		//When scene is loading, wait until resources have been loaded and hide loading screen
+		if (this.is_loading_scene && this.resources_loaded && this.script_ready) {
+			this.is_loading_scene = false;
+			this.active = false;
+			app.texture_state = "";
+			sceneMain.events.dispatch('resourcesloaded');
+			
+			if(b5.Game.Multiplayer.isGuest) {
+				b5.Game.Multiplayer.guestReady = true;
+			  b5.Game.Multiplayer.hostReady && this.AllLoaded(true);
+			  b5.Game.Multiplayer.guest.send('8Ξ'); //Ready
+			  
+			 /*
+			  //Sometimes the loaded event gets stuck on multiplayer,
+		  	//so send it again until loading screen is fading out
+		  	app.clearInterval(this.mpSyncTask);
+		  	
+	  		this.mpSyncTask = app.setInterval(t => {
+		  		if(!b5.Game.Multiplayer.hostReady || (b5.Game.Multiplayer.hostReady && b5.Game.loadingScreen.closed)) {
+	  				b5.Game.Multiplayer.guest.send('9Ξ1');
+	  				//this.AllLoaded();
+	  				b5.Game.addCheev('[guest] scene_loader resync');
+	  			}
+	  			else app.clearInterval(t.name);
+  			},5);
+			*/
+			}
+			else if(b5.Game.Multiplayer.isHosting) {
+				b5.Game.Multiplayer.hostReady = true;
+				b5.Game.Multiplayer.guestReady && this.AllLoaded(true);
+				b5.Game.Multiplayer.sendToGuest('SCENE_LOADED');
+				
+				//Sometimes the loaded event gets stuck on multiplayer,
+		  	//so send it again until loading screen is fading out
+	  		app.clearInterval(this.mpSyncTask);
+		  	
+	  		this.mpSyncTask = app.setInterval(t => {
+		  		if(b5.Game.Multiplayer.guestReady && b5.Game.loadingScreen.closed) {
+	  				//MultiplayerReSync();
+	  				this.AllLoaded();
+	  				b5.Game.Multiplayer.sendToGuest('HIDE_LS',true);
+	  				b5.Game.addCheev('[host] resync');
+	  			}
+	  			else app.clearInterval(this.mpSyncTask);
+  			},1);
+  			
+			}
+			else this.AllLoaded(); //Solo
+		
+			
+			//Start updating the scene, even if loading screen is still in the hidding animation.
+		}
+	}
+};
+b5.Game.SceneLoader.reset = function() {
+	this.is_loading_scene = false;
+	this.available = true;
+	b5.Game.loadingScreen.closed && b5.Game.HideLoadingScreen();
+}
+
+b5.Game.ReloadScene = function(loading_screen) {
+	app.events.dispatch('reloadscene');
+	b5.Game.LoadScene(this.SceneLoader.sceneId, false, true, loading_screen || this.SceneLoader.loading_screen, sceneMain.data.loadData, true, this.SceneLoader.bundle);
+};
+
+//Bundled scenes (on mods folder)
+b5.Game.LoadSceneBundle = function(name, stopMusic, fadeOutMusic, loadingScreenProperties, loadData) {
+	this.LoadScene(name, stopMusic,	fadeOutMusic, loadingScreenProperties, loadData, false, true);
+};

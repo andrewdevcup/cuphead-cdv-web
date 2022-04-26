@@ -1,0 +1,27 @@
+{
+	"cup": [
+		"sound.cup",
+		"game_flags.cup",
+	  "screenfx.cup",
+		"loading_screen.cup",
+		"scene_loader.cup",
+		"input.cup",
+		"texts.cup",
+		"WIFI_MULTIPLAYER.cup",
+		"fonts_main.cup",
+		"ui.cup",
+		"pause_menu.cup",
+		"cheevs_card.cup",
+		"definitions.cup",
+		"current_save_slot.cup",
+		"player_joined_screen.cup"
+	],
+	"sav": [
+		"cuphead_player_data_v1_slot_0.sav",
+		"cuphead_player_data_v1_slot_1.sav",
+		"cuphead_player_data_v1_slot_2.sav"
+	],
+	"maps": [ 0, 0, 0, "inkwellIsle1" ],
+	"levels": ["elder_kettle_house","tutorial"],
+	"cutscenes": ["intro_book_cutscene"]
+}

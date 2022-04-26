@@ -1,0 +1,10 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,76,52,0,0, title_card_in_a
+0,76,0,101,56,0,0, title_card_in_fr
+0,177,0,40,47,0,0, title_card_in_glow_jp
+0,217,0,69,48,0,0, title_card_in_pol
+0,286,0,78,51,0,0, title_card_in_port
+0,0,56,158,57,0,0, title_card_in_rus
+0,158,56,72,50,0,0, title_card_in_spanUE
+0,230,51,68,55,0,0, title_card_in_spanUS
+0,298,51,76,52,0,0, title_card_tilde_b

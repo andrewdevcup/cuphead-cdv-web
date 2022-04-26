@@ -1,0 +1,556 @@
+b5.LoadScene = function(world, scene, data, game) {
+	//scene is the main scene where resources and actors will be added
+	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
+	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
+	game.importObject('CreateLevel').init();
+	game.importObject('CreateCommonPlatformingResources');
+	game.importObject('CreatePlayer');
+
+	data.levelID = 0; //Tutorial
+	
+  //Set level to played
+  game.SlotUtils.getLevelData(data.levelID).played = true;
+
+	world.camera_speed_x = 0.033;
+
+	//Format
+	data.setDescFormat = function(label, lines, apply) {
+		label.line_height = 27;
+		!apply && label.clearFormat();
+		for (var i = 0; i < lines.length; i++) {
+			label[(apply?'apply':'set')+'FormatLine'](lines[i], 0, 0, [void 0, void 0, void 0, 5, 0.58, 0.58]);
+		}
+	}
+
+	var tutorialbg = scene.background.findActor('TutorialBG');
+	tutorialbg.bitmap = scene.findResource('TutorialRoomBackBitmap', 'bitmap');
+	tutorialbg.center_atlas = true;
+  tutorialbg.fit = b5.Actor.FitBest;
+
+	var tutorialf = scene.findActor('TutorialFront');
+	tutorialf.bitmap = scene.findResource('TutorialRoomFrontBitmap', 'bitmap');
+	tutorialf.center_atlas = true;
+	tutorialf.fit = b5.Actor.FitBest;
+
+	//Tutorial main label
+	var tutolabel = world.findActor('TutorialLabel', true);
+	tutolabel.font = scene.findResource('CupheadVogueBoldFont', 'brush');
+
+	var tutorialObjects = scene.findResource('TutorialObjectsAtlas', 'brush');
+	//Duck
+
+	var ducklabel = world.findActor('DuckLabel', true);
+	ducklabel.font = tutolabel.font;
+
+	var duckArrow = world.findActor('DuckArrow', true);
+	duckArrow.atlas = tutorialObjects;
+	duckArrow.current_frame = 1;
+	duckArrow.center_atlas = true;
+
+	//Jump
+
+	var jumplabel = world.findActor('JumpLabel', true);
+	jumplabel.font = tutolabel.font;
+
+	var jumpBtn = game.UI.createButton(game.UI.getButtonForPlayer('jump', 'p1'), 'dark');
+	world.findActor('Layer1').addActor(jumpBtn);
+	jumpBtn.setPosition(625, 90);
+	jumpBtn._scale = 1.2;
+	jumpBtn.actors[0].fill_style = "#d6d6d6"
+
+	var jumpArrow = world.findActor('JumpArrow', true);
+	jumpArrow.atlas = tutorialObjects;
+	jumpArrow.current_frame = 2;
+	jumpArrow.center_atlas = true;
+
+	var cube = world.findActor('Cube', true);
+	cube.atlas = tutorialObjects;
+	cube.current_frame = 9;
+	cube.center_atlas = true;
+
+	//Dash
+	var dashlabel = world.findActor('DashLabel', true);
+	dashlabel.font = tutolabel.font;
+
+	var dashbtn = game.UI.createButton(game.UI.getButtonForPlayer('dash', 'p1'), 'dark');
+	world.findActor('Layer1').addActor(dashbtn);
+	dashbtn._scale = 1.2;
+	dashbtn.setPosition(1230, -250);
+	dashbtn.actors[0].fill_style = "#d6d6d6"
+
+	var dashArrow = world.findActor('DashArrow', true);
+	dashArrow.atlas = tutorialObjects;
+	dashArrow.current_frame = 0;
+	dashArrow.center_atlas = true;
+
+	//Cylinder and platform
+
+	var CylAndPlat = world.findActor('CylinderAndPlatform', true);
+	CylAndPlat.atlas = tutorialObjects;
+	CylAndPlat.current_frame = 24;
+	CylAndPlat.center_atlas = true;
+
+	//Descend
+
+	var descendlabel = world.findActor('DescendLabel', true);
+	descendlabel.font = tutolabel.font;
+
+	var descendJumpBtn = game.UI.createButton(game.UI.getButtonForPlayer('jump', 'p1'), 'dark');
+	world.findActor('Layer1').addActor(descendJumpBtn);
+	descendJumpBtn._scale = 1.2;
+	descendJumpBtn.setPosition(1820, 69);
+	descendJumpBtn.actors[0].fill_style = "#d6d6d6";
+
+	var descendArrBtn = game.UI.createButton("&", 'dark');
+	world.findActor('Layer1').addActor(descendArrBtn);
+	descendArrBtn._scale = 1.2;
+	descendArrBtn.setPosition(1745, 69);
+
+	//Reuse text, genius isn't it?
+	descendArrBtn.actors[0].fill_style = "black";
+	descendArrBtn.actors[0].setPosition(32, 6);
+	//descendArrBtn.actors[0]._scale = 1.15;
+
+	var descendArr = world.findActor('DescendArrow', true);
+	descendArr.atlas = tutorialObjects;
+	descendArr.current_frame = 25;
+	descendArr.center_atlas = true;
+
+	//Shoot
+
+	var shootlabel = world.findActor('ShootLabel', true);
+	shootlabel.font = tutolabel.font;
+
+	var shootBtn = game.UI.createButton(game.UI.getButtonForPlayer('shoot', 'p1'), 'dark');
+	world.findActor('Layer1').addActor(shootBtn);
+	shootBtn._scale = 1.2;
+	shootBtn.setPosition(2400, -80);
+	shootBtn.actors[0].fill_style = "#d6d6d6";
+
+	//Lock
+
+	var locklabel = world.findActor('LockLabel', true);
+	locklabel.font = tutolabel.font;
+
+	var lockBtn = game.UI.createButton(game.UI.getButtonForPlayer('lock', 'p1'), 'dark');
+	world.findActor('Layer1').addActor(lockBtn);
+	lockBtn._scale = 1.2;
+	lockBtn.setPosition(2800, -80);
+	lockBtn.actors[0].fill_style = "#d6d6d6";
+
+	//Lock objects
+
+	var lockArrow = world.findActor('LockArrow', true);
+	lockArrow.atlas = tutorialObjects;
+	lockArrow.current_frame = 3;
+	lockArrow.center_atlas = true;
+
+	//Plynth
+	var plynth0 = world.findActor('Plynth0', true);
+	plynth0.atlas = tutorialObjects;
+	plynth0.current_frame = 17; //before pyramid is destroyed
+	plynth0.center_atlas = true;
+
+	var plynth0Pyr = world.findActor('Plynth0Pyramid', true);
+	plynth0Pyr.atlas = tutorialObjects;
+	plynth0Pyr.current_frame = 18;
+	plynth0Pyr.center_atlas = true;
+
+	var plynth0Tar = world.findActor('Plynth0Target', true);
+	plynth0Tar.atlas = tutorialObjects;
+	plynth0Tar.playAnim('plynthTarget', true);
+	plynth0Tar.center_atlas = true;
+
+	plynth0Tar.health = 24;
+
+	//Behavior
+	plynth0Tar.onDeath = function() {
+		this.destroy();
+		plynth0Pyr.destroy();
+		//Explosion
+		data.spawnParticle('largeExplosion', plynth0Pyr);
+		//Sfx
+		var exsfx = scene.findResource('ExplosionSfx', 'sound');
+		if (exsfx) {
+			exsfx.setPlaybackSpeed(1.4);
+			exsfx.play();
+		}
+		//Move collision
+		var wcoll = world.findActor('Plynth0Coll0', true);
+		wcoll.setPosition(wcoll.x, 190);
+
+		var fcoll = world.findActor('Plynth0CollFloor', true);
+		fcoll.setPosition(wcoll.x, 20);
+		fcoll.collider.setPosition(fcoll.x, fcoll.y);
+		//Set atlas
+		plynth0.current_frame = 16; //After pyramid was destroyed
+		
+		//Multiplayer
+		game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+	}
+	
+	plynth0Tar.onBulletHit = function(bullet) {
+		//Tint to aqua
+		this.tint_colour = plynth0Pyr.tint_colour = "#00dddd";
+
+		this.setTimeout(function() {
+			plynth0Tar.tint_colour = plynth0Pyr.tint_colour = "white";
+		}, app.dt*2);
+
+		this.health -= bullet.damage;
+		if (this.health <= 0) {
+			
+			this.onDeath();
+			
+		}
+	};
+
+	//Parry
+
+	var parrylabel = world.findActor('ParryLabel', true);
+	parrylabel.font = tutolabel.font;
+
+	var parryJumpBtn = game.UI.createButton(game.UI.getButtonForPlayer('jump', 'p1'), 'dark');
+	world.findActor('Layer1').addActor(parryJumpBtn);
+	parryJumpBtn.setPosition(parrylabel.x, parrylabel.y - 60);
+	parryJumpBtn._scale = 1.2;
+	parryJumpBtn.actors[0].fill_style = "#d6d6d6"
+
+	var setSphereActive = function(active, parryobj) {
+		if (active) return parryobj.tags = ['Parryable'],
+		b5.Maths.randomRange(14, 15);
+		else return parryobj.tags = [],
+		b5.Maths.randomRange(19, 20);
+	};
+
+	//Parry objects
+
+	var parryObj1 = world.findActor('ParryObject1', true);
+	parryObj1.atlas = tutorialObjects;
+	parryObj1.center_atlas = true;
+	parryObj1.current_frame = setSphereActive(true, parryObj1); //Pink
+
+	var parryObj2 = world.findActor('ParryObject2', true);
+	parryObj2.atlas = tutorialObjects;
+	parryObj2.center_atlas = true;
+	parryObj2.current_frame = setSphereActive(false, parryObj2);
+
+	var parryObj3 = world.findActor('ParryObject3', true);
+	parryObj3.atlas = tutorialObjects;
+	parryObj3.center_atlas = true;
+	parryObj3.current_frame = setSphereActive(false, parryObj3);
+
+	//Parry arrows
+	var parryArrow1 = world.findActor('ParryArrow1', true);
+	parryArrow1.atlas = tutorialObjects;
+	parryArrow1.current_frame = 4;
+	parryArrow1.center_atlas = true;
+
+	var parryArrow2 = world.findActor('ParryArrow2', true);
+	parryArrow2.atlas = tutorialObjects;
+	parryArrow2.current_frame = 5;
+	parryArrow2.center_atlas = true;
+
+	var parryArrow3 = world.findActor('ParryArrow3', true);
+	parryArrow3.atlas = tutorialObjects;
+	parryArrow3.current_frame = 6;
+	parryArrow3.center_atlas = true;
+
+	var parryArrowB = world.findActor('ParryArrowBounce', true);
+	parryArrowB.atlas = tutorialObjects;
+	parryArrowB.current_frame = 7;
+	parryArrowB.center_atlas = true;
+
+
+	//Behaviors
+
+	parryObj1.onParry = function(p) {
+		this.current_frame = setSphereActive(false, this);
+		parryObj2.current_frame = setSphereActive(true, parryObj2);
+		//Disable 3
+		if(game.Multiplayer.isGuest)
+	  	parryObj3.current_frame = setSphereActive(false, parryObj3);
+	}
+	parryObj2.onParry = function(p) {
+		this.current_frame = setSphereActive(false, this);
+		parryObj3.current_frame = setSphereActive(true, parryObj3);
+		//Disable 1
+		if(game.Multiplayer.isGuest)
+	  	parryObj1.current_frame = setSphereActive(false, parryObj1);
+	}
+	parryObj3.onParry = function(p) {
+		this.current_frame = setSphereActive(false, this);
+		parryObj1.current_frame = setSphereActive(true, parryObj1);
+		//Disable 2
+		if(game.Multiplayer.isGuest)
+	  	parryObj2.current_frame = setSphereActive(false, parryObj2);
+	}
+
+	//Cylinder 2
+	var Cyl2 = world.findActor('Cylinder2', true);
+	Cyl2.atlas = tutorialObjects;
+	Cyl2.current_frame = 11;
+	Cyl2.center_atlas = true;
+
+	//Cube 2
+	var Cube2 = world.findActor('Cube2', true);
+	Cube2.atlas = tutorialObjects;
+	Cube2.current_frame = 10;
+	Cube2.center_atlas = true;
+
+	//Parry revive
+
+	var arrowRevive = world.findActor('ArrowRevive', true);
+	arrowRevive.atlas = tutorialObjects;
+	arrowRevive.current_frame = 8;
+	arrowRevive.center_atlas = true;
+
+	//Revive
+	var revivelabel = world.findActor('ReviveLabel', true);
+	revivelabel.font = tutolabel.font;
+	
+	//Ghost (from player.spawnGhost)
+	data.spawnGhost = function(x,y,speed_y) {
+		var ghost = new b5.Actor(),
+		parryObj = new b5.RectActor();
+		
+		ghost.atlas = scene.findResource('CupheadGhostAtlas','brush');
+		ghost.playAnim('idle',true);
+		
+		ghost.y = -20;
+		ghost._scale = 0.94;
+		ghost.cull = false;
+		
+		parryObj.setSize(40,40);
+		parryObj.fill_style = "transparent";
+		parryObj.tags = ["Parryable"];
+		parryObj.parryScore = 100;
+		parryObj.addActor(ghost);
+		parryObj.cull = false;
+		parryObj.id = "TutoGhost";
+		
+		parryObj.setPosition(x,y);
+		
+		parryObj.onParry = function() {
+			this.tags = [];
+			this.body.m_linearVelocity.y = 0;
+			scene.findResource('PlayerReviveSfx','sound').play();
+			this.actors[0].playAnimWithEnd('thank_you',_this=>{
+				var reviveEff = data.spawnPlayerParticle("playerReviveEffect", _this.parent);
+				_this.parent.destroy();
+				reviveEff.onAnimEnd = function() {
+					this.destroy();
+					
+					world.setTimeout(()=>{
+						data.spawnGhost(4533, 450, -13);
+					},2)
+				}
+			});
+		}
+		
+		//TP
+		
+		parryObj.onTick = function() {
+			this.y < -395.0 && this.setPosition(this.x,550);
+		}
+		
+		world.findActor('Layer'+data.view.playerLayer,true).addActor(parryObj);
+		parryObj.layer = 2;
+		
+		parryObj.initBody('collider',true);
+		parryObj.addFixtureSelf();
+		
+		parryObj.body.m_linearVelocity.y = speed_y;
+	}
+
+	//EX
+
+	var EXlabel = world.findActor('EXLabel', true);
+	EXlabel.font = tutolabel.font;
+
+	var ExBtn = game.UI.createButton(game.UI.getButtonForPlayer('ex', 'p1'), 'dark');
+	world.findActor('Layer1').addActor(ExBtn);
+	ExBtn.setPosition(EXlabel.x, EXlabel.y - 60);
+	ExBtn._scale = 1.2;
+	ExBtn.actors[0].fill_style = "#d6d6d6";
+
+	//Cube 3
+
+	var Cube3 = world.findActor('Cube3', true);
+	Cube3.atlas = tutorialObjects;
+	Cube3.current_frame = 9;
+	Cube3.center_atlas = true;
+
+	//Coin
+
+	var coinlabel = world.findActor('CoinLabel', true);
+	coinlabel.font = tutolabel.font;
+
+	//Exit Door
+	var exitDoor = world.findActor('NPC_ExitDoor', true);
+	exitDoor.atlas = tutorialObjects;
+	exitDoor.current_frame = 13;
+	exitDoor.center_atlas = true;
+
+	//Secret
+	var light = world.findActor('ParryLight', true);
+	light.onParry = function() {
+		game.LoadScene('the_light', 0, 1, {});
+		this.destroy();
+	}
+
+
+};
+b5.onLoadingScreenOut = function(world, scene, data, game) {
+	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
+	data.initializePlayers();
+
+	//Initialize multiplayer
+	game.Multiplayer.Initialize(world, data);
+
+	//Play music
+	scene.findResource('MUS_Tutorial', 'sound').play();
+
+  data.spawnGhost(4533,450,-7);
+
+	var tutolabel = world.findActor('TutorialLabel', true),
+	ducklabel = world.findActor('DuckLabel', true),
+	jumplabel = world.findActor('JumpLabel', true),
+	dashlabel = world.findActor('DashLabel', true),
+	descendlabel = world.findActor('DescendLabel', true),
+	shootlabel = world.findActor('ShootLabel', true),
+	locklabel = world.findActor('LockLabel', true),
+	parrylabel = world.findActor('ParryLabel', true),
+	revivelabel = world.findActor('ReviveLabel', true),
+	EXlabel = world.findActor('EXLabel', true),
+	coinlabel = world.findActor('CoinLabel', true);
+
+	//Language change
+	world.setInterval(()=> {
+		if (data.lang != b5.Game.cfg.Language.lang) {
+			data.lang = b5.Game.cfg.Language.lang;
+
+			var txt = data.Texts;
+			
+			parrylabel.clearFormat();
+			revivelabel.clearFormat();
+
+			tutolabel.text = txt.tutorial;
+			ducklabel.text = txt.duck + '\n' + txt.duckDesc;
+			jumplabel.text = txt.jump + '\n' + txt.jumpDesc;
+			dashlabel.text = txt.dash + '\n' + txt.dashDesc;
+			descendlabel.text = txt.descend + '\n' + txt.descendDesc;
+			shootlabel.text = txt.shoot + '\n' + txt.shootDesc;
+			locklabel.text = txt.lock + '\n' + txt.lockDesc;
+	  	parrylabel.setTextFmt(txt.parry + '\n' + txt.parryDesc);
+			revivelabel.setTextFmt(txt.revive + '\n' + txt.reviveDesc);
+			EXlabel.text = txt.ex + '\n' + txt.exDesc;
+			coinlabel.text = txt.coin + '\n' + txt.coinDesc;
+			
+			data.setDescFormat(ducklabel, [1, 2]);
+			data.setDescFormat(jumplabel, [1, 2, 3]);
+			data.setDescFormat(dashlabel, [1, 2]);
+			data.setDescFormat(descendlabel, [1, 2]);
+			data.setDescFormat(shootlabel, [1, 2, 3]);
+			data.setDescFormat(locklabel, [1, 2, 3]);
+			data.setDescFormat(parrylabel,[1,2,3,4], true);
+			data.setDescFormat(revivelabel,[1,2,3,4], true);
+			data.setDescFormat(EXlabel, [1, 2, 3]);
+			data.setDescFormat(coinlabel, [1, 2]);
+		}
+	},
+		0);
+
+};
+b5.addSceneResources = function(scene, data, game) {
+	//Resources that will be added to scene, this will be called before LoadScene
+
+	//Tutorial room bitmaps
+	//Front and back
+	var tuto_front = new b5.Bitmap('TutorialRoomFrontBitmap',
+		data.resourcePath + 'tutorial_room_front_layer_0001.png',
+		false),
+	tuto_bg = new b5.Bitmap('TutorialRoomBackBitmap',
+		data.resourcePath + 'tutorial_room_back_layer_0001.png',
+		false);
+
+	scene.addResource(tuto_front,
+		'bitmap');
+	scene.addResource(tuto_bg,
+		'bitmap');
+
+	//Tutorial objects atlas
+	var tutoBitmap = new b5.Bitmap('TutorialObjectsBitmap',
+		data.resourcePath + 'SpriteAtlasTexture_Tutorial.png',
+		false),
+	tutoBitmap2 = new b5.Bitmap('TutoriaCylinderAndPlatformBitmap',
+		data.resourcePath + 'tutorial_cylinder_and_platform.png',
+		false),
+	tutoArrB = new b5.Bitmap('TutorialArrowBitmap',
+		data.resourcePath + 'tutorial_descend_arrow.png',
+		false);
+
+	scene.addResource(tutoBitmap,
+		'bitmap');
+	scene.addResource(tutoBitmap2,
+		'bitmap');
+	scene.addResource(tutoArrB,
+		'bitmap');
+
+	var tutoAtlas = new b5.ImageAtlas('TutorialObjectsAtlas',
+		[tutoBitmap,
+			tutoBitmap2,
+			tutoArrB]);
+	tutoAtlas.parseFrames(b5.File.readSync(data.resourcePath + 'SpriteAtlasTexture_Tutorial.csv'));
+	tutoAtlas.parseAnims(b5.File.readSync(data.resourcePath + 'tutorialObjects.atlas.json'));
+	scene.addResource(tutoAtlas,
+		'brush');
+
+	//Fonts
+	var vogueFont = new b5.ImageAtlas('CupheadVogueBoldFont',
+		[
+			scene.addResource(new b5.Bitmap('CupheadVogueBold', b5.Paths.fonts + 'CupheadVogue-Bold-merged-0.png'), 'bitmap')
+		]);
+	vogueFont.parseFrames(b5.File.readSync(b5.Paths.fonts + 'CupheadVogue-Bold-merged.bft'));
+	scene.addResource(vogueFont,
+		'brush');
+
+	//Music
+	var mus_tuto = new b5.Sound('MUS_Tutorial',
+		data.resourcePath + 'MUS_Tutorial.ogg',
+		false,
+		false,
+		false,
+		{
+			equalizer: true,
+			limiter: true
+		});
+	mus_tuto.output_gain = game.Music.volume;
+	mus_tuto.onDestroy = game.Music.remove;
+	game.Music.add(mus_tuto);
+	mus_tuto.loop = true;
+	scene.addResource(mus_tuto,
+		'sound');
+
+	//Sfx
+	var explosion = new b5.Sound('ExplosionSfx',
+		b5.Paths.sceneRes + 'clown/sfx/sfx_clown_bulb_explosion_01.ogg',
+		false,
+		false);
+	game.Sfx.add(explosion);
+	explosion.output_gain = game.Sfx.volume;
+	explosion.onDestroy = game.Sfx.remove;
+	scene.addResource(explosion,
+		'sound');
+		
+};
+b5.onSceneUnload = function(world, scene, data, game, clearResources) {
+	//Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
+	//You can also remove created objects in b5.Game if they were created and used on the scene.
+
+};
+//DEPRECATED
+b5.UpdateScene = function(world, scene, data, game) {
+	//For updating actors and behaviors on your scene every frame
+
+};

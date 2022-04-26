@@ -1,0 +1,17 @@
+bitmap_index,sx,sy,sw,sx,ox,oy,notes
+0,0,0,590,571,0,0, SlotSelection background
+0,591,0,540,138,0,0, SlotSelection outline
+0,588,138,543,141,2,3, SlotSelection orange cuphead
+0,588,278,543,139,2,3, SlotSelection green mugman
+0,592,420,524,22,0,0, SlotSelection bg cuphead
+0,592,443,524,22,0,0, SlotSelection bg mugman
+0,744,502,37,38,0,0, SlotSelectionBox a expert
+0,609,503,38,37,0,0, SlotSlectionBox b expert
+0,699,502,38,40,0,0, SlotSelectionBox a complete
+0,654,503,39,37,0,0, SlotSelectionBox b complete
+0,1133,0,109,110,0,0, cuphead idle lines 1
+0,1243,0,111,111,0,0, cuphead idle lines 2
+0,1355,0,107,111,0,0, cuphead idle lines 3
+0,1245,117,104,107,0,0, mugman idle lines 1
+0,1137,117,103,107,1,0, mugman idle lines 2
+0,1351,117,103,107,2,0, mugman idle lines 3

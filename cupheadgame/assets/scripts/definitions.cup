@@ -1,0 +1,46 @@
+//IDs are from original Cuphead savefile.
+b5.Game.GameDefIDs = {
+	weapons: {
+		"2147483647": "empty",
+		"1456773641": "peashooter",
+		"1456773649": "spread",
+		"1460621839": "chaser",
+		"1467024095": "lobber",
+		"1466416941": "charge",
+		"1466518900": "roundabout",
+		"1457006169": "unused?",
+		"empty": 2147483647,
+		"peashooter": 1456773641,
+		"spread": 1456773649,
+		"chaser": 1460621839,
+		"lobber": 1467024095,
+		"roundabout": 1466518900,
+		"unused?": 1457006169
+	},
+	charms: {
+		"2147483647": "empty",
+		"1461001046": "smokebomb",
+		"1460832742": "heart",
+		"1460880866": "coffee",
+		"1487051212": "psugar",
+		"1500641115": "twinheart",
+		"1500621999": "whetstone",
+		"empty": 2147483647,
+		"smokebomb": 1461001046,
+		"heart": 1460832742,
+		"coffee": 1460880866,
+		"psugar": 1487051212,
+		"twinheart": 1500641115,
+		"whetstone": 1500621999
+	},
+	supers: {
+		"2147483647": "empty",
+		"1456815409": "superart1",
+		"1495012282": "superart2",
+		"1467617939": "superart3",
+		"empty": 2147483647,
+		"superart1": 1456815409,
+		"superart2": 1495012282,
+		"superart3": 1467617939
+	}
+};

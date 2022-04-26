@@ -1,0 +1,388 @@
+return function(thisPlayer, flags, world, scene, game, wpnData) {
+	/* Setup */
+
+	var thisAtlas = scene.findResource('SpreadAtlas', 'brush'),
+	viewLayer = world.findActor(thisPlayer.parent.name, true),
+	body = wpnData.body,
+	shootTime = 0,
+	shootChange = false,
+	shootAngle = 0,
+	time = 0,
+	thisWeapon = null,
+	name = "spread",
+
+	sfxBulletDeath = scene.findResource('WeaponDeathSfx', 'sound'),
+	sfxBulletHit = scene.findResource('ShootHitSfx', 'sound'),
+	sfxFireLoop = [
+		scene.findResource('SpreadLoopSfx1', 'sound'),
+		scene.findResource('SpreadLoopSfx2', 'sound'),
+		scene.findResource('SpreadLoopSfx3', 'sound'),
+		scene.findResource('SpreadLoopSfx4', 'sound')
+	];
+
+	/*Weapon behaviors*/
+	var weapon = {
+		Spawn: function(pos, angle) {
+			/*Spawning normal bullet(s)*/
+
+			//Spawn 5 bullets from angle 35 to -35
+			//Angles 35, 0 and -35 are faster	but shorter in duration
+			//Angles 17.5 and -17.5 are slower but longer in duration
+			//Also has different death and hit particles
+			var b_angle;
+
+			for (var i = 0; i < wpnData.bulletCount; i++) {
+				b_angle = b5.Maths.pos(wpnData.angleRange[0], wpnData.angleRange[1], (i/wpnData.bulletCount)+.1) * b5.Maths.DtoRad;
+
+				//On every odd number, set small bullet
+				var small = !(i / 2 === i >> 1);
+
+				//Actor with kinematic body
+				var bullet = new b5[wpnData.body.hitbox.type+'Actor'];
+				bullet.radius = wpnData.body.hitbox.size;
+				bullet.x = thisPlayer.x + pos[0];
+				bullet.y = thisPlayer.y + pos[1];
+				bullet.despawnTime = !small ? wpnData.despawnTime: wpnData.despawnTimeSmall;
+				bullet.damage = wpnData.damage * thisPlayer.data.damageMultiplier;
+				bullet.time = 0;
+				bullet.fill_style = 'transparent';
+				bullet.tags = ["playerBullet"];
+				bullet.tag = "playerBullet";
+				bullet.bulletsId = scene.data.playerBullets.length;
+				bullet.layer = thisPlayer.layer-1;
+				bullet.supermeter_score = wpnData.supermeter_score;
+				bullet.small_bullet = small;
+
+				viewLayer.addActor(bullet);
+
+				bullet.destroyBullet = function(timeout) {
+					if (timeout) thisWeapon.SpawnParticle(this.small_bullet?'smallBulletDeath': 'bulletDeath', [this.x, this.y]);
+					else {
+						//Hit
+						thisWeapon.SpawnParticle(this.small_bullet?'smallBulletHit': 'bulletHit', [this.x, this.y])
+					}
+					this.release(true);
+				}
+
+				bullet.initBody(body.bodyType, body.fixedRotation, true);
+				
+				bullet.addFixture({
+				type: b5.Shape[body.shape],
+				width: body.size[0],
+				height: body.size[1],
+				friction: body.friction || 0,
+				restitution: body.restitution || 0,
+				density: body.density || 1,
+				is_sensor: true
+			});
+			
+			
+				//Attach atlas
+				var bAt = new b5.Actor;
+				bAt.atlas = thisAtlas;
+			//	bAt.x = -5;
+				bAt.rotation = angle + b_angle || 0;
+				bullet.addActor(bAt);
+				bAt.use_parent_opacity = false;
+				bAt._scale = wpnData.scale;
+
+				var speed = small ? wpnData.speedSmall: wpnData.speed;
+
+				bullet.body.m_linearVelocity.x = Math.cos(bAt.rotation)*speed;
+				bullet.body.m_linearVelocity.y = Math.sin(bAt.rotation)*speed;
+
+				//Play anims
+				bAt.playAnim('spread_idle', true);
+
+				bullet.onTick = function() {
+					this.time += app.dt;
+					if (this.time > this.despawnTime) {
+						this.destroyBullet(true);
+					}
+
+					//Check overlaps
+					var ols = this.A_overlaps; 
+					for (var i = 0; i < ols.length; i++)
+				  	if(ols[i]) {
+				  	var l = ols[i];
+						if (ols[i].tags.indexOf("hittableEnemy") != -1) {
+							//Enemy was hit
+							if (!this.destroyed) {
+								this.destroyBullet();
+								l.onBulletHit && l.onBulletHit(this);
+								this.destroyed = true;
+								this.onEnemyHit && this.onEnemyHit(l);
+								sfxBulletHit.play();
+
+								//Add score to player
+								thisPlayer.data.supermeter < thisPlayer.data.max_supermeter_score && (thisPlayer.data.supermeter += this.supermeter_score);
+								
+						  	//Add score to level
+						  	scene.data.Statistics.damage_given += this.damage;
+							}
+							return;
+						}
+						if (ols[i].tags.search(["wall", "floor"]) != -1 && ols[i].tags.indexOf('ignoreBullets') == -1) {
+							//Scenery was hit
+							this.destroyBullet();
+							sfxBulletDeath.play();
+							return;
+						}
+			  	}
+				}
+			}
+
+			//	scene.data.playerBullets.push(bullet);
+
+		},
+		SpawnParticle: function(type, pos, optTarget, ...extraArgs) {
+			/*Bullet particle*/
+			switch (type) {
+				case "bulletSpawn":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
+					p.setPosition(pos[0], pos[1]);
+					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					thisPlayer.parent.addActor(p);
+					p._scale = 0.92;
+					p.playAnim('spark');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					p.spawned_when_running = flags.running;
+					p.facing = thisPlayer.data.facing;
+
+					//Follow player when running
+					p.onTick = function() {
+						var so = thisPlayer.data.shootOffset;
+						thisPlayer.data.facing == this.facing &&
+						this.spawned_when_running && flags.running &&
+						!flags.inAir && p.setPosition(thisPlayer.x + so[0], thisPlayer.y + so[1]);
+					}
+					break;
+				case "bulletDeath":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.setPosition(pos[0], pos[1]);
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
+					p.layer = thisPlayer.layer+1;
+					thisPlayer.parent.addActor(p);
+					p._scale = 0.92;
+					p.playAnim('spread_large_death');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					break;
+				case "smallBulletDeath":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.setPosition(pos[0], pos[1]);
+					p.layer = thisPlayer.layer+1;
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
+					thisPlayer.parent.addActor(p);
+					p._scale = 0.92;
+					p.playAnim('spread_small_death');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					break;
+				case "bulletHit":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.setPosition(pos[0], pos[1]);
+					p.layer = thisPlayer.layer+1;
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
+					thisPlayer.parent.addActor(p);
+					p._scale = 0.88;
+					p.playAnim('spread_large_hit');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					break;
+				case "smallBulletHit":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.setPosition(pos[0], pos[1]);
+					p.layer = thisPlayer.layer+1;
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
+					thisPlayer.parent.addActor(p);
+					p._scale = 0.88;
+					p.playAnim('spread_small_hit');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					break; 
+				case "exBulletDeath":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.setPosition(pos[0], pos[1]);
+					p.rotation = extraArgs[0];
+					thisPlayer.parent.addActor(p);
+					p.layer = thisPlayer.layer+body.ex.sub_layer;
+					p.frame_speed = 24;
+					p.frames_repeat = false;
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.playAnimWithEnd('ex_death');
+					p.onAnimEnd = p.destroy;
+					break;
+				case "exBulletFlame":
+					var p = new b5.Actor;
+					p.atlas = thisAtlas;
+					p.setPosition(pos[0], pos[1]);
+					p.layer = thisPlayer.layer+1;
+					thisPlayer.parent.addActor(p);
+				  p._scale = 0.95;
+				  p.rotation = extraArgs[0];
+					p.playAnim('ex_flame');
+					p.center_atlas = true;
+					p.tags = ["playerParticle"];
+					p.onAnimEnd = p.destroy;
+					break;
+			}
+		},
+		SpawnEX: function(pos, angle) {
+			/*Spawning EX bullet(s)*/
+
+			//Spawn 8 in total, 4 up down left right, 4 in diagonals
+			var b_angle;
+
+			for (var i = 0; i < wpnData.exBulletCount; i++) {
+				b_angle = b5.Maths.pos(wpnData.exAngleRange[0], wpnData.exAngleRange[1], (i/wpnData.exBulletCount)) * b5.Maths.DtoRad;
+				
+				var ax = Math.cos(b_angle),
+				ay = Math.sin(b_angle);
+				//Actor with kinematic body
+				var exb = new b5[wpnData.body.ex.hitbox.type+'Actor'];
+				exb.radius = wpnData.body.ex.hitbox.size;
+				exb.x = thisPlayer.x + ax*35;
+				exb.y = thisPlayer.y + ay*35;
+				exb.despawnTime = wpnData.ex.despawnTime;
+				exb.damage = wpnData.ex.damage * thisPlayer.data.damageMultiplier;
+				exb.time = 0;
+				exb.fill_style = "transparent";
+				//	exb.fill_style = 'transparent';
+				exb.tags = ["playerBullet"];
+				exb.tag = "playerBullet";
+				//exb.layer = body.sub_layer;
+				exb.supermeter_score = 0;
+				exb.enemy_hit = false,
+				exb.stun_delay = wpnData.ex.hitDelay;
+
+				exb.layer = thisPlayer.layer+1;
+				viewLayer.addActor(exb);
+
+				//Attach atlas
+				var bAt = new b5.Actor;
+				bAt.atlas = thisAtlas;
+				bAt.x = 5;
+				bAt.rotation = b_angle;
+				exb.addActor(bAt);
+				bAt.use_parent_opacity = false;
+				bAt.center_atlas = true;
+				bAt._scale = wpnData.ex.scale;
+				
+				//Spawn flames
+				bAt.setInterval(task=>{
+					var _this = task.data;
+					thisWeapon.SpawnParticle('exBulletFlame',[_this.parent.x,_this.parent.y],null,_this.rotation);
+				},0.15);
+				
+				thisWeapon.SpawnParticle('exBulletFlame',[exb.x,exb.y],null,bAt.rotation);
+				bAt.playAnimWithEnd('ex_spawn',_this => {
+					_this.playAnim('ex_loop',true);
+				});
+
+				exb.destroyBullet = function(timeout) {
+					!timeout && thisWeapon.SpawnParticle('exBulletDeath', [this.x, this.y],null, this.actors[0].rotation);
+					this.release(true);
+			}
+
+			exb.initBody(body.ex.bodyType, body.ex.fixedRotation, true);
+			exb.addFixtureSelf();
+
+			exb.body.m_linearVelocity.x = ax*wpnData.ex.speed;
+			exb.body.m_linearVelocity.y = ay*wpnData.ex.speed;
+
+			exb.onTick = function() {
+				this.time += app.dt;
+				if (this.time > this.despawnTime) {
+					this.destroyBullet(true);
+				}
+
+				//Check overlaps
+				var ols = this.A_overlaps;
+				for (var i = 0, ol = null; i < ols.length; i++)
+					if (ol = ols[i], ol && ol.tags.indexOf("hittableEnemy") != -1) {
+						//Enemy was hit
+						ol.onBulletHit && ol.onBulletHit(this);
+						this.onEnemyHit && this.onEnemyHit(ol);
+						
+						//Add score to level
+						scene.data.Statistics.damage_given += this.damage;
+							
+						this.destroyBullet();
+						return;
+					}
+			}
+		}
+	},
+	  onTick: function(bullets, exBullets) {
+		/*Updating bullets behavior*/
+		time += app.dt;
+
+		//Shooting angle changed
+		if (shootAngle != thisPlayer.data.shootAngle) {
+			shootAngle = thisPlayer.data.shootAngle;
+			shootTime -= app.dt; //Delay shoot one frame to synchronize shooting angle and position
+		}
+
+		if (shootTime < wpnData.delay) shootTime += app.dt;
+		else if (!flags.dashing && !flags.damageHit) {
+			shootTime = 0;
+			thisPlayer.data.triggerShot = true;
+			!flags.inAir && (thisPlayer.updateAnimations = true);
+			var pos = [
+				thisPlayer.data.shootOffset[0],
+				thisPlayer.data.shootOffset[1]
+			];
+			thisWeapon.Spawn(pos, thisPlayer.data.shootAngle);
+			thisWeapon.SpawnParticle("bulletSpawn", [thisPlayer.x + thisPlayer.data.shootOffset[0], thisPlayer.y + thisPlayer.data.shootOffset[1]]);
+		}
+
+		//Shooting changed
+		if (shootChange != flags.shooting) {
+			shootChange = flags.shooting;
+
+			if (shootChange) {
+				sfxFireLoop[b5.Maths.randomRange(0, 3)].play();
+			}
+
+		}
+
+	},
+  	onShootingStopped: function(playerDamaged) {
+		for (var i = 0; i < sfxFireLoop.length; i++) {
+			sfxFireLoop[i].location && sfxFireLoop[i].stop();
+		}
+
+		//If other players are shooting with the same weapon,
+		//Keep	playing the sound effect
+		//This only applies to those weapons with a looping sfx rather than playing one sfx per shot
+		
+	/*	if(playerDamaged)*/ for (var i = 0, p = world.findActorsByTagName('player', true); i < p.length; i++) if(p[i] !== thisPlayer) {
+			var player = p[i],
+			w = player.equipedWeapons[player.flags.weaponIndex];
+
+			if (w === name && player.flags.shooting && player.flags.heartPoints > 0) {
+				var si = b5.Maths.randomRange(0, 3);
+				!sfxFireLoop[si].isPlaying() && sfxFireLoop[si].play();
+			}
+		}
+		shootChange = false;
+	}
+  };
+
+return thisWeapon = weapon;
+};

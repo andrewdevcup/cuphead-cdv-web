@@ -1,0 +1,81 @@
+{
+	"speed": 60,
+	"desaccel": 1.5,
+	"damage": 8.5,
+	"upwardSpeed": 6.5,
+	"upwardSpeedDesacceleration": 0.2,
+	"supermeter_score": 5,
+	"delay": 0.25,
+	"scale": 0.9,
+	"despawnTime": 3,
+	"ex": {
+		"speed": 70,
+		"acceleration": 7500,
+		"desaccelerationTime": 0.5,
+		"damage": 5,
+		"multiHit": 8,
+		"hitDelay": 0.35,
+		"scale": 1,
+		"despawnTime": 100,
+		"consumption": 100
+	},
+	"body": {
+		"shape": "TypeBox",
+		"size": [40,25],
+		"fixedRotation": true,
+		"sub_layer": 0,
+		"bodyType": "collider",
+		"hitbox": {
+			"type": "Arc",
+			"size": 20
+		},
+		"ex": {
+			"shape": "TypeBox",
+			"size": [100,100],
+			"fixedRotation": true,
+			"bodyType": "collider",
+			"sub_layer": 3,
+	  	"hitbox": {
+  			"type": "Arc",
+			  "size": 70
+	  	}
+		}
+	},
+	"resources": {
+		"bitmap": [
+			{
+				"name": "RoundaboutBitmap0",
+				"src": "player/weapons/roundabout/SpriteAtlasTexture_Roundabout-0.png",
+				"preload": false
+			},
+			{
+				"name": "RoundaboutEquipIconBitmap0",
+				"src": "player/weapons/roundabout/SpriteAtlasTexture_RoundaboutEquipIcon-0.png"
+			}
+		],
+		"brush": [{
+			"name": "RoundaboutAtlas",
+			"bitmaps": ["RoundaboutBitmap0"],
+			"frames": "player/weapons/roundabout/SpriteAtlasTexture_Roundabout.csv",
+			"anims": "player/weapons/roundabout/roundabout.atlas.json"
+		},
+		{
+			"name": "roundabout:WEAPON_EQUIP_ICON",
+			"bitmaps": ["RoundaboutEquipIconBitmap0"],
+			"frames": "player/weapons/roundabout/SpriteAtlasTexture_RoundaboutEquipIcon.csv"
+		}],
+		"sound": [
+			{
+				"automatize": {
+					"name": "RoundaboutShootSfx%i",
+					"start": 1,
+					"end": 11,
+					"pad": 3,
+					"src": "player/weapons/roundabout/sfx_player_weapon_boomerang_###.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+		  }
+    ]
+	}
+}

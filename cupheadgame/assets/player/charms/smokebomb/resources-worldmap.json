@@ -1,0 +1,15 @@
+{
+	"bitmap": [
+		{
+			"name": "SmokeBombEquipIcon",
+			"src": "player/charms/smokebomb/SpriteAtlasTexture_SmokeDash-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "smokebomb:CHARM_EQUIP_ICON",
+			"bitmaps": ["SmokeBombEquipIcon"],
+			"frames": "player/charms/smokebomb/SpriteAtlasTexture_SmokeDash.csv"
+		}
+	]
+}

@@ -1,0 +1,128 @@
+{
+	"bitmap": [{
+		"automatize": {
+			"name": "OnionBitmap%i",
+			"start": 0,
+			"end": 7,
+			"pad": 1,
+			"src": "scenes/veggies/onion/SpriteAtlasTexture_Onion-#.png"
+		}
+	},
+		{
+			"name": "OnionTearsBitmap",
+			"src": "scenes/veggies/onion/SpriteAtlasTexture_OnionTears-0.png"
+		},
+		{
+			"name": "OnionMugshot",
+			"src": "scenes/veggies/death_card_mugshot_onion.png"
+		},
+		{
+			"name": "RaddishBitmap",
+			"src": "scenes/veggies/raddish/SpriteAtlasTexture_Raddish-0.png"
+		},
+		{
+			"name": "RaddishPuff",
+			"src": "scenes/veggies/raddish/SpriteAtlasTexture_RaddishPuff-0.png"
+		}],
+	"brush": [{
+		"name": "OnionAtlas",
+		"bitmaps": {
+			"start": 0,
+			"end": 7,
+			"name-prefix": "OnionBitmap%i"
+		},
+		"frames": "scenes/veggies/onion/SpriteAtlasTexture_Onion.csv",
+		"anims": "scenes/veggies/onion/onion.anims.json"
+	},
+		{
+			"name": "OnionTearsAtlas",
+			"bitmaps": ["OnionTearsBitmap"],
+			"frames": "scenes/veggies/onion/SpriteAtlasTexture_OnionTears.csv",
+			"anims": "scenes/veggies/onion/onionTears.anims.json"
+		},
+		{
+			"name": "RaddishAtlas",
+			"bitmaps": ["RaddishBitmap"],
+			"frames": "scenes/veggies/raddish/SpriteAtlasTexture_Raddish.csv",
+			"anims": "scenes/veggies/raddish/raddish.anims.json"
+		},
+		{
+			"name": "RaddishPuffAtlas",
+			"bitmaps": ["RaddishPuff"],
+			"frames": "scenes/veggies/raddish/SpriteAtlasTexture_RaddishPuff.csv"
+		}],
+	"sound": [{
+		"name": "OnionRiseSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Onion_Rise.ogg",
+		"category": "sfx"
+	},
+	{
+		"name": "OnionCryingSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Onion_Crying.ogg",
+		"category": "sfx",
+		"loop": true
+	},
+	{
+		"name": "OnionExitBashfulSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Onion_Exit_Bashful.ogg",
+		"category": "sfx"
+	},
+	{
+		"name": "OnionDieSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Onion_Die.ogg",
+		"category": "sfx"
+	},
+	{
+		"automatize": {
+			"name": "OnionTeardropSfx%i",
+			"start": 1,
+			"end": 6,
+			"pad": 2,
+			"src": "scenes/veggies/sfx_level_veggies_Onion_Teardrop_##.ogg",
+			"category": "sfx",
+			"reuse": true
+		}
+	},
+	{
+		"name": "RaddishIntroSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Raddish_Voice_Intro.ogg",
+		"category": "sfx",
+		"reuse": true
+	},
+	{
+		"name": "RaddishIntroBonkSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Raddish_Bonk.ogg",
+		"category": "sfx",
+		"reuse": true
+	},
+	{
+		"name": "RaddishStartSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Raddish_Start.ogg",
+		"category": "sfx",
+		"reuse": true
+	},
+	{
+		"name": "RaddishLoopSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Raddish_Loop.ogg",
+		"category": "sfx",
+		"loop": true
+	},
+	{
+		"name": "RaddishDeathVoiceSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Raddish_Voice_Death.ogg",
+		"category": "sfx",
+	  "reuse": true
+	},
+	{
+		"name": "RaddishEndSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Raddish_End.ogg",
+		"category": "sfx",
+		"reuse": true
+	},
+	{
+		"name": "RaddishDeathSfx",
+		"src": "scenes/veggies/sfx_level_veggies_Raddish_Death.ogg",
+		"category": "sfx",
+		"reuse": true
+	}]
+}

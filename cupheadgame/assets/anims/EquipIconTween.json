@@ -1,0 +1,15 @@
+{
+	"timelines": [
+		{
+			"anims": [
+				{
+					"property": "_y",
+					"frames": [0,90],
+					"times": [0.4],
+					"easing": ["quadout"],
+					"repeats": 1
+				}
+			]
+		}
+	]
+}

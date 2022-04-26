@@ -1,0 +1,6 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,1617,806,0,0, Background
+0,0,806,1693,845,0,0, Vignette
+0,1,1655,437,289,0,0, bg chair
+0,528,1657,588,225,0,0, bg couch
+0,1622,0,136,182,0,0, bg fireplace glow

@@ -1,0 +1,16 @@
+{
+	"bitmap": [
+		{
+			"name": "SmokeDashSmoke",
+			"src": "player/charms/smokebomb/SpriteAtlasTexture_playerDashSmoke-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "PlayerDashSmokeAtlas",
+			"bitmaps": ["SmokeDashSmoke"],
+			"frames": "player/charms/smokebomb/SpriteAtlasTexture_playerDashSmoke.csv",
+			"anims": "player/charms/smokebomb/dashSmoke.anims.json"
+		}
+	]
+}

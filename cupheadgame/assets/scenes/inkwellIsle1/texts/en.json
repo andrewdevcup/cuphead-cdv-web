@@ -1,0 +1,15 @@
+{
+	"enter": "ENTER",
+	"elder_kettle_house": "THE ELDER\nKETTLE",
+	"porkrind_emporium": "PORKRIND'S\nEMPORIUM",
+	"weapons_room": "EQUIP\nROOM",
+	"the_root_pack": "The Root Pack",
+	"botanic_panic": ":BOTANIC  \n&f[,,,,1.25,1.1]PANIC&f!\"",
+	"goopy_le_grande": "Goopy Le Grande",
+	"ruse_of_an_ooze": ";RUSE OF\nAN OOZE\"",
+	"title_card_in_frame": 0,
+	"difficulty_select": "Difficulty Selection",
+	"d_simple": "SIMPLE",
+	"d_regular": "REGULAR",
+	"d_extreme": "EXTREME"
+}

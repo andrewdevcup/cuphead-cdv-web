@@ -1,0 +1,86 @@
+(function() {
+	var lay = b5.Game.UiButtons = new b5.Actor(),
+	memphis = scene_GUI.findResource('CupheadMemphisFont','brush');
+	
+	scene_GUI.addActor(lay);
+	lay._layer = 5;
+	lay.cull = false;
+	lay.h = 50;
+	lay.x2 = -64;
+	lay._y = -325;
+//	lay.dock_x = b5.Actor.Dock_Right;
+//	lay.dock_y = b5.Actor.Dock_Top;
+	
+	lay.setButtons = function(btns) {
+		this.removeAllActors();
+		this.cleanupDestroyedActors();
+		this.w = 0;
+		
+		!btns && (btns=[]);
+		
+		for(var i = 0; i < btns.length; i++) {
+			let lbl = new b5.LabelActor();
+			lbl.font = memphis;
+			lbl.text = "loading";
+			lbl.cull = false;
+			lbl.data = btns[i];
+			lbl.onDraw = function() {
+				this.text = this.data.text.startsWith('texts.') ? b5.Game.Texts.texts[this.data.text.substr(6)] : this.data.text;
+			};
+			
+			let btn = b5.Game.UI.createButton(b5.Game.UI.getButtonForPlayer(lbl.data.actionButton,"p1"), 'light');
+			btn.cull = false;
+			this.addActor(lbl);
+			lbl.addActor(btn);
+			
+			btn.textA = lbl;
+			lbl.button = btn;
+			btn._scale = 4.2;
+			lbl._scale = 0.45;
+			
+			let pad = 60;
+			
+			btn.onTick = function() {
+				this._y = -this.textA.h;
+				
+				this.textA.inner_w = (this.textA.w*app.global_font_scale) + pad;
+				
+				this._x = this.textA.inner_w;
+				
+				this.textA.total_w = (this.textA.inner_w * this.textA.scale_x) + this.w - 20;
+			}
+			
+		}
+		//Update layout
+		this.onTick = function() {
+			this.aw = 0;
+			for(var i = 0, px = 0; i < this.actors.length; i++) {
+				this.actors[i]._x = px;
+				
+				var iw = this.actors[i].total_w;
+				px += iw;
+				this.aw += iw;
+			}
+			
+			this._x = (sceneMain.w/2) + (-this.aw + (this.actors[this.actors.length-1].total_w/2));
+		}
+		
+		this.draw();
+	}
+	
+	lay.show = function(anim) {
+		this.opacity = anim ? 0 : 1;
+		anim && this.TweenTo('opacity',1,0.3, b5.Ease.linear, true);
+	}
+		
+	lay.hide = function(anim) {
+		this.opacity = anim ? 1 : 0;
+		anim && this.TweenTo('opacity',0,0.3, b5.Ease.linear, true);
+		
+	}
+	
+	b5.Game.UiButtons.hide();
+	
+	app.events.on('sceneunload', e => b5.Game.UiButtons.hide());
+	
+})();

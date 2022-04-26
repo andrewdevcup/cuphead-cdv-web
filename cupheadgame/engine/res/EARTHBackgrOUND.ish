@@ -1,0 +1,81 @@
+[vertex]
+[/vertex]
+[fragment]
+/* Written by AndrewDev */
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform vec4 outputFrame;
+
+uniform vec2 amplitude;
+uniform vec2 frequency;
+uniform vec2 time;
+uniform vec2 repeat;
+uniform vec2 offset;
+uniform bool interleavedX;
+uniform bool interleavedY;
+uniform bool verticalWaveY;
+uniform bool mirrorWrap;
+
+float signX = 1.;
+float signY = 1.;
+
+//Number is even?
+bool even(float n) {
+	return fract(floor(n)*.5) == 0.;
+}
+
+float getSign(float p) {
+	//Calculate sign based on the current Y position.
+	//Positive for even numbers, negative for odd	numbers.
+	return even(p) ? 1.: -1.;
+}
+
+float wrap(float n, float x) {
+	//Wrap n between 0 and x in a repeating pattern
+	return x * fract(abs(n) / x);
+}
+
+float mirror(float n, float x) {
+	//Cycle between x and 0 back and forth,
+	//do this for every odd number of floor(m)
+	float m = abs(n) / x;
+	float o = floor(m);
+	float p = fract(m);
+	float q = even(o) ? p: 1. - p;
+	return q * x;
+}
+
+void main(void) {
+
+	if (interleavedX) signX = getSign(vTextureCoord.y * outputFrame.w); //Change sign per "scanline"
+	if (interleavedY) signY = getSign(vTextureCoord.x * outputFrame.z); //Change sign per "column"
+
+	float phaseX = (offset.x/outputFrame.z) + (vTextureCoord.x*repeat.x) + (amplitude.x > 0. ? signX*(cos(vTextureCoord.y * frequency.x + time.x) * amplitude.x) : 0.);
+	float phaseY = (offset.y/outputFrame.w) + (vTextureCoord.y*repeat.y) + (amplitude.y > 0. ? signY*(cos((verticalWaveY ? vTextureCoord.y: vTextureCoord.x) * frequency.y + time.y) * amplitude.y): 0.);
+
+	//Wrapping
+	if (mirrorWrap) {
+		phaseX = mirror(phaseX, 1.);
+		phaseY = mirror(phaseY, 1.);
+	} else {
+		phaseX = wrap(phaseX, 1.);
+		phaseY = wrap(phaseY, 1.);
+	}
+
+	gl_FragColor = texture2D(uSampler, vec2(phaseX, phaseY));
+}
+[/fragment]
+[uniforms]
+{
+	"amplitude": [0,0],
+	"frequency": [12,7],
+	"time": [0,0],
+	"repeat": [1,1],
+	"offset": [0,0],
+	"interleavedX": false,
+	"interleavedY": false,
+	"verticalWaveY": true,
+	"mirrorWrap": false
+}
+[/uniforms]

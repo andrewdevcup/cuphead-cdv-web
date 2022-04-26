@@ -1,0 +1,42 @@
+[vertex]
+[/vertex]
+[fragment]
+// Source: https://github.com/pixijs/filters/blob/main/filters/outline/src/outline.frag
+varying vec2 vTextureCoord;
+uniform sampler2D uSampler;
+
+uniform vec2 thickness;
+uniform vec4 outlineColor;
+uniform bool outlineOnly;
+
+const float DOUBLE_PI = 6.283185307179586;
+
+void main(void) {
+    vec4 ownColor = texture2D(uSampler, vTextureCoord);
+    vec4 curColor;
+    float maxAlpha = 0.;
+    vec2 displaced;
+    for (float angle = 0.; angle <= DOUBLE_PI; angle += 0.39269908169872414) {
+        displaced.x = vTextureCoord.x + thickness.x * cos(angle);
+        displaced.y = vTextureCoord.y + thickness.y * sin(angle);
+        curColor = texture2D(uSampler, displaced);
+        maxAlpha = max(maxAlpha, curColor.a);
+    }
+    float resultAlpha = max(maxAlpha, ownColor.a);
+    
+    if(outlineOnly) resultAlpha -= ownColor.a;
+    gl_FragColor = vec4((ownColor.rgb + outlineColor.rgb * (1. - ownColor.a)) * resultAlpha, resultAlpha);
+}
+[/fragment]
+[uniforms]
+{
+	"thickness": [0, 0],
+	"outlineColor": [0,0,0],
+	"outlineOnly": false
+}
+[/uniforms]
+[options]
+{
+	"padding": 5
+}
+[/options]

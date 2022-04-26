@@ -1,0 +1,222 @@
+b5.export = function(world, scene, data, game) {
+	var myexports = {};
+
+	//Resources imported in player/common
+
+	data.createHUD = function(player, x, y) {
+		var hudlay = new b5.RectActor,
+		hudbg = new b5.Actor;
+		scene.addActor(hudlay);
+		hudlay.name = player.name +'HUD';
+		hudlay._layer = 4;
+		
+		var paddingX = 4,
+		paddingY = 3;
+		
+		hudlay.setPosition(x + (x < 0 ? paddingX : -paddingX), y + (y < 0 ? paddingY : -paddingY));
+		
+		hudbg.atlas = sceneMain.findResource('HUD_Atlas', 'brush');
+		hudbg.player = player.name;
+		hudlay.addActor(hudbg);
+		hudbg._scale = 1.1;
+		//hudbg.center_atlas = false;
+		hudbg.w = 78;
+		hudbg.h = 30;
+		hudbg.setPosition(x > 0 ? -55: 55, y > 0 ? -25: 25);
+
+		hudbg.currentHp = data[player.name].flags.heartPoints;
+		hudbg.playAnim(hudbg.currentHp+'HP', true);
+		hudbg._layer = 3;
+
+		//White effect
+		var w = new b5.RectActor;
+		w.setSize(78, 30); //hugbg atlas size
+		hudbg.addActor(w);
+		w.opacity = 0;
+
+		hudbg.onTick = function() {
+			if (data[player.name]) {
+				var playerHP = data[player.name].flags.heartPoints;
+
+				if (this.currentHp != playerHP) {
+					this.currentHp = playerHP;
+
+					//Animate
+					if (playerHP) this.playAnim(playerHP+'HP', true);
+					else this.playAnim('DEAD');
+				  
+				  this._scale = 2.2;
+				  w.opacity = 1;
+					this.TweenTo('_scale', 1.1, 0.35, b5.Ease.circout, true,.08);
+					w.TweenTo('opacity', 0, 0.25, b5.Ease.quadout, true,0.12);
+				}
+			}
+		};
+
+		//Cards
+		var card_count = Math.floor(data[player.name].variables.max_supermeter_score/100),
+		cardBG = new b5.Actor,
+		cardFlipSfx = [
+			scene.findResource('PlayerCardSfx1', 'sound'),
+			scene.findResource('PlayerCardSfx2', 'sound')
+		];
+
+		cardBG.name = player.name + "-cards";//clip_children = true;
+		cardBG.setSize(30*card_count, 20);
+
+		cardBG.x = hudbg.x + (x < 0 ? hudbg.w*1.5: -hudbg.w*1.6);
+		cardBG.y = hudbg.y + (y < 0 ? -hudbg.h*1.5: hudbg.h*1.55);
+		
+		var hudWpnIcons = new b5.Actor;
+		hudWpnIcons.setPosition(hudbg.x,hudbg.y);
+		hudWpnIcons.y += y < 0 ? -25 : 25;
+		
+		//Mask
+		var maskedActors = new b5.Actor;
+		hudlay.addActor(maskedActors);
+		
+	  var hudMask = new b5.RectActor;
+		hudMask.setSize(95 + cardBG.w,80);
+		hudMask.ox = ((hudMask.w/2)) * (x>0?-1:1);
+		hudMask.oy = 49 * (y>0?-1:1);
+		
+		maskedActors.addActor(cardBG);
+		maskedActors.addActor(hudWpnIcons);
+		hudlay.addActor(hudMask);
+		
+		hudMask.layer = 1;
+		hudMask.fill_style = "white";
+		
+		if(game.cfg.Video.colorFX) {
+			maskedActors.setMask(hudMask);
+		}
+		else hudMask.visible = false;
+		
+		//Area
+		hudlay.setSize(-1,-1);
+	
+		//Equip	icons
+		for(var i=0; i<player.equipedWeapons.length;i++) {
+			var wn = player.equipedWeapons[i],
+			wni = new	b5.Actor();
+			wni.atlas = scene.findResource(wn+':WEAPON_EQUIP_ICON','brush');
+			wni.frame_speed = 12;
+			wni.ignore_atlas_size = true;
+			wni.setSize(85,85);
+			wni.name = player.name+"-weaponIcon:"+wn;
+			wni.weapon = wn;
+			wni.index_ = i;
+			wni.lwi = i;
+			
+			wni.y_to = y < 0 ? 1 : -1;
+		//	wni.y = wni.h/4*wni.y_to;
+			wni.y_o = wni.y;
+			wni.showing = false;
+			wni.visible = false;
+			hudWpnIcons.addActor(wni);
+			
+			wni.tweenBack = function() {
+				this.TweenToWithEnd('_y',this.y_o,0.2,b5.Ease.quadin,true,0, e => this.visible = false);
+			};
+			
+			wni.onTick = function() {
+				var equiped = player.flags.weaponIndex == this.index_; //player.equipedWeapons[player.flags.weaponIndex] === this.weapon;
+				if(player.flags.weaponIndex !== this.lwi && equiped) {
+					this.lwi = player.flags.weaponIndex;
+					this.y = this.y_o;
+					this.bringToFront();
+					
+					this.showing = true;
+					this.visible = true;
+					//Update icon
+					this.atlas = scene.findResource(player.equipedWeapons[this.lwi]+':WEAPON_EQUIP_ICON','brush');
+					
+					this.clearTimeout(this.backTimeout);
+					this.TweenToWithEnd('_y',this.y_o+(this.y_to*53),0.2,b5.Ease.quadout,true,0,_this=>{
+						_this.backTimeout = _this.setTimeout(task => {
+							var _this = task.data;
+							_this.showing = false;
+							_this.tweenBack();
+						},2);
+					});
+				}
+				else if(!equiped) {
+					this.lwi = player.flags.weaponIndex;
+					//Retract if showing
+					if(this.showing) {
+						this.tweenBack();
+						this.showing=false;
+					}
+				}
+			};
+		}
+		
+
+		//Go from where
+		var originY = y > 0 ? 1: -1,
+		originX = x > 0 ? 1 : -1,
+		cardAtlas = scene.findResource('HUD_Atlas', 'brush');
+
+
+		for (var i = 0; i < card_count; i++) {
+			var card = new b5.Actor;
+			card.atlas = cardAtlas;
+			card.current_frame = 11; //Empty
+			card._scale = 1.1;
+			card.center_atlas = false;
+			card.name = player.name + 'Card'+i;
+
+			card.x = (-originX*(-cardBG.w/2)+ 16*-originX) + (i*24)*-originX;
+			card.ymax = -45 * originY;
+			card.ymin = -13 * originY;
+			card.index = i+1;
+			card.ly = card.y;
+			card.maxscore = 100;
+			card.minscore = (i)*100;
+			card.score = 0;
+			card.full_anim = false;
+			card.empty_anim = false;
+			card.anim_max = false;
+
+			card.onTick = function() {
+				if (data[player.name]) {
+					var score = data[player.name].variables.supermeter,
+					maxsc = data[player.name].variables.max_supermeter_score;
+
+					this.score = b5.Maths.cap((score-this.minscore) / this.maxscore, 0, 1);
+
+					this.ly = b5.Maths.pos(this.ymin,this.ymax, this.score); //this.ymin * (1-this.score)+this.ymax;
+
+					this._y += (-this.y + this.ly)*0.1*game.speed; //Smoothing
+
+					//Animate
+					if (this.score >= 1 && !this.full_anim) {
+						this.playAnim('CardFull-'+player.name);
+						this.full_anim = true;
+						this.empty_anim = false;
+						//Play sfx
+						!data[player.name].flags.successfulParry && cardFlipSfx[b5.Maths.randomRange(0, 1)].play();
+					} else if (!this.empty_anim && this.score < 1) {
+						this.playAnim('CardEmpty-'+player.name);
+						this.empty_anim = true;
+						this.full_anim = false;
+					}
+
+					if (score >= maxsc && !this.anim_max) {
+						this.anim_max = true;
+						this.playAnim('CardMax-'+player.name, true);
+					} else if (this.anim_max && score < maxsc) {
+						this.anim_max = false;
+						if (this.score >= 1) this.playAnim('CardFullIdle-'+player.name);
+						else this.playAnim('CardEmpty-'+player.name);
+					}
+				}
+			};
+
+			cardBG.addActor(card);
+
+		}
+	};
+
+	return myexports;
+};

@@ -1,0 +1,190 @@
+return {
+	runningDust: function(target, scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerRunningDustAtlas','brush');
+		p.center_atlas = true;
+		p.setPosition(target.x,target.y+45);
+		p._scale = 0.9;
+		p.round_pixels = false;
+		target.parent.addActor(p);
+		p.tags = ['particle','playerParticle'];
+		p._layer = target.layer+1;
+		//Play random anims
+		var anims = ['dustA','dustB','dustC','dustD','dustE','dustF'];
+		p.playAnim(anims[b5.Maths.randomRange(0,5)]);
+		//Destroy on anim end
+		p.onAnimEnd = p.destroy;
+		//Go up
+		p.vy = -80;
+	},
+	dashDust: function(target,scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerDashDustAtlas','brush');
+		p.center_atlas = true;
+		p.setPosition(target.x,target.y+45);
+		p.scale_y = 0.9;
+		//Face player direction
+		p.scale_x = 0.9 * Math.sign(target.data.facing);
+		p.round_pixels = false;
+		target.parent.addActor(p);
+		p._layer = target.layer+1;
+		p.tags = ['particle','playerParticle'];
+		p.playAnim('playerDashDust');
+		p.name = target.name + '-dashDust';
+		//Destroy on anim end
+		p.onAnimEnd = p.destroy;
+	},
+	landDust: function(target,scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerLandDustAtlas','brush');
+		p.center_atlas = true;
+		p.setPosition(target.x,target.y+45);
+		p.scale_y = 0.9;
+		//Face player direction
+		p.scale_x = 0.9 * Math.sign(target.data.facing);
+		p.round_pixels = false;
+		target.parent.addActor(p);
+		p._layer = target.layer+1;
+		p.tags = ['particle','playerParticle'];
+		//Play random anims
+		var anims = ['landDustA','landDustB'];
+		p.playAnim(anims[b5.Maths.randomRange(0,1)]);
+		//Destroy on anim end
+		p.onAnimEnd = p.destroy;
+	},
+	parrySpark: function(target,scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerParrySparkAtlas','brush');
+		p.center_atlas = true;
+		p.scale_x = 0.97;// 0.9 * target.scale_x;
+		p.scale_y = 0.97;//0.9;// * target.scale_y;
+		p.setPosition(target.x,target.y);
+		p.round_pixels = false;
+		p.layer = target.layer+1;
+		target.parent.addActor(p);
+		//Random rotation
+		p.setRotation(Math.PI * b5.Maths.randomRange(-1,1,true));
+		p.tags = ['particle','playerParticle'];
+		//Play anim
+		p.playAnim('parrySpark');
+		//Destroy on anim end
+		p.onAnimEnd = p.destroy;
+	},
+	parryEffect: function(target,scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerParryEffectAtlas','brush');
+		p.center_atlas = true;
+		p.setPosition(target.x,target.y);
+		p.scale_y = 0.9;
+		p.opacity = 0.9;
+		p.round_pixels = false;
+		target.parent.addActor(p);
+		p._layer = target.layer - 1;
+		target.parent.order_changed = true
+		p.frame_speed = 24;
+		p.frames_repeat = false;
+		//Destroy on anim end
+		p.setTimeout(function() {
+			p.destroy();
+		},0.083);
+	},
+	playerReviveEffect: function(target,scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerReviveEffAtlas','brush');
+		p.center_atlas = true;
+		p._scale = 0.9;
+		p.setPosition(target.x,target.y);
+		p.round_pixels = false
+		target.parent.addActor(p);
+		p.tags = ['particle','playerParticle'];
+		//Play anim
+		p.playAnim('player_revive_effect');
+		//Destroy on anim end
+		return p;
+	},
+	playerDeathBody: function(target, scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerDeathBodiesAtlas','brush');
+		p.center_atlas = true;
+		p._scale = 1;
+		p.setPosition(target.x,target.y);
+		p.layer = target.layer + 1;
+		target.parent.addActor(p);
+		p.tags = ['particle','playerParticle'];
+		//To destroy it add this.destroy() on your p.onDestroy method
+		return p;
+	},
+	playerExplodeFX: function(target, scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerExplodeFXAtlas','brush');
+		p.center_atlas = true;
+		p._scale = 0.89;
+		p.setPosition(target.x,target.y);
+		p.layer = target.layer + 2;
+		target.parent.addActor(p);
+		p.tags = ['particle','playerParticle'];
+		p.frame_speed = 24;
+		p.frames_repeat = false;
+		p.onAnimEnd = p.destroy;
+		return p;
+	},
+	playerHitFX: function(target, scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerHitFXAtlas','brush');
+		p.center_atlas = true;
+		p._scale = 0.63;
+		p.round_pixels = false;
+		target.parent.addActor(p);
+		p.setPosition(target.x,target.y);
+		p.layer = target.layer +1;
+		//Random rotation
+		p.setRotation(Math.PI * b5.Maths.randomRange(-1,1,true));
+		p.tags = ['particle','playerParticle'];
+		//Play anim
+		p.frame_speed = 24;
+		p.frames_repeat = false;
+		//Destroy on anim end
+		p.onAnimEnd = p.destroy;
+	},
+	exChargeUp: function(target, scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerEXChargeUpAtlas','brush');
+		p.center_atlas = true;
+		p.round_pixels = false;
+		p.layer = target.layer-1;
+		target.parent.addActor(p);
+		p.setPosition(target.x,target.y);
+		p._scale = 0.85;
+		//Random rotation
+		p.tags = ['particle','playerParticle'];
+		//Play anim
+		p.frame_speed = 24;
+		p.frames_repeat = false;
+		//Destroy on anim end
+		p.onAnimEnd = function() {
+			this.onAnimEnded && this.onAnimEnded();
+			this.destroy();
+		};
+		return p;
+	},
+	exDust: function(target, scene) {
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('playerEXDustAtlas','brush');
+		p.center_atlas = true;
+		p.round_pixels = false;
+		p.layer = target.layer-1;
+		p.rotation = target.data.shootAngle;
+		target.parent.addActor(p);
+		target.parent.order_changed = true;
+		p.setPosition(target.x + target.data.shootOffset[0],target.y	+ target.data.shootOffset[1]);
+		p._scale = 0.85;
+		//Random rotation
+		p.tags = ['particle','playerParticle'];
+		//Play anim
+		p.frame_speed = 24;
+		p.frames_repeat = false;
+		//Destroy on anim end
+		p.onAnimEnd = p.destroy;
+		return p;
+	}
+};

@@ -1,0 +1,74 @@
+{
+	"sound": [
+		{
+			"name": "SfxVinylScratch1",
+			"src": "scenes/common_level/sfx_vinyl_scratch_01.ogg",
+			"category": "sfx",
+			"global_stream": true
+		},
+		{
+			"name": "SfxVinylScratch2",
+			"src": "scenes/common_level/sfx_vinyl_scratch_02.ogg",
+			"category": "sfx",
+			"global_stream": true
+		},
+		{
+			"name": "KnockoutBoomSfx",
+			"src": "scenes/common_level/sfx_level_knockout_boom_01.ogg",
+			"category": "sfx",
+			"reuse": true
+		}
+	],
+	"bitmap": [{
+		"name": "playerReviveEffBitmap",
+		"src": "scenes/common_level/playerReviveEffect/playerReviveEffAtlas.png",
+		"preload": false
+	},
+	{
+  	"name": "YouDiedTextBitmap",
+		"src": "scenes/common_level/you_died_text_0001.png",
+		"preload": false
+	},
+	{
+		"name": "DeathCardBG",
+		"src": "scenes/common_level/death_card_bg.png"
+	},
+	{
+		"name": "DeathCardBG_Secret",
+		"src": "scenes/common_level/death_card_bg_secret.png"
+	},
+	{
+		"name": "DeathCardMarkerBitmap0",
+		"src": "scenes/common_level/SpriteAtlasTexture_DCMarker-0.png"
+	},
+	{
+		"name": "BossExplosionBitmap0",
+		"src": "scenes/common_level/SpriteAtlasTexture_bossExplosion-0.png"
+	}],
+	"brush": [{
+		"name": "playerReviveEffAtlas",
+		"bitmaps": ["playerReviveEffBitmap"],
+		"frames": "scenes/common_level/playerReviveEffect/playerReviveEffAtlas.csv",
+		"anims": "scenes/common_level/playerReviveEffect/playerReviveEffect.atlas.json"
+	},
+	{
+		"name": "DeathCardMarkers",
+		"bitmaps": ["DeathCardMarkerBitmap0"],
+		"frames": "scenes/common_level/SpriteAtlasTexture_DCMarker.csv"
+	},
+	{
+		"name": "BossExplosionAtlas",
+		"bitmaps": ["BossExplosionBitmap0"],
+		"frames": "scenes/common_level/SpriteAtlasTexture_bossExplosion.csv"
+	}],
+	"shader": [{
+		"name": "EnemyHitShader",
+		"src": "scenes/common_level/EnemyHit.ish",
+		"async": true
+	},
+	{
+		"name": "TintModesShader",
+		"src": "shader/TintModes.ish",
+		"async": true
+	}]
+}
