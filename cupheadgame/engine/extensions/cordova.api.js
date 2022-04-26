@@ -10,7 +10,7 @@ try{b5}catch(e){b5={}}
 
 b5.Cordova = {
 	file: !!(window.cordova && window.cordova.file),
-	orientation: !!(screen.lockOrientation && screen.unlockOrientation) && (window.cordova ? cordova.platformId != "browser" : !0),
+	orientation: !!(screen.lockOrientation && screen.unlockOrientation) && (window.cordova ? cordova.platformId != "browser" : !1),
 	statusbar: !!window.StatusBar,
 	fullscreen: !!window.AndroidFullScreen
 };
