@@ -59,7 +59,7 @@ b5.Splash = function() {
 
 b5.onload = function() {
 	
-	//Add buttons for mobile devices to flip the screen
+//Add buttons for mobile devices to flip the screen
 if(b5.Utils.IsMobile()) {
 	var mbtn = document.createElement('button');
 	mbtn.textContent = "Fullscreen";
@@ -67,6 +67,13 @@ if(b5.Utils.IsMobile()) {
 	mbtn.onclick = function() {
 	    b5.Utils.SetFullscreen(true);
 	    b5.Utils.SetOrientation('landscape');
+	}
+	
+        var cbtn = document.createElement('button');
+	cbtn.textContent = "Console";
+	document.body.appendChild(cbtn);
+	cbtn.onclick = function() {
+	    console.show();
 	}
 }
 
