@@ -117,7 +117,8 @@ function onDeviceReady() {
 				internalDir = window.DebugBuild ? '/sdcard/CupheadGame/' : cordova.file.applicationDirectory+'cupheadgame/'
 			break;
 			default:
-				internalDir = cordova.file.applicationDirectory+'cupheadgame/';
+				var appDir = cordova.file.applicationDirectory;
+				internalDir = (!appDir.startsWith("http") ? appDir : "") +'cupheadgame/';
 		}
 	}
 	else {
