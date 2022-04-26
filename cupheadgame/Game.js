@@ -68,13 +68,6 @@ if(b5.Utils.IsMobile()) {
 	    b5.Utils.SetFullscreen(true);
 	    b5.Utils.SetOrientation('landscape');
 	}
-	
-        var cbtn = document.createElement('button');
-	cbtn.textContent = "Console";
-	document.body.appendChild(cbtn);
-	cbtn.onclick = function() {
-	    console.show();
-	}
 }
 
 //Extensions
