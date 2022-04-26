@@ -58,6 +58,17 @@ b5.Splash = function() {
 
 
 b5.onload = function() {
+	
+	//Add buttons for mobile devices to flip the screen
+if(b5.Utils.IsMobile()) {
+	var mbtn = document.createElement('button');
+	mbtn.textContent = "Fullscreen";
+	document.body.appendChild(mbtn);
+	mbtn.onclick = function() {
+	    b5.Utils.SetFullscreen(true);
+	    b5.Utils.SetOrientation('landscape');
+	}
+}
 
 //Extensions
 //b5.Utils.loadJS(internalDir +'engine/extensions/xml2js.js').onload = function() {
