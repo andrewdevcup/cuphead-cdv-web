@@ -12,9 +12,7 @@ uniform vec2 frequency;
 uniform vec2 time;
 uniform vec2 repeat;
 uniform vec2 offset;
-uniform bool interleavedX;
-uniform bool interleavedY;
-uniform bool verticalWaveY;
+uniform bool interleaved;
 uniform bool mirrorWrap;
 
 float signX = 1.;
@@ -32,7 +30,7 @@ float getSign(float p) {
 }
 
 float wrap(float n, float x) {
-	//Wrap n between 0 and x in a repeating pattern
+	//Wrap n between 0 and x
 	return x * fract(abs(n) / x);
 }
 
@@ -48,34 +46,27 @@ float mirror(float n, float x) {
 
 void main(void) {
 
-	if (interleavedX) signX = getSign(vTextureCoord.y * outputFrame.w); //Change sign per "scanline"
-	if (interleavedY) signY = getSign(vTextureCoord.x * outputFrame.z); //Change sign per "column"
+	if (interleaved) signX = getSign(vTextureCoord.y * outputFrame.w); //Change sign per "scanline"
+	//if (interleavedY) signY = getSign(vTextureCoord.x * outputFrame.z); //Change sign per "column"
 
-	float phaseX = (offset.x/outputFrame.z) + (vTextureCoord.x*repeat.x) + (amplitude.x > 0. ? signX*(cos(vTextureCoord.y * frequency.x + time.x) * amplitude.x) : 0.);
-	float phaseY = (offset.y/outputFrame.w) + (vTextureCoord.y*repeat.y) + (amplitude.y > 0. ? signY*(cos((verticalWaveY ? vTextureCoord.y: vTextureCoord.x) * frequency.y + time.y) * amplitude.y): 0.);
+	float phaseX = (offset.x/outputFrame.z) + (vTextureCoord.x*repeat.x) + (amplitude.x > 0. ? signX*(cos(vTextureCoord.y * frequency.x + time.x) * amplitude.x): 0.);
+	float phaseY = (offset.y/outputFrame.w) + (vTextureCoord.y*repeat.y) + (amplitude.y > 0. ? signY*(cos(vTextureCoord.y * frequency.y + time.y) * amplitude.y): 0.);
 
 	//Wrapping
-	if (mirrorWrap) {
-		phaseX = mirror(phaseX, 1.);
-		phaseY = mirror(phaseY, 1.);
-	} else {
-		phaseX = wrap(phaseX, 1.);
-		phaseY = wrap(phaseY, 1.);
-	}
+	phaseX = mirrorWrap ? mirror(phaseX, 1.) : wrap(phaseX, 1.);
+	phaseY = mirrorWrap ? mirror(phaseY, 1.) : wrap(phaseY, 1.);
 
 	gl_FragColor = texture2D(uSampler, vec2(phaseX, phaseY));
 }
 [/fragment]
 [uniforms]
 {
-	"amplitude": [0,0],
-	"frequency": [12,7],
+	"amplitude": [0.03,0.05],
+	"frequency": [3,5],
 	"time": [0,0],
 	"repeat": [1,1],
 	"offset": [0,0],
-	"interleavedX": false,
-	"interleavedY": false,
-	"verticalWaveY": true,
-	"mirrorWrap": false
+	"interleaved": false,
+	"mirrorWrap": true
 }
 [/uniforms]

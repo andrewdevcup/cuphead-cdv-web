@@ -1,0 +1,41 @@
+return function(thisPlayer, flags, world, scene, game, charmData) {
+	//Setup actions
+	let air = false,
+	pSParry = false,
+	sugarActive = false,
+	lasthp = flags.heartPoints;
+	
+	return {
+		onTick: function() {
+			//Upddate
+			
+			if(lasthp != flags.heartPoints) {
+				lasthp = flags.heartPoints;
+				
+				lasthp == 0 && (thisPlayer.hitboxes[5].hitbox_active = false);
+			}
+			
+			if(flags.inAir != air) {
+				air = flags.inAir;
+				
+				if(air && !flags.shootingEX && !flags.damageHit && flags.heartPoints > 0) {
+					sugarActive = true;
+					thisPlayer.setTimeout(m=>thisPlayer.Sprite.playAnim('jump_parry',true), app.dt*2);
+					thisPlayer.hitboxes[5].hitbox_active = true;
+				}
+				else thisPlayer.hitboxes[5].hitbox_active = false;
+			}
+			
+			if(flags.successfulParry != pSParry) {
+				pSParry = flags.successfulParry;
+				
+				if(pSParry && sugarActive) {
+					sugarActive = false;
+					thisPlayer.hitboxes[5].hitbox_active = false;
+				}
+				
+			}
+			
+		}
+	};
+};

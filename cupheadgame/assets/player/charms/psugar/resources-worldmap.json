@@ -1,0 +1,15 @@
+{
+	"bitmap": [
+		{
+			"name": "SugarEquipIcon",
+			"src": "player/charms/psugar/SpriteAtlasTexture_Sugar-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "psugar:CHARM_EQUIP_ICON",
+			"bitmaps": ["SugarEquipIcon"],
+			"frames": "player/charms/psugar/SpriteAtlasTexture_Sugar.csv"
+		}
+	]
+}

@@ -22,14 +22,17 @@
 		lang == "*" && (lang = b5.Utils.GetLanguage().language);
 		txtRaw = new b5.Raw('texts',b5.Paths.texts+lang+'.json',true, raw => {
 			txts = raw;
+			b5.Game.cfg.Language.lang = lang;
 		},true);
 			
 		//Load default EN language if local language isn't present
-		if(!txts) new b5.Raw('texts',sceneData.resourcePath+'texts/en.json',true, raw => {
+		if(!txts) new b5.Raw('texts',b5.Paths.texts+'en.json',true, raw => {
 			txts = raw;
+			b5.Game.cfg.Language.lang = 'en';
+			console.log('Could not find localization for '+lang+'. Using default (en-US)');
 		},true);
 			
 		this.Texts.texts = JSON.secParse(txts);
-		this.cfg.Language.lang = lang;
+		
 	};
 })();

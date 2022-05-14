@@ -92,7 +92,7 @@
 	b5.Game.ShowLoadingScreen = function(type, showHourglass, speed) {
 		var loadScreen = b5.Game.loadingScreen;
 		
-		if(loadScreen.state == "closed" || loadScreen.state == "closing") return;
+		if( (loadScreen.state == "closed" || loadScreen.state == "closing") ) return;
 		
 		loadScreen.hourglass.opacity = 0;
 		loadScreen._av = true;
@@ -110,8 +110,11 @@
 		switch (type) {
 			case "close":
 				loadScreen.opacity = 1;
-				loadScreen.playAnim('close');
-				loadScreen.onAnimEnd = onShow;
+				loadScreen.current_anim != 'close' && loadScreen.playAnim('close');
+				loadScreen.onAnimEnd = function() {
+					this.current_anim = "";
+					onShow();
+				}
 				break;
 			case "fade":
 				loadScreen.anim_frames = null; //Clear atlas animation
@@ -125,7 +128,7 @@
 	b5.Game.HideLoadingScreen = function(type, speed, fromSceneLoader) {
 		var loadScreen = b5.Game.loadingScreen;
 		
-		//if( (loadScreen.state == "open" || loadScreen.state == "opening") ) return;
+		if( (loadScreen.state == "open" || loadScreen.state == "opening") && !loadScreen.hourglass.visible) return;
 		
 		loadScreen.state = "opening";
 		
@@ -140,8 +143,11 @@
 			app.events.dispatch('hideloadingscreen');
 			switch (type) {
 				case 'open':
-					loadScreen.playAnim('open');
-					loadScreen.onAnimEnd = onHide;
+					loadScreen.current_anim != 'open' && loadScreen.playAnim('open');
+					loadScreen.onAnimEnd = function() {
+						this.current_anim = "";
+						onHide();
+					};
 					break;
 				case 'fade':
 					loadScreen.anim_frames = null; //Clear atlas animation

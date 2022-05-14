@@ -688,7 +688,7 @@
 		var txt = b5.Game.Texts.texts,
 		ix = pauseMenu.data.main_lvl_index-1,
 		mptext = b5.Game.Multiplayer.player2Joined ? txt.pause_card_removep2
-		  : b5.Game.Multiplayer.host.connected ? txt.host_manage : txt.pause_card_createroom;
+		  : b5.Game.Multiplayer.data.HOST_CODE != "" ? txt.host_roomcode + ": "+b5.Game.Multiplayer.data.HOST_CODE : txt.pause_card_createroom;
 		
 		this.text = txt.pause_card_resume +"\n"+
 								txt.pause_card_retry +"\n"+
@@ -796,7 +796,7 @@
 		var txt = b5.Game.Texts.texts,
 	  ix = pauseMenu.data.main_wldm_index-1,
 	  mptext = b5.Game.Multiplayer.player2Joined ? txt.pause_card_removep2
-		  : b5.Game.Multiplayer.HostStarted ? txt.host_manage : txt.pause_card_createroom;
+		  : b5.Game.Multiplayer.data.HOST_CODE != "" ? txt.host_roomcode + ': '+b5.Game.Multiplayer.data.HOST_CODE : txt.pause_card_createroom;
 	  
 	  this.text = txt.pause_card_resume +"\n"+
 	  						txt.main_menu_options +"\n"+

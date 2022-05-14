@@ -1,0 +1,137 @@
+
+b5.LoadScene = function(world, scene, data, game) {
+	//scene is the main scene where resources and actors will be added
+	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
+	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
+  
+  data.levelID = 7; //Original Cuphead level ID
+
+  game.SlotUtils.getLevelData(7).played = true;
+  
+  data.spawnParticle = function(name, target) {
+  	switch(name) {
+  		case "smDustA":
+  			var p = new b5.Actor();
+  			p.atlas = scene.findResource('smallDustAtlas','brush');
+  			p.onAnimEnd = p.destroy;
+  			p.layer = data.view.playerSubLayer+1;;
+  			target.parent.addActor(p);
+  			p.setPosition(target.x,target.y+40);
+  			p.playAnim('dust_a');
+  			return p;
+  		case "smDustB":
+  			var p = new b5.Actor();
+  			p.atlas = scene.findResource('smallDustAtlas','brush');
+  			p.onAnimEnd = p.destroy;
+  			p.layer = data.view.playerSubLayer+1;
+  			target.parent.addActor(p);
+  			p.setPosition(target.x,target.y+50);
+  			p.playAnim('dust_b');
+  			return p;
+  		case "lgDustA":
+  			var p = new b5.Actor();
+  			p.atlas = scene.findResource('largeDustAtlas','brush');
+  			p.onAnimEnd = p.destroy;
+  			p.layer = data.view.playerSubLayer+1;
+  			target.parent.addActor(p);
+  			p._scale = 0.97;
+  			p.setPosition(target.x,target.y+80);
+  			p.playAnim('lgDust_a');
+  			return p;
+  		case "lgDustB":
+  			var p = new b5.Actor();
+  			p.atlas = scene.findResource('largeDustAtlas','brush');
+  			p.onAnimEnd = p.destroy;
+  			p.layer = data.view.playerSubLayer+1;
+  			target.parent.addActor(p);
+  			p._scale = 0.97;
+  			p.setPosition(target.x,target.y+90);
+  			p.playAnim('lgDust_b');
+  			return p;
+  		case "TombSlamDust":
+  			var p = new b5.Actor();
+  			p.atlas = scene.findResource('TombDustAtlas','brush');
+  			p.onAnimEnd = p.destroy;
+  			p.layer = data.view.playerSubLayer+2;
+  			p.tag = "particle";
+  			target.parent.addActor(p);
+  			p._scale = 0.9;
+  			p.setPosition(target.x-30,target.y+80);
+  			p.playAnim('tomb_slam_dust');
+  			return p;
+  		case "SlimeExplode":
+  			var p = new b5.Actor();
+  			p.atlas = scene.findResource('SlimeExplodeAtlas','brush');
+  			p.onAnimEnd = p.destroy;
+  			p.layer = data.view.playerSubLayer+1;
+  			p._scale = 1.2;
+  			target.parent.addActor(p);
+  			p.setPosition(target.x,target.y-90);
+  			p.frame_speed = 24;
+  			p.tag = "particle";
+  			p.frames_repeat = false;
+  			return p;
+  		case "TombSmashDust":
+  			var p = new b5.Actor();
+  			p.atlas = scene.findResource('TombDustAtlas','brush');
+  			p.onAnimEnd = p.destroy;
+  			p.layer = data.view.playerSubLayer+4;
+  			p.tag = "particle";
+  			target.parent.addActor(p);
+  			p._scale = 0.98;
+  			p.setPosition(target.x-15,target.y+100);
+  			p.playAnim('tomb_smash_dust');
+  			return p;
+  	}
+  }
+  
+  game.importObject('CreateLevel')
+      .init()
+      .loadFightTextsResources();
+      
+  //Load only on Difficulty > 0 (Normal / Hard)
+  if(data.Statistics.skill > 0) new b5.Raw('Phase3TombResources', data.resourcePath + 'phase3.resources.json', true, desc => {
+  	game.parseResources(desc, scene);
+  	scene.tryLoadNextResource();
+  },true);
+      
+  game.importObject('CreatePlayer');
+  
+  game.importObject('CreateCommonBossLevelResources');
+  game.importObject('CreateBoss');
+  game.importObject('CreateEnemies');
+  
+  data.Statistics.level_type = 'boss'; //For winscreen
+  data.Statistics.optimalTime = 180; //Time to beat the boss for score
+  
+};
+b5.onLoadingScreenOut = function(world, scene, data, game) {
+	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
+  
+  data.initializePlayers();
+  
+ //Initialize multiplayer
+ game.Multiplayer.Initialize(world,data);
+ 
+ if(!data.levelData.fightStarted) {
+		data.playFightText('GetReady');
+  	data.playersIntroAnimation();
+	}
+	
+	scene.findResource('MUS_Slime','sound').play();
+ 
+};
+b5.addSceneResources = function(scene, data, game) {
+	//Resources that will be added to scene, this will be called before LoadScene
+
+};
+b5.onSceneUnload = function(world, scene, data, game, clearResources) {
+    //Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
+    //You can also remove created objects in b5.Game if they were created and used on the scene.
+
+};
+//DEPRECATED
+b5.UpdateScene = function(world, scene, data, game) {
+	//For updating actors and behaviors on your scene every frame
+
+};

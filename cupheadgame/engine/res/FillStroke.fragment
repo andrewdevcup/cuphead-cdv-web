@@ -33,8 +33,8 @@ void main(void) {
 	luma *= .25;
 
 	//Average luma for current pixel and sides
-	float lmc = (color.r + color.g + color.b) / 3.;
-	float lms = (luma.r + luma.g + luma.b) / 3.;
+	float lmc = length(color.rgb);//(color.r + color.g + color.b) / 3.;
+	float lms = length(luma.rgb);//(luma.r + luma.g + luma.b) / 3.;
 
 	//Compare
 	//Set to white if sides average luma is greater than current luma, else set to black.

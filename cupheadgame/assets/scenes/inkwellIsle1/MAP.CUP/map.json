@@ -232,6 +232,32 @@
 		"properties": {
 			"tint_colour": "#ffc000"
 		}
+	},
+	{
+		"name": "NPC_Slime",
+		"type": "Rect",
+		"size": [100,85],
+		"pos": [67,-310],
+		"visible": true,
+		"layer": 2,
+		"tags": ["NPC"],
+		"add_collider": true,
+		"scale": 1,
+		"color": "transparent"
+	},
+	{
+		"name": "Slime_Entrance",
+		"type": "",
+		"size": [150,150],
+		"pos": [1270,-350],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 2,
+		"scale": 0.95,
+		"atlas": "LevelsIconsAtlas",
+		"base_anim": "slime",
+		"cull": false,
+		"anim_loop": true
 	}
 	],
 	"resources": {

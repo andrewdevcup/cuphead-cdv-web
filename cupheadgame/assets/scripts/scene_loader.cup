@@ -164,7 +164,7 @@ b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenPropertie
 
 				b5.Game.GUI.enableAllButtons();
 				//Disable pause button on multiplayer
-				b5.Game.Multiplayer.isGuest && b5.Game.GUI.disableButtons('Pause');
+			//	b5.Game.Multiplayer.isGuest && b5.Game.GUI.disableButtons('Pause');
 				
 				b5.LoadScene(sceneMain.view, sceneMain, sceneMain.data, b5.Game);
 				app.focus_scene2 = sceneMain;

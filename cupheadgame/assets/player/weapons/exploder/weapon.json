@@ -1,0 +1,39 @@
+{
+	"speed": 38,
+	"damage": 4,
+	"supermeter_score": 2.48,
+	"delay": 0.35,
+	"scale": 0.8,
+	"despawnTime": 3,
+	"ex": {
+		"speed": 65,
+		"damage": 8.3,
+		"scale": 0.85,
+		"despawnTime": 5,
+		"consumption": 100
+	},
+	"body": {
+		"shape": "TypeBox",
+		"size": [40,25],
+		"fixedRotation": true,
+		"sub_layer": 0,
+		"bodyType": "collider",
+		"hitbox": {
+			"type": "Arc",
+			"size": 15
+		},
+		"ex": {
+			"shape": "TypeBox",
+			"size": [100,100],
+			"fixedRotation": true,
+			"bodyType": "collider",
+			"sub_layer": 3,
+	  	"hitbox": {
+  			"type": "Arc",
+			  "size": 15
+	  	}
+		}
+	},
+	"resources": {
+	}
+}

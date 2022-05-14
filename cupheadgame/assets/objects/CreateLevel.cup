@@ -69,10 +69,11 @@ b5.export = function(world, scene, sceneData, game, importData) {
 		}
 		for (var i = data.view.playerLayer-1, a = 1; i > 0; i--) {
 			//Move slower on lower layers (farther to the camera)
+			a = i/(data.view.playerLayer-1)*(data.view.world_depth / data.view.world_depth);
 			world.actors[i].x2 = world.ox * a;
 			world.actors[i].y2 = world.oy * a;
 			world.actors[i].dirty();
-			a = i/(data.view.playerLayer-1)*(data.view.world_depth / data.view.world_depth);// * (data.view.background_depth||1);
+			
 		}
 		}
 
@@ -90,10 +91,11 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	//	}
 
 		world.camera_range = data.view.freeCamera ? world.scale/2: data.view.cameraRange/world.scale;
-
-		world.target_x = (world.camera_offset_x + avgx) * world.camera_range;
-		world.target_y = (world.camera_offset_y + avgy) * world.camera_range;
-
+		
+		if(plys.length > 0) {
+			world.target_x = (world.camera_offset_x + avgx) * world.camera_range;
+			world.target_y = (world.camera_offset_y + avgy) * world.camera_range;
+		}
 	}
 
 	sceneData.shakeCamera = function(amount, speed, time) {
@@ -305,6 +307,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 		o.base_anim && a.atlas && (a.playAnim(o.base_anim,o.anim_loop));
 		o.text === void 0 ? "" : a.setTextFmt(o.text);
 		a.fit = o.fit !== void 0 ? b5.Actor[o.fit] : b5.Actor.FitNone;
+		o.lighter === true && a.sprite && (a.sprite.zeroTintAlpha = true);
 		if(o.properties !== void 0) for(var k in o.properties) a[k] = o.properties[k];
 		//Add to world
 		//If no layer specified, appendTo an existing actor
@@ -330,7 +333,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 		}
 
 		//Script
-		if(o.script) a.onCreate = Function('return '+b5.File.readSync(sceneData.levelDataPath + 'scripts/' + o.script))();
+		if(o.script) a.onCreate = new Function('return '+b5.File.readSync(sceneData.levelDataPath + 'scripts/' + o.script))();
 		myexports.createdList.push(a);
 	}
 
@@ -370,9 +373,9 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	scene.events.on('playerhit', d => {
 		//Get HP score from max between players
 		for(var i = 0, p = world.findActorsByTagName('player',true), hp = 0; i < p.length; i++) {
-			hp = Math.max(p[i].flags.heartPoints, hp);
+			hp = Math.max(p[i].flags.heartPoints-1, hp);
 		}
-		scene.data.Statistics.hp = hp - 1;
+		scene.data.Statistics.hp = hp;
 	});
 	
 	//Update texts
@@ -434,16 +437,27 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	
 	//Multiplayer syncs
 	scene.events.on('objectparried', evtdata => {
-		if(game.Multiplayer.isGuest) {
+		if(evtdata[2] == "send") {
+			var target = game.Multiplayer.target();
+			game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['objectparried',[evtdata[0],evtdata[1],target]]);
+		}
+		else if(evtdata[2] == game.Multiplayer.session) {
 	  	var obj = world.findActorById(evtdata[0],true),
 	  	byplyr = world.findActor(evtdata[1],true);
 	  	if(obj && !obj.destroyed && byplyr && obj.onParry) obj.onParry(byplyr);
 		}
 	});
 	scene.events.on('enemydeath', evtdata => {
-		if(game.Multiplayer.isGuest) {
-	  	var obj = world.findActorById(evtdata[0],true);
-	  	if(obj && !obj.destroyed && obj.onDeath) obj.onDeath();
+		if(evtdata[1] == "send") {
+			var target = game.Multiplayer.target();
+			game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['enemydeath',[evtdata[0], target]]);
+		}
+		else if(evtdata[1] == game.Multiplayer.session) {
+			var obj = world.findActorById(evtdata[0],true);
+			if(obj && !obj.evt_destroy && obj.onDeath) {
+				obj.evt_destroy = true;
+				obj.onDeath();
+			}
 		}
 	});
 

@@ -1,0 +1,25 @@
+{
+	"qm_a_intro": {
+		"indices":[0,1,2,3,4],"speed":24
+	},
+	"qm_a_death": {
+		"indices": [4,3,3,1,0],"speed":24
+	},
+	"qm_a": {
+		"indices":[5,6],"speed":12
+	},"qm_b_intro": {
+		"indices":[7,8,9,10,11],"speed":24
+	},
+	"qm_b_death": {
+		"indices": [11,10,9,8,7],"speed":24
+	},"qm_b": {
+		"indices":[12,13],"speed":12
+	},"qm_c_intro": {
+		"indices":[14,15,16,17,18],"speed":24
+	},
+	"qm_c_death": {
+		"indices": [18,17,16,15,14],"speed":24
+	},"qm_c": {
+		"indices":[19,20],"speed":12
+	}
+}

@@ -123,13 +123,13 @@
 							'bitmap'
 						)
 					);
-					c.upload();
+					
 				}
 				var fr = new b5.Raw('frames', b5.Paths.assets + 'screenfx/screenfx.frames.json', true, frames =>{
 					scfx.atlas.parseFrames(frames, true)
 				},true);
 				app.addFilter(b5.Filters.screenfx.filter);
-				omp._av = false;
+				b[b.length-1].onload=a => omp._av = false;
 			}, app.dt);
 		}
 	};

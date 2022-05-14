@@ -1,11 +1,11 @@
-&f[#31C6D9]@!Mr.Sonic12649S&f
+&f[#31C6D9]@!Mr.Sonic12649S:&f
 - Admin & Helper
-&f[#5B2076]@LeTiky&f
+&f[#E84F62]@LeTiky:&f
 - GUI Buttons Art
-&f[#5B2076]@Azukar&f
+&f[#E84F62]@Azukar:&f
 - Spanish Fight Texts Art
-&f[#D6680E]@Alphax    @Jerecraft&f
-&f[#D6680E]@! Alex    @red death&f
+&f[#D6680E]@Alphax    @red death&f
+&f[#D6680E]@! Alex      @TheMineroMCD:&f
 - Beta Tester
 &f[,,,9,0.9,0.9]... And all the members of 
 the Discord Server, and You!&f

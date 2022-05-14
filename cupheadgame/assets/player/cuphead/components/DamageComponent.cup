@@ -60,14 +60,21 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	};
 	
 	//Stop damage on guest
-	game.Multiplayer.isGuest && (flags.hittable = false);
+	flags.hittable = game.Multiplayer.canExecute(thisPlayer);
 	
+	let evtPlayer = thisPlayer;
 	scene.events.on('playerhit', evtdata => {
-		if(evtdata[2] && game.Multiplayer.isGuest && thisPlayer.name == evtdata[0]) {
-			flags.intangible = false;
-			flags.heartPoints = evtdata[1];
-			flags.damageHit = true;
-			thisPlayer.onEnemyHit();
+		if(evtPlayer.name == evtdata[0]) {
+			if(evtdata[2] == "send") {
+				var target = game.Multiplayer.target();
+				game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playerhit',[evtdata[0], evtdata[1], target]]);
+			}
+			else if(evtdata[2] == game.Multiplayer.session) {
+				flags.intangible = false;
+				flags.heartPoints = evtdata[1];
+				flags.damageHit = true;
+				thisPlayer.onEnemyHit();
+			}
 		}
 	});
 	
@@ -82,10 +89,6 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
      	flags.parryActive = false;
      	flags.dashing = false;
      	thisPlayer.onEXAnimEnded(true);
-     	
-     	scene.events.dispatch('playerhit',[thisPlayer.name, flags.heartPoints,0]);
-     	//Sync
-     	game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['playerhit',[thisPlayer.name,flags.heartPoints,1]]);
      	
      	data.spawnPlayerParticle('playerHitFX',thisPlayer);
      	

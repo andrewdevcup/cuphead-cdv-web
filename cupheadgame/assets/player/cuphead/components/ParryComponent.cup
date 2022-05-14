@@ -15,12 +15,17 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		scene.findResource('PlayerParryPowerUpSfx2','sound')
 	],
 	parryPowerUpFullSfx = scene.findResource('PlayerParryPowerUpFull','sound'),
-	atlas = thisPlayer.findActor('AtlasImage','brush');
+	atlas = thisPlayer.findActor('AtlasImage','brush'),
+	parryScoreSync = 0;
 	
 	
-	//Guest events
+	//Events
 	scene.events.on('playerparry', evtdata => {
-		if(evtdata[3] && game.Multiplayer.isGuest && thisPlayer.name == evtdata[0]) {
+		if(evtdata[3] == "send") {
+			var target = game.Multiplayer.target();
+			game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playerparry',[evtdata[0], evtdata[1], evtdata[2], target]]);
+		}
+		else if(evtdata[3] == game.Multiplayer.session && thisPlayer.name == evtdata[0]) {
 			thisPlayer.data.supermeter = evtdata[2];
 			!flags.successfulParry && thisPlayer.parry(evtdata[1]);
 		}
@@ -42,10 +47,9 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		parrySlapSfx[b5.Maths.randomRange(0,1)].play();
 		
 		//Sync
-		scene.events.dispatch('playerparry',[thisPlayer.name, parryScore, thisPlayer.data.supermeter, 0]);
-		
-		game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['playerparry',[thisPlayer.name, parryScore, thisPlayer.data.supermeter, 1]]);
-		
+		parryScoreSync = parryScore || 0;
+		scene.events.dispatch('playerparry',[thisPlayer.name, parryScore, thisPlayer.data.supermeter, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+
 		//Add score
 		parryScore >= 100 && data.addScore('parry',1);
 		

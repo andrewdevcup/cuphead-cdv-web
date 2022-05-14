@@ -9,13 +9,15 @@ b5.Game.GameDefIDs = {
 		"1466416941": "charge",
 		"1466518900": "roundabout",
 		"1457006169": "unused?",
+		"fan-exploder": "exploder",
 		"empty": 2147483647,
 		"peashooter": 1456773641,
 		"spread": 1456773649,
 		"chaser": 1460621839,
 		"lobber": 1467024095,
 		"roundabout": 1466518900,
-		"unused?": 1457006169
+		"unused?": 1457006169,
+		"exploder": "fan-exploder"
 	},
 	charms: {
 		"2147483647": "empty",

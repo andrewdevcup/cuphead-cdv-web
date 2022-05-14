@@ -1,0 +1,125 @@
+{
+	"health": 1200,
+	"maxHealth": 1200,
+	"difficultyAndPhases": [
+		{
+			"damageMultiplier": 1.09091,
+			"data": {
+				"slime": {
+					"jumpChargeTime": 0.4,
+					"randomJumpChargeTime": 0.55,
+					"randomJumpChargeChance": 0.1,
+					"jumpSpeed": 105,
+					"lowJumpRange": 3,
+					"randomJumpSpeed": 115,
+					"horizSpeed": 45,
+					"punchAfterRandomJumpCount": [4,6],
+					"punchWait": 0.5,
+					"maxHp": 1200,
+					"morphHp": 600,
+					"gravity_scale": 0.86
+				},
+				"lg_slime": {
+					"jumpChargeTime": 0.55,
+					"randomJumpChargeTime": 0.65,
+					"randomJumpChargeChance": 0.2,
+					"jumpSpeed": 102,
+					"lowJumpRange": 4,
+					"randomJumpSpeed": 115,
+					"horizSpeed": 40,
+					"punchAfterRandomJumpCount": [4,6],
+					"blinkCount": 4,
+					"punchWait": 0.8,
+					"morphHp": 0,
+					"gravity_scale": 0.86
+				}
+			},
+			"phases": [
+				{
+					"health": 0,
+					"deathCardMessage": "slime",
+					"mugshot": {
+						"bitmap": "SlimeMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 600,
+					"deathCardMessage": "lg-slime",
+					"mugshot": {
+						"bitmap": "LgSlimeMugshot",
+						"offset": [-19,0]
+					}
+				}
+			]
+		},
+  	{
+			"damageMultiplier": 0.97,
+			"data": {
+				"slime": {
+					"jumpChargeTime": 0.3,
+					"randomJumpChargeTime": 0.45,
+					"randomJumpChargeChance": 0.1,
+					"jumpSpeed": 105,
+					"lowJumpRange": 4,
+					"randomJumpSpeed": 115,
+					"horizSpeed": 45,
+					"punchAfterRandomJumpCount": [4,6],
+					"punchWait": 0.5,
+					"maxHp": 1200,
+					"morphHp": 820,
+					"gravity_scale": 0.9
+				},
+				"lg_slime": {
+					"jumpChargeTime": 0.45,
+					"randomJumpChargeTime": 0.55,
+					"randomJumpChargeChance": 0.2,
+					"jumpSpeed": 102,
+					"lowJumpRange": 5,
+					"randomJumpSpeed": 115,
+					"horizSpeed": 40,
+					"punchAfterRandomJumpCount": [3,5],
+					"blinkCount": 4,
+					"punchWait": 0.73,
+					"morphHp": 350,
+					"gravity_scale": 0.9,
+					"phase3TransitionTime": 3.6
+				},
+				"tombstone": {
+					"maxHp": 350,
+					"horizSpeed": 60,
+					"smashWait": 0.4,
+					"smashAfterRandomTurnsCount": [3,4],
+					"acceleration": 0.08
+				}
+			},
+			"phases": [
+				{
+					"health": 0,
+					"deathCardMessage": "slime",
+					"mugshot": {
+						"bitmap": "SlimeMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 380,
+					"deathCardMessage": "lg-slime",
+					"mugshot": {
+						"bitmap": "LgSlimeMugshot",
+						"offset": [-19,0]
+					}
+				},
+				{
+					"health": 850,
+					"deathCardMessage": "tomb",
+					"mugshot": {
+						"bitmap": "TombSlimeMugshot",
+						"offset": [0,0]
+					}
+				}
+			]
+		},
+		{}
+	]
+}

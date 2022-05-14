@@ -1,0 +1,111 @@
+{
+	"bitmap": [
+		{
+			"automatize": {
+				"name": "TombBitmap%i",
+				"start": 0,
+				"end": 3,
+				"pad": 1,
+				"src": "scenes/slime/tomb/SpriteAtlasTexture_Tomb-#.png"
+			}
+		},
+		{
+			"automatize": {
+				"name": "TombDustBitmap%i",
+				"start": 0,
+				"end": 2,
+				"pad": 1,
+				"src": "scenes/slime/tombDust/SpriteAtlasTexture_TombDust-#.png"
+			}
+		},
+		{
+			"automatize": {
+				"name": "SlimeExplodeBitmap%i",
+				"start": 1,
+				"end": 16,
+				"pad": 4,
+				"src": "scenes/slime/slimeExplode/lg_slime_explode_####.png"
+			}
+		}
+	],
+	"brush": [
+		{
+			"name": "TombAtlas",
+			"bitmaps": {
+				"start": 0,
+				"end": 3,
+				"name-prefix": "TombBitmap%i"
+			},
+			"frames": "scenes/slime/tomb/SpriteAtlasTexture_Tomb.csv",
+			"anims": "scenes/slime/tomb/tomb.anims.json"
+		},
+		{
+			"name": "TombDustAtlas",
+			"bitmaps": {
+				"start": 0,
+				"end": 2,
+				"name-prefix": "TombDustBitmap%i"
+			},
+			"frames": "scenes/slime/tombDust/SpriteAtlasTexture_TombDust.csv",
+			"anims": "scenes/slime/tombDust/tombDust.anims.json"
+		},
+		{
+			"name": "SlimeExplodeAtlas",
+			"bitmaps": {
+				"start": 1,
+				"end": 16,
+				"name-prefix": "SlimeExplodeBitmap%i"
+			},
+			"frames": "scenes/slime/slimeExplode/lg_slime_explode.csv"
+		}
+	],
+	"sound": [
+		{
+			"name": "TombFallSfx",
+			"src": "scenes/slime/AudioClip/sfx_slime_tombstone_drop_onto_slime.ogg",
+			"category": "sfx"
+		},
+		{
+			"automatize": {
+				"name": "TombstoneSlideSfx%i",
+				"start": 1,
+				"end": 5,
+				"pad": 2,
+				"src": "scenes/slime/AudioClip/sfx_slime_tombstone_slide_##.ogg",
+				"category": "sfx",
+				"reuse": true
+			}
+		},
+		{
+			"automatize": {
+				"name": "TombstoneTauntSfx%i",
+				"start": 1,
+				"end": 5,
+				"pad": 2,
+				"src": "scenes/slime/AudioClip/sfx_slime_tombstone_taunts_##.ogg",
+				"category": "sfx",
+				"reuse": true
+			}
+		},
+		{
+			"name": "TombstoneDeathSfx",
+			"category": "sfx"
+		},
+		{
+			"name": "TombstoneSplatStartSfx",
+			"src": "scenes/slime/AudioClip/sfx_slime_tombstone_splat_start.ogg",
+			"category": "sfx"
+		},
+		{
+			"automatize": {
+				"name": "TombstoneSplatSfx%i",
+				"start": 1,
+				"end": 5,
+				"pad": 2,
+				"src": "scenes/slime/AudioClip/sfx_slime_tombstone_splat_01.ogg",
+				"category": "sfx",
+				"reuse": true
+			}
+		}
+	]
+}

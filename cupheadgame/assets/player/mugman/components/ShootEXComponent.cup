@@ -86,8 +86,14 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	
 	//Guest events
 	scene.events.on('playerex', evtdata => {
-		if(evtdata[4] && game.Multiplayer.isGuest && thisPlayer.name == evtdata[0]) {
-			!flags.shootingEX && thisPlayer.startEX(evtdata[1],evtdata[2],evtdata[3]);
+		if(thisPlayer.name == evtdata[0]) {
+			if(evtdata[4] == "send") {
+				var target = game.Multiplayer.target();
+				game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playerex',[evtdata[0],evtdata[1],evtdata[2],evtdata[3],target]]);
+			}
+			else if(evtdata[4] == game.Multiplayer.session) {
+				!flags.shootingEX && thisPlayer.startEX(evtdata[1],evtdata[2],evtdata[3]);
+			}
 		}
 	});
 
@@ -104,9 +110,9 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				shootex = btnY;
 
 				if (shootex && !flags.shootingEX) {
-					//Sync guest
-					scene.events.dispatch('playerex',[thisPlayer.name,thisPlayer.data.supermeter,0]);
-					game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['playerex',[thisPlayer.name, thisPlayer.data.supermeter,axis_x,axis_y,1]]);
+				
+					//Sync
+					scene.events.dispatch('playerex',[thisPlayer.name, Math.round1000(thisPlayer.data.supermeter), axis_x, axis_y, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
 					
 					thisPlayer.startEX(thisPlayer.data.supermeter,axis_x,axis_y);
 				}

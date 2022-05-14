@@ -70,8 +70,8 @@ return {
 				  
 				  potato.atlas = scene.findResource('PotatoAtlas','brush');
 				  world.PlayerLayer.addActor(potato);
-				  potato.setPosition(365,10);
-				  potato._scale = 1.25;
+				  potato.setPosition(365,9.6);
+				  potato._scale = 1.27;
 				  potato.layer = 2;
 				  potato.visible = false;
 				  
@@ -259,7 +259,7 @@ return {
 				 	scene.events.off(potato.allplayersdeadevent);
 				  	
 				 	//Use hitbox as mask
-				 	potato.hitbox.setSize(500,555);
+				 	potato.hitbox.setSize(500,563);
 				 	potato.hitbox._y -= 1
 			  	potato.hitbox.visible = true;
 				 	potato.setMask(potato.hitbox);
@@ -319,7 +319,7 @@ return {
 				  var onionHitbox = new b5.ArcActor();
 				  onionHitbox.radius = 185;
 				  onionHitbox.visible = false;
-				  onionHitbox.setPosition(25,110);
+				  onionHitbox.setPosition(25,300);
 				  world.PlayerLayer.addActor(onionHitbox);
 				  onionHitbox.initBody('collider');
 				  onionHitbox.addFixtureSelf();
@@ -380,6 +380,13 @@ return {
 				  	onion.visible = true;
 				  	onion.turns = 0;
 				  	onion.hitbox.tags = ["enemy","hittableEnemy"];
+				  	
+				  	var tw = new b5.Tweener(onion.hitbox.body.m_xf.position,'y',null,300/scene.world_scale,110/scene.world_scale,0.2,b5.Ease.linear,0,onion);
+				  	tw.onTick = function() {
+				  		onion.hitbox.setPosition(onion.hitbox.x,onion.hitbox.body.m_xf.position.y*scene.world_scale);
+				  	}
+				  	tw.start();
+
 				  	onion.setTimeout(a => {
 				  		onion.dirtA.visible = true;
 				  		onion.dirtA.playAnim('onion_dirt');
@@ -391,7 +398,7 @@ return {
 				  		var turns = 0;
 				  		//Look
 				  		!data.players_dead && onion.setInterval(r => {
-				  			r.wait = 0.85;
+				  			r.wait = 0.75;
 				  			turns++;
 				  			if(turns <= onion.data.turnsCountBashful) {
 				  				turns == onion.data.turnsCountBashful && (r.wait = 0.35); //Faster
@@ -399,7 +406,7 @@ return {
 				  			}
 				  			data.playEvent('OnionBashful');
 				  			
-				  		},0.65);
+				  		},0.6);
 				  	});
 				  },0.92);
 				  
@@ -672,6 +679,7 @@ return {
 				  world.Layer6.addActor(carrot);
 				  carrot.setPosition(0,-120);
 				  carrot._scale = 1.25;
+				  carrot._scale_x = 1.33;
 				  carrot._layer = 2;
 				  carrot.visible = false
 				  
@@ -692,6 +700,7 @@ return {
 				  carrot.eyes.atlas = carrot.atlas;
 				  world.Layer6.addActor(carrot.eyes);
 				  carrot.eyes._scale = 1.25;
+				  carrot.eyes._scale_x = 1.33;
 				  carrot.eyes._layer = 3;
 				  carrot.eyes.visible = false;
 				  carrot.eyes._y = -190;
@@ -819,7 +828,7 @@ return {
 						timesShoot++;
 					  if(timesShoot <= carrot.data.ringsShoot) {
 							var particle = carrot.addHypnoChargeParticle();
-							particle.onEnd = (ax,ay) => carrot.hp > 0 && data.playEvent('CarrotShootBeam',[ax,ay,target.x,target.y, timesShoot == carrot.data.ringsShoot?1:0]);
+							particle.onEnd = (ax,ay) => carrot.hp > 0 && target && data.playEvent('CarrotShootBeam',[ax,ay,target.x,target.y, timesShoot == carrot.data.ringsShoot?1:0]);
 					  }
 					  else carrot.clearInterval(t.name);
 					},carrot.data.carrotHypnoRingRythm);
@@ -903,7 +912,8 @@ return {
 		}
 		
 		//Basic defeat manager
-		var dead = false;
+		var dead = false,
+		bossData;
 
 		thisActor.onTick = function() {
 			bossData = scene.data.bossData; //Fix object error in guest

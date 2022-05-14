@@ -31,8 +31,9 @@ return {
 				t.onOffscreen();
 			});
 			
-			//Multiplayer
-			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+			//Sync Multiplayer
+			scene.events.dispatch('enemydeath',[this.id, 'send']);
+			
 		}
 		
 		j.setTimeout(t => {
@@ -76,8 +77,8 @@ return {
 				t.onOffscreen();
 			});
 			
-			//Multiplayer
-			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+			//Sync Multiplayer
+			scene.events.dispatch('enemydeath',[this.id, 'send']);
 		}
 		
 		j.onParry = j.onPlayerHit;
@@ -106,7 +107,7 @@ return {
 		b._layer = 4;//data.layer;
 		b.setPosition(data.pos.x,data.pos.y);
 		b.data = data.data;
-		b._scale = 0.92;
+		b._scale = 0.96;
 		
 		b.id = b.data.id;
 		
@@ -130,8 +131,8 @@ return {
 				t.destroyProjectile();
 			});
 			
-			//Multiplayer
-			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+			//Sync Multiplayer
+			scene.events.dispatch('enemydeath',[this.id, 'send']);
 		}
 		
 		var enemyHitShader = scene.findResource('EnemyHitShader','shader');
@@ -215,8 +216,8 @@ return {
 				t.destroyProjectile();
 			});
 			
-			//Multiplayer
-			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+			//Sync Multiplayer
+			scene.events.dispatch('enemydeath',[this.id, 'send']);
 		}
 		
 		b.onTick = function() {
@@ -268,8 +269,8 @@ return {
 			this.tags = [];
 			!this.in_floor && this.release(true);
 			
-			//Multiplayer
-			game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+			//Sync Multiplayer
+			scene.events.dispatch('enemydeath',[this.id, 'send']);
 		}
 		
 		b.onParry = b.destroyProjectile;

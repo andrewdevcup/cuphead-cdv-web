@@ -12,14 +12,14 @@ return {
 		//After sting, load winscreen or any other scene
 		//If winscreen, pass statistics and players to evaluate grade
 		scene.events.once('onfightwin:nextscene', ()=>{
-			b5.Game.LoadScene('winscreen', 0, 0, {
+			!game.Multiplayer.isGuest && b5.Game.LoadScene('winscreen', 0, 0, {
 				show_anim: 'fade',
 				show_speed: 2,
 				hide_anim: 'fade',
 				hide_speed: 0.35,
 				hourglass: false
 			}, {
-				stats: scene.data.Statistics,
+				stats: Object.clone(scene.data.Statistics),
 				players: scene.data.players.activePlayers,
 				fromLevelID: data.levelID
 			});
@@ -31,7 +31,7 @@ return {
 		
 		data.playEvent = function(evt, evtData, eventFromHost) {
 			if(game.Multiplayer.isHosting)
-				game.Multiplayer.sendToGuest('PLAY_EVENT',[evt,evtData,'scene',true]);
+				game.Multiplayer.sendToGuest('PLAY_EVENT',[evt,evtData]);
 				
 			if(!game.Multiplayer.isGuest || eventFromHost) switch(evt) {
 				default:
@@ -40,7 +40,8 @@ return {
 		}
 		
 		//Basic defeat manager
-		var dead = false;
+		var dead = false,
+		bossData;
 
 		thisActor.onTick = function() {
 			bossData = scene.data.bossData; //Fix object error in guest
@@ -50,8 +51,8 @@ return {
 				
 				if (bossData.health <= 0 && !dead) {
 					dead = true;
-					thisActor.onDeath && thisActor.onDeath();
-					scene.data.onBossDeath && scene.data.onBossDeath();
+					
+					data.playEvent('Knockout'); //Handler
 				}
 			}
 			

@@ -185,8 +185,8 @@ b5.LoadScene = function(world, scene, data, game) {
 		//Set atlas
 		plynth0.current_frame = 16; //After pyramid was destroyed
 		
-		//Multiplayer
-		game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['enemydeath',[this.id]]);
+		//Sync Multiplayer
+		scene.events.dispatch('enemydeath',[this.id, 'send']);
 	}
 	
 	plynth0Tar.onBulletHit = function(bullet) {

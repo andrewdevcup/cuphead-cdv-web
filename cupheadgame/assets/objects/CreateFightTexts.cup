@@ -4,7 +4,7 @@ b5.export = function(world, scene, data, game) {
 	//Load sequences
 
 myexports.loadResources = function() {
-	var special = game.cfg.Language.lang == "es" ? b5.Maths.randomChance(1/50) ? '-AZUKAR' : '' : '',
+	var special = game.cfg.Language.lang == "es" ? b5.Maths.randomChance(1/10) ? '-AZUKAR' : '' : '',
 	basePath = b5.Paths.sceneRes + 'common_bosslevel/FightText/',
 	readyRes = basePath + 'GetReady' + special + '/SpriteAtlasTexture_GetReady-',
 	KOres = basePath + 'KO/SpriteAtlasTexture_Knockout-0.png';

@@ -89,9 +89,9 @@ ArrayBuffer.detach = function(a) {
 
 //Fix fetch if File plugin is installed
 
-globalThis._fetch = globalThis.fetch;
+self._fetch = self.fetch;
 
-globalThis.fetch = function(url, options) {
+self.fetch = function(url, options) {
 	return new Promise((re, rj) => {
 		const r = new XMLHttpRequest();
 		re({

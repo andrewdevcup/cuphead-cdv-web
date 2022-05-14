@@ -7,6 +7,10 @@
 		"dialogs": [],
 		"script": "scripts/veggies.cup"
 	},
+	"NPC_Slime": {
+		"dialogs": [],
+		"script": "scripts/slime.cup"
+	},
 	"NPC_Shop": {
 		"dialogs": [],
 		"script": "scripts/shop.cup"

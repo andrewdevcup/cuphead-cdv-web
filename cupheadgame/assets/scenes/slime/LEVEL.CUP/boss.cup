@@ -1,0 +1,1269 @@
+return {
+	BossObject: function(thisActor, world, scene, data, game) {
+		
+		var difficulty = scene.data.Statistics.skill,
+		currentPhase = data.bossData.difficultyAndPhases[difficulty];
+		
+		//Explosions after Knockout
+		thisActor.onDeath = function() {
+			scene.events.once('after-knockout',()=>{
+				var sb = data.levelData.currentPhase != "Tombstone" ? data.SlimeBoss.hitbox : data.TombstoneBoss;
+				scene.data.createBossExplosionsEmitter(sb.x,sb.y,180,10);
+			});
+		};
+		
+		var enemyHitShader = scene.findResource('EnemyHitShader','shader');
+		
+		data.levelData.currentPhase = "smSlime";
+		
+		data.levelData.id = 0;
+		data.getId = function() {
+			//Generate and increment an id for enemies
+			//It'll be used to identify objects on local mp
+			return data.levelData.id++;
+		}
+		
+		//After sting, load winscreen or any other scene
+		//If winscreen, pass statistics and players to evaluate grade
+		scene.events.once('onfightwin:nextscene', ()=>{
+			!game.Multiplayer.isGuest && b5.Game.LoadScene('winscreen', 0, 0, {
+				show_anim: 'fade',
+				show_speed: 2,
+				hide_anim: 'fade',
+				hide_speed: 0.35,
+				hourglass: false
+			}, {
+				stats: Object.clone(scene.data.Statistics),
+				players: scene.data.players.activePlayers,
+				fromLevelID: data.levelID
+			});
+		});
+		
+		scene.events.on('playEvent',e =>data.playEvent(e[0],e[1],true));
+		
+		
+		//Sensor hitbox
+		var ar = data.transitionArea = new b5.RectActor();
+		ar.setSize(600,250);
+		world.PlayerLayer.addActor(ar);
+		ar.initBody('collider',true);
+		ar.addFixtureSelf();
+		ar.tag = "TransitionArea";
+		ar.visible = false;
+		
+		//Event system to synchronize host and guest
+		
+		data.playEvent = function(evt, evtData, eventFromHost) {
+			if(game.Multiplayer.isHosting)
+				game.Multiplayer.sendToGuest('PLAY_EVENT',[evt,evtData]);
+				
+			if(!game.Multiplayer.isGuest || eventFromHost) switch(evt) {
+				case 'SlimeIntro':
+					if(data.SlimeBoss) return;
+					
+					var slime = data.SlimeBoss = new b5.Actor(),
+					sHitbox = new b5.ArcActor();
+					
+					sHitbox.x = 370;
+					sHitbox.fill_style = "transparent";
+					sHitbox.layer = 3;
+					
+					slime.hitbox = sHitbox;
+					
+					sHitbox.Sprite = slime;
+					
+					sHitbox.radius = 90;
+					slime.atlas = scene.findResource('SlimeAtlas','brush');
+					slime.playAnim('idle',true);
+					
+					sHitbox.addActor(slime);
+					
+					slime.Hitboxes = [];
+					
+					slime.addHitbox = function(type) {
+						var hb = new b5[type+'Actor']();
+						hb.setPosition(this.hitbox.x,this.hitbox.y);
+						hb.setSize(10,10);
+						hb.radius = 10;
+						this.hitbox.parent.addActor(hb);
+						hb.initBody('collider',true);
+						hb.tags = ["enemy","hittableEnemy"];
+						hb.disableCollision(this.hitbox);
+						hb.addFixtureSelf();
+						hb._layer = 10;
+						hb.opacity = 0.5;
+						
+						hb.visible = !!game.Flags.debugShowHitboxes;
+						
+						hb.onBulletHit = this.onBulletHit;
+						
+						hb.offset_x = hb.offset_y = 0;
+						hb.offset_w = hb.offset_h = 1;
+						hb.A_rotation = 0;
+						
+						this.Hitboxes.push(hb);
+						
+						return hb;
+					};
+					
+					slime.clearHitboxes = function(exceptActors) {
+						for(var i = 0; this.Hitboxes.length > i;) {
+							if(exceptActors && exceptActors.indexOf(this.Hitboxes[i]) != -1) i++;
+							else {
+								this.Hitboxes[i].release(true);
+								this.Hitboxes.shift();
+							}
+						}
+					};
+					
+					slime.hitbox.onBodyUpdate = function() {
+						for(var i = 0, h = this.Sprite.Hitboxes; i < h.length; i++) {
+							h[i].setPosition(this.x + h[i].offset_x, this.y + h[i].offset_y);
+							h[i].setRotation(h[i].A_rotation);
+							h[i].type !== b5.Actor.Type_Arc && h[i].setSize(h[i].offset_w, h[i].offset_h);
+						}
+					};
+					
+					var punchsns = slime.sensorHitbox = new b5.RectActor();
+					punchsns.setSize(1200,500);
+					punchsns.x = sHitbox.x;
+					punchsns.visible = false;
+					
+					slime.facing = -1;
+					slime.data = currentPhase.data.slime;
+					slime.maxHp = slime.hp = slime.data.maxHp;
+					slime.invincible = false;
+					
+					data.currentPhaseBoss = slime;
+					
+					slime.onBulletHit = function(bullet) {
+				  	slime.addFilter(enemyHitShader.filter);
+				  	slime.setTimeout(t=>{
+				  		t.data.removeFilter(enemyHitShader.filter);
+				  	},0.07);
+				  	
+				  	if(!slime.invincible) {
+				  		slime.hp -= bullet.damage * currentPhase.damageMultiplier;
+				  		data.bossData.health -= bullet.damage * currentPhase.damageMultiplier;
+				  	}
+				  	
+				  	switch(data.levelData.currentPhase) {
+				  		case "smSlime":
+				  			if(slime.hp < slime.data.morphHp) {
+						  		slime.invincible = true;
+						  		
+						  		if(slime.inTransitionArea) data.levelData.currentPhase = "smSlimeTransition";
+						  	}
+				  			break;
+				  		case "lgSlime":
+				  			if(slime.hp < slime.data.morphHp) {
+						  		data.levelData.currentPhase = "lgSlimeTransition-ph3-pre";
+						  		slime.invincible = true;
+						  		
+						  		//Play events
+						  	}
+						  	break;
+						  case "lgSlimeTransition-ph3-pre":
+						  	if(slime.inAir && slime.hitbox.body.m_linearVelocity.y >=	0) {
+						  		//Play anim and transition event
+						  		data.playEvent('LG_SlimeTransitionPH3',[slime.hitbox.x,slime.hitbox.y,slime.facing]);
+						  	}
+						  	break;
+				  	}
+					};
+					
+					/**/
+					
+					sHitbox.onBulletHit = slime.onBulletHit;
+					
+					world.PlayerLayer.addActor(sHitbox);
+					sHitbox.initBody('dynamic',true);
+					sHitbox.addFixtureSelf();
+					
+					sHitbox.body.m_gravityScale.y = slime.data.gravity_scale;
+					
+					//Base hitbox (for damage and events)
+	
+					
+					world.PlayerLayer.addActor(punchsns);
+					punchsns.initBody('dynamic');
+					
+					var pfx = punchsns.getFixtureSelf();
+					pfx.is_sensor = true;
+					
+					punchsns.addFixture(pfx);
+					
+					punchsns.body.m_invMass =1;
+					
+					punchsns.weldBodyTo(sHitbox);
+					
+					//Disable collisions
+					for(var i = 0, a = data.getActivePlayers(); i < a.length; i++) {
+						sHitbox.disableCollision(a[i]);
+					}
+					
+					slime.pAddEvt = scene.events.on('playeradded', player => {
+						slime.disableCollision(player);
+					});
+					
+					scene.events.on('allplayersdead', a => {
+						if(data.levelData.currentPhase != "Tombstone") {
+							slime.tasks.clear();
+							slime.removeFilter();
+			 			  slime.hitbox.body.SetActive(false);
+						}
+						else {
+							data.TombstoneBoss.tasks.clear();
+							data.TombstoneBoss.body.SetActive(false);
+						}
+					});
+					
+					slime.setTimeout(s => {
+						s.data.playAnimWithEnd('intro', g => {
+							g.playAnim('idle',true);
+							
+							g.setTimeout(m=>data.playEvent('SlimeJumpPrepare',[g.hitbox.x,g.hitbox.y,g.facing]),0.2)
+						});
+					},1.2);
+					
+					slime.prev_vy = 0;
+					slime.inAir = false;
+					slime.lastFacing = -1;
+					slime.jumps = 0;
+					slime.bigjump = false;
+					slime.inTransitionArea = false;
+					
+					slime.smallAnimController = slime.setInterval(s => {
+						var _this = s.data,
+						ols = _this.hitbox.A_overlaps,
+						air = true,
+						wall = false,
+						wallX = 0,
+						y = Math.sign(Math.round(_this.hitbox.body.m_linearVelocity.y));
+						
+						if(!data.levelData.fightStarted) return;
+						
+						slime.inTransitionArea = false;
+						
+						for(var i = 0; i < ols.length; i++) {
+							if(ols[i].tags.indexOf('floor') != -1 && air) air = false;
+							if(ols[i].tags.indexOf('wall') != -1 && !wall) {
+								wall = true;
+								wallX = ols[i].x > _this.hitbox.x ? 1 : -1;
+							}
+							if(ols[i].tag == "TransitionArea" && !slime.inTransitionArea)	slime.inTransitionArea = true;
+						}
+						
+						//Facing test
+						if(_this.current_anim.indexOf('turn') == -1) _this._scale_x = -_this.facing;
+					
+						if(_this.wallCollide != wall) {
+							_this.wallCollide = wall;
+							
+							//Wall state change
+							if(wall) {
+								y < b5.Maths.randomRange(1,2) && (_this.hitbox.body.m_linearVelocity.x = _this.data.horizSpeed * -wallX);
+								if(y > 0) { //Going down
+									_this.inAir && _this.playAnimWithEnd('jump_down_turn', sl => {
+										sl.scale_x *= -1;
+										sl.playAnim('jump_'+(sl.hitbox.body.m_linearVelocity.y>0?'down':'up'),true);
+										sl.dirty();
+									});
+									_this.facing = -wallX;
+									!_this.inAir && (_this._scale_x = -wallX);
+								}
+								//Going up and touching the wall
+								else {
+									_this.inAir && _this.playAnimWithEnd('jump_up_turn', sl => {
+										sl.scale_x *= -1;
+										sl.playAnim('jump_'+(sl.hitbox.body.m_linearVelocity.y>0?'down':'up'),true);
+										sl.dirty();
+									});
+									_this.facing = -wallX;
+									!_this.inAir && (_this._scale_x = -wallX);
+								}
+								return;
+							}
+							else if(_this.current_anim.indexOf("turn") == -1 && _this.facing == wallX) {
+								//If no air turn but facing wall, flip
+								_this._scale_x = -wallX;
+								_this.facing = -wallX;
+							}
+							
+						}
+						if(_this.inAir != air) {
+							_this.inAir = air;
+							
+							//Air state change
+							if(!air) {
+								data.shakeCamera(5,0,1);
+								data.playEvent('SlimeDoNext',[_this.hitbox.x,_this.hitbox.y,_this.facing, slime.inTransitionArea ? 1:0,data.levelData.currentPhase]);
+								
+								//Sfx
+								scene.findResource('SlimeSmallLandSfx'+b5.Maths.randomRange(1,5),'sound').play();
+							
+								//Particle
+					    	data.spawnParticle('smDust' + (_this.bigjump ? 'B':'A'),_this.hitbox);
+								return;
+							}
+						}
+						
+						if(y != _this.prev_vy) {
+							_this.prev_vy = y;
+							
+							//Speed Y sign change (up/down)
+							if(y > 0 && _this.inAir && _this.current_anim.indexOf('turn') == -1 ) _this.playAnimWithEnd('jump_up_down_trans',d => d.playAnim('jump_down',true));
+						}
+						
+						
+					},0);
+					
+					break;
+				case 'SlimeJumpPrepare':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2];
+					
+					slime.hitbox.setPosition(pos.x,pos.y);
+					
+					slime.hitbox.body.m_linearVelocity.x = 0;
+					slime.hitbox.body.m_linearVelocity.y = 0;
+					
+					slime.facing = facing;
+					slime._scale_x = -facing;
+					
+					//Hitboxes
+					{
+						let bh = slime.addHitbox('Arc');
+						bh.radius = 90;
+					}
+					
+					var isChance = b5.Maths.randomChance(slime.data.randomJumpChargeChance);
+		   		slime.bigjump = isChance;
+					slime.playAnimWithEnd('jump_intro', s => {
+						s.playAnim('jump_prepare',true);
+						s.setTimeout(m => {
+							slime.playAnimWithEnd('jump_air', a => data.playEvent('SlimeJump',[pos.x,pos.y,facing, isChance?1:0]));
+						}, !isChance ? s.data.jumpChargeTime : s.data.randomJumpChargeTime);
+					});
+					
+					break;
+				case 'SlimeJump':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2],
+					chance = evtData[3];
+					
+					slime.jumps++;
+					
+					slime.hitbox.setPosition(pos.x,pos.y);
+					
+					slime.facing = facing;
+					slime._scale_x = -facing;
+					
+					slime.playAnim('jump_up',true);
+					
+					var lv = slime.hitbox.body.m_linearVelocity,
+					spd = game.speed > 2 ? game.speed : 1;
+					
+					lv.y = (chance == 1 ? -slime.data.randomJumpSpeed :  -slime.data.jumpSpeed + b5.Maths.randomRange(0,slime.data.lowJumpRange))*spd;
+					lv.x = slime.data.horizSpeed * facing * spd;
+					
+					//Sfx
+					scene.findResource('SlimeSmallJumpSfx'+b5.Maths.randomRange(1,4),'sound').play();
+					break;
+				case 'SlimeDoNext':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2],
+					transitionArea = evtData[3],
+					currentPhaseEvt = evtData[4],
+					rjp = null;
+					
+					if(currentPhaseEvt !== void 0) data.levelData.currentPhase = currentPhaseEvt;
+					
+					switch(data.levelData.currentPhase) {
+						case "smSlime":
+							rjp = slime.data.punchAfterRandomJumpCount;
+							
+							slime.clearHitboxes();
+							//If players are on sight, punch
+							if(slime.jumps >= b5.Maths.randomRange(rjp[0],rjp[1])) for(var i = 0, ol = slime.sensorHitbox.A_overlaps, a = data.getActivePlayers(); i < a.length; i++) {
+								var n = ol.indexOf(a[i]),
+								x = a[i].x > slime.sensorHitbox.x ? 1 : -1;
+								if(n != -1 && x == facing) return data.playEvent('SlimePunchPrepare',[pos.x,pos.y,facing]);
+							}
+							
+							data.playEvent('SlimeJumpPrepare',[pos.x,pos.y,facing]);
+							break;
+						case "smSlimeTransition":
+							var slime = data.SlimeBoss;
+							
+							slime.clearHitboxes();
+							
+							//Hitboxes
+							{
+								let bh = slime.addHitbox('Arc');
+								bh.radius = 90;
+								
+								//Animate big
+								bh.setTimeout(m => {
+									bh.TweenTo('radius',160,0.3);
+									bh.TweenTo('offet_y',-40,0.3);
+								},4.4);
+							}
+							
+							if(!transitionArea) data.playEvent('SlimeJumpPrepare',[pos.x,pos.y,facing]);
+							
+							slime.playAnimWithEnd("morph", e => {
+								e.playAnim('lg_idle',true);
+								e.invincible = false;
+								
+								data.playEvent('lgSlimeIntro',[e.hitbox.x,e.hitbox.y,e.facing]);
+							});
+							
+							//Add questionmarks
+							slime.setTimeout(k => {
+								scene.data.createEnemy('questionMark',slime.hitbox.x + 150,slime.hitbox.y-100,1,{id:701,type:'a',float:{x:70,y:-10,s:0.7}});
+								scene.data.createEnemy('questionMark',slime.hitbox.x,slime.hitbox.y-230,1,{id:702,type:'b',float:{x:0,y:-80,s:0.7}});
+								scene.data.createEnemy('questionMark',slime.hitbox.x -150 ,slime.hitbox.y-100,1,{id:703,type:'c',float:{x:-70,y:-10,s:0.7}});
+							},2.6);
+							
+							//Not needed anymore
+							slime.clearInterval(slime.smallAnimController);
+							
+							scene.findResource('SlimeSmallTransformSfx','sound').play();
+							break;
+						case 'lgSlime':
+							var slime = data.SlimeBoss;
+							rjp = slime.data.punchAfterRandomJumpCount;
+							
+							slime.clearHitboxes();
+							
+							//If players are on sight, punch
+							if(slime.jumps >= b5.Maths.randomRange(rjp[0],rjp[1])) for(var i = 0, ol = slime.sensorHitbox.A_overlaps, a = data.getActivePlayers(); i < a.length; i++) {
+								var n = ol.indexOf(a[i]),
+								x = a[i].x > slime.sensorHitbox.x ? 1 : -1;
+								if(n != -1) return data.playEvent('LG_SlimePunchPrepare',[pos.x,pos.y,x,slime.punches]);
+							}
+							
+							data.playEvent('LG_SlimeJumpPrepare',[pos.x,pos.y,facing]);
+							
+							break;
+						case 'lgSlimeTransition-ph3-pre':
+							var slime = data.SlimeBoss;
+							data.playEvent('LG_SlimeTransitionPH3',[slime.hitbox.x,slime.hitbox.y,facing]);
+						  break;
+					}
+					break;
+				case 'SlimePunchPrepare':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2];
+					
+					slime.jumps = 0;
+					slime.hitbox.setPosition(pos.x,pos.y);
+					slime._scale_x = -facing;
+					slime.facing = facing;
+					
+					slime.hitbox.body.m_linearVelocity.x = 0;
+					slime.hitbox.body.m_linearVelocity.y = 0;
+					
+					slime.clearHitboxes();
+					
+					//Hitboxes
+					{
+						let base1 = slime.addHitbox('Rect'),
+						arc1 = slime.addHitbox('Arc');
+						
+						base1.offset_w = 100,
+						base1.offset_h = 100;
+						
+						arc1.radius = 70;
+						
+						arc1.TweenTo('offset_x',-110 * facing, 0.5);
+					}
+					
+					//Anim
+					slime.playAnimWithEnd('jump_intro_to_back', k =>
+						k.playAnimWithEnd('punch_prepare', a => {
+							slime.setTimeout(m => data.playEvent('SlimePunch',[pos.x,pos.y,facing]), slime.data.punchWait);
+							
+							//Sfx
+							scene.findResource('SlimeStretchSfx'+b5.Maths.randomRange(1,2),'sound').play();
+						}));
+						
+					break;
+				case 'SlimePunch':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2];
+					
+					slime.hitbox.setPosition(pos.x,pos.y);
+					slime._scale_x = -facing;
+					slime.facing = facing;
+					
+					slime.clearHitboxes();
+					
+					//Hitboxes
+					{
+						let base1 = slime.addHitbox('Rect'),
+						base2 = slime.addHitbox('Rect'),
+						arc1 = slime.addHitbox('Arc');
+						
+						base1.offset_w = 100,
+						base1.offset_h = 100;
+						
+						base2.offset_w = 40;
+						base2.offset_h = 150;
+						base2.A_rotation = 0.15 * facing;
+						base2.offset_x = 16 * facing;
+						base2.offset_y = -50 * facing;
+						
+						arc1.radius = 110;
+						arc1.offset_x = -20 * facing;
+						arc1.offset_y = -200;
+						
+						//Animate
+						let	time = 0.1;
+						arc1.TweenTo('radius',170, time);
+						arc1.TweenTo('offset_x',420*facing,time);
+						arc1.TweenTo('offset_y',-145,time);
+						
+						base1.TweenTo('A_rotation',0.25*facing,time);
+						
+						base2.TweenTo('A_rotation',1.1*facing,time);
+						base2.TweenTo('offset_w',140,time);
+						base2.TweenTo('offset_h',260,time);
+						base2.TweenTo('offset_x',110*facing,time);
+						base2.TweenTo('offset_y',-80,time);
+						
+						//Animate back
+						arc1.setTimeout(a => {
+							base2.offset_y = -9999;
+							arc1.TweenToWithEnd('offset_x',0,time,b5.Ease.linear,true,0,e => {
+								arc1.TweenTo('offset_y',0,time,b5.Ease.linear);
+							});
+							arc1.TweenTo('radius',88,time,b5.Ease.linear);
+						},0.6);
+						
+					}
+					
+					slime.playAnimWithEnd('punch', a => {
+						!data.players_dead && data.playEvent('SlimeDoNext',[pos.x,pos.y,facing, slime.inTransitionArea ? 1:0, data.levelData.currentPhase]);
+					});
+					break;
+					
+				case 'LG_SlimeJumpPrepare':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2];
+					
+					slime.hitbox.setPosition(pos.x,pos.y);
+					
+					slime.facing = facing;
+					slime._scale_x = -facing;
+					
+					slime.hitbox.body.m_linearVelocity.x = 0;
+					slime.hitbox.body.m_linearVelocity.y = 0;
+					
+					slime.clearHitboxes();
+					
+					//Hitboxes
+					{
+						let bh = slime.addHitbox('Arc');
+						bh.radius = 160;
+						bh.offset_y = -40;
+					}
+					
+					var isChance = b5.Maths.randomChance(slime.data.randomJumpChargeChance);
+		   		slime.bigjump = isChance;
+					slime.playAnimWithEnd('lg_jump_intro', s => {
+						s.playAnim('lg_jump_prepare',true);
+						s.setTimeout(m => {
+							slime.playAnimWithEnd('lg_jump_air', a => data.playEvent('LG_SlimeJump',[pos.x,pos.y,facing, isChance?1:0]));
+						}, !isChance ? s.data.jumpChargeTime : s.data.randomJumpChargeTime);
+					});
+					
+					break;
+				case 'LG_SlimeJump':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2],
+					chance = evtData[3];
+					
+					slime.jumps++;
+					
+					slime.hitbox.setPosition(pos.x,pos.y);
+					
+					slime.facing = facing;
+					slime._scale_x = -facing;
+					
+					
+					slime.playAnim('lg_slime_jump_up',true);
+					
+					var lv = slime.hitbox.body.m_linearVelocity,
+					spd = game.speed > 2 ? game.speed : 1;
+					
+					lv.y = (chance == 1 ? -slime.data.randomJumpSpeed :  -slime.data.jumpSpeed + b5.Maths.randomRange(0,slime.data.lowJumpRange))* spd;
+					lv.x = slime.data.horizSpeed * facing * spd;
+					
+					//Sfx
+					scene.findResource('SlimeBigJumpSfx'+b5.Maths.randomRange(1,5),'sound').play();
+					break;
+					
+				case 'LG_SlimePunchPrepare':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2],
+					blink = evtData[3] == 0;
+					
+					slime.jumps = 0;
+					slime.hitbox.setPosition(pos.x,pos.y);
+					
+					slime.hitbox.body.m_linearVelocity.x = 0;
+					slime.hitbox.body.m_linearVelocity.y = 0;
+					
+					slime.clearHitboxes();
+					
+					//Hitboxes
+					{
+						let bh = slime.addHitbox('Arc');
+						bh.radius = 160;
+						bh.offset_y = -40;
+						
+						//Arm and box glove prepare
+						let boxg = slime.addHitbox('Arc','LG_boxGloveHitbox1');
+						boxg.radius = 110;
+						boxg.offset_x = -20 * facing;
+						boxg.offset_y = -110;
+						
+						boxg.TweenTo('offset_x',-150*facing,0.25);
+					}
+					
+					let turn = slime.facing != facing,
+					playBlinks = function(thenf) {
+						slime.blinks++;
+						slime.playAnimWithEnd('blink',u => u.blinks < u.data.blinkCount ? playBlinks(thenf) : thenf(true));
+					},
+					punchf = function(afterBlink) {
+						slime.blinks = 0;
+						if(turn && !afterBlink) slime.playAnimWithEnd('lg_slime_punch_prepare_turn', a => {
+							a.playAnim('lg_slime_punch_hold');
+							a.facing *= -1;
+							a._scale_x *= -1;
+						});
+						else {
+							slime.facing = facing;
+							slime._scale_x = -facing;
+							slime.playAnimWithEnd('lg_slime_punch_prepare', a => a.playAnim('lg_slime_punch_hold'));
+						}
+						
+						slime.setTimeout(m => {
+							data.playEvent('LG_SlimePunch',[pos.x,pos.y,facing]);
+						}, slime.data.punchWait);
+							
+						//Sfx
+					  scene.findResource('SlimeBigPunchSfx'+b5.Maths.randomRange(1,4),'sound').play();
+						scene.findResource('SlimeBigPunchVoiceSfx'+b5.Maths.randomRange(1,6),'sound').play();
+					}
+					
+					slime.playAnimWithEnd('lg_jump_intro_to_back', k => {
+						
+						//Blink on the first punch
+						if(blink) {
+							if(turn) {
+								slime.playAnimWithEnd('lg_slime_jump_up_turn', m => {
+									slime._scale_x *= -1;
+									slime.facing *= -1;
+									playBlinks(punchf);
+								});
+							}
+							else playBlinks(punchf);
+						}
+						else punchf();
+						
+					});
+						
+					break;
+				case 'LG_SlimePunch':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2];
+					
+					slime.hitbox.setPosition(pos.x,pos.y);
+					slime._scale_x = -facing;
+					slime.facing = facing;
+					slime.punches++;
+					
+					slime.clearHitboxes();
+					
+					//Hitboxes
+					{
+						let bh = slime.addHitbox('Arc');
+						bh.radius = 160;
+						bh.offset_y = -40;
+						
+						//Arm and box glove prepare
+						let boxg = slime.addHitbox('Arc','LG_boxGloveHitbox1');
+						boxg.radius = 90;
+						
+						boxg.offset_x = -180 * facing;
+						boxg.offset_y = -100;
+						
+					  let rh = slime.addHitbox('Rect','LG_armHitbox1');
+						
+						rh.offset_y = -100;
+						rh.offset_h = 95;
+						rh.offset_w = 300;
+						
+						rh.setTimeout(a => {
+							boxg.TweenTo('offset_x',505*facing,0.23);
+							boxg.TweenTo('radius',110,0.23);
+							rh.TweenTo('offset_x',300*facing,0.23,b5.Ease.linear,0.016);
+						},0.037);
+						
+						//Back
+						rh.setTimeout(a => {
+							boxg.TweenTo('offset_x',-180*facing,0.2,b5.Ease.linear,0);
+							rh.TweenTo('offset_x',0,0.2,b5.Ease.linear,0);
+						},0.75);
+					}
+					
+					
+					slime.playAnimWithEnd('lg_slime_punch', a => {
+						!data.players_dead && (
+							data.playEvent('SlimeDoNext',[pos.x,pos.y,facing, data.levelData.currentPhase])
+						);// 'SlimeDoNext'
+					});
+					break;
+					
+				case 'lgSlimeIntro':
+					var slime = data.SlimeBoss,
+					pos = {x: evtData[0], y: evtData[1]},
+					facing = evtData[2];
+					
+					//Dispose	smSlime textures, free memory
+					const btms = slime.atlas.bitmaps;
+					btms[4].unload();
+					btms[5].unload();
+					btms[6].unload();
+					btms[7].unload();
+					
+					slime.hitbox.setPosition(pos.x,pos.y);
+					slime._scale_x = -facing;
+					slime.facing = facing;
+					
+					slime.sensorHitbox.setSize(1000,500);
+					
+					data.levelData.currentPhase = "lgSlime";
+					
+					slime.current_anim != "lg_idle" && slime.playAnim("lg_idle",true);
+					
+					slime.setTimeout(s => !data.players_dead && data.playEvent('SlimeDoNext',[pos.x,pos.y,facing, data.levelData.currentPhase]), 1.2);
+					
+					slime.data = currentPhase.data.lg_slime;
+					//Setup animation controllers
+					slime.prev_vy = 0;
+					slime.inAir = false;
+					slime.lastFacing = facing;
+					slime.jumps = 0;
+					slime.blinks = 0;
+					slime.punches = 0;
+					slime.bigjump = false;
+					slime.inTransitionArea = false;
+					
+					slime.largeAnimController = slime.setInterval(s => {
+						var _this = s.data,
+						ols = _this.hitbox.A_overlaps,
+						air = true,
+						wall = false,
+						wallX = 0,
+						turnAnim = false,
+						y = Math.sign(Math.round(_this.hitbox.body.m_linearVelocity.y));
+						
+						slime.inTransitionArea = false;
+						
+						for(var i = 0; i < ols.length; i++) {
+							if(ols[i].tags.indexOf('floor') != -1 && air) air = false;
+							if(ols[i].tags.indexOf('wall') != -1 && !wall) {
+								wall = true;
+								wallX = ols[i].x > _this.hitbox.x ? 1 : -1;
+							}
+							if(ols[i].tag == "TransitionArea" && !slime.inTransitionArea)	slime.inTransitionArea = true;
+						}
+						
+						//Facing test
+						if(turnAnim = _this.current_anim.indexOf('turn') == -1) _this._scale_x = -_this.facing;
+						
+						if(_this.wallCollide != wall) {
+							_this.wallCollide = wall;
+							
+							//Wall state change
+							if(wall) {
+								y < b5.Maths.randomRange(1,2) && (_this.hitbox.body.m_linearVelocity.x = _this.data.horizSpeed * -wallX);
+								if(y > 0) { //Going down
+									_this.inAir && _this.playAnimWithEnd('lg_slime_jump_down_turn', sl => {
+										sl.scale_x *= -1;
+										sl.playAnim('lg_slime_jump_'+(sl.hitbox.body.m_linearVelocity.y>0?'down':'up'),true);
+										sl.dirty();
+									});
+									_this.facing = -wallX;
+									!_this.inAir && (_this._scale_x = -wallX);
+								}
+								//Going up and touching the wall
+								else {
+									_this.inAir && _this.playAnimWithEnd('lg_slime_jump_up_turn', sl => {
+										sl.scale_x *= -1;
+										sl.playAnim('lg_slime_jump_'+(sl.hitbox.body.m_linearVelocity.y>0?'down':'up'),true);
+										sl.dirty();
+									});
+									_this.facing = -wallX;
+									!_this.inAir && (_this._scale_x = -wallX);
+								}
+								return;
+							}
+							else if(_this.current_anim.indexOf("turn") == -1 && _this.facing == wallX) {
+								//If no air turn but facing wall, flip
+								_this._scale_x = -wallX;
+								_this.facing = -wallX;
+							}
+						}
+						if(_this.inAir != air) {
+							_this.inAir = air;
+							
+							//Air state change
+							if(!air) {
+								data.shakeCamera(9.3,0,1);
+								data.playEvent('SlimeDoNext',[_this.hitbox.x,_this.hitbox.y,_this.facing, data.levelData.currentPhase]);
+								
+								//Sfx
+								scene.findResource('SlimeBigLandSfx'+b5.Maths.randomRange(1,6),'sound').play();
+							
+								//Particle
+					    	data.spawnParticle('lgDust' + (_this.bigjump ? 'B':'A'),_this.hitbox);
+								return;
+							}
+						}
+						
+						if(y != _this.prev_vy) {
+							_this.prev_vy = y;
+							
+							//Speed Y sign change (up/down)
+							if(y > 0 && _this.inAir && _this.current_anim.indexOf('turn') == -1 ) _this.playAnimWithEnd('lg_jump_up_down_trans',d => d.playAnim('lg_slime_jump_down',true));
+						}
+						
+						
+					},0);
+					break;
+				case "LG_SlimeTransitionPH3":
+					var slime = data.SlimeBoss,
+					pos = evtData && {x: evtData[0], y: evtData[1]},
+					facing = evtData && evtData[2];
+					
+					slime.jumps = 0;
+					slime.removeFilter();
+					if(evtData) {
+						slime.hitbox.setPosition(pos.x,pos.y);
+						slime._scale_x = -facing;
+						slime.facing = facing;
+						
+						slime.clearHitboxes();
+					
+						//Hitboxes
+						{
+							let bh = slime.addHitbox('Arc');
+							bh.radius = 160;
+							bh.offset_y = -40;
+						}
+						
+					}
+					
+					slime.hitbox.body.m_linearVelocity.x = 0;
+					slime.hitbox.body.m_linearVelocity.y = 0;
+					
+					data.levelData.currentPhase = "lgSlimeTransition-ph3"
+					
+					//Sfx
+					scene.findResource('SlimeBigDeathSfx','sound').play();
+					scene.findResource('SlimeBigDeathVoiceSfx','sound').play();
+					
+					//Clear tasks
+					slime.clearInterval(slime.largeAnimController);
+					
+					//Animate
+					slime.onAnimEnd = null;
+					if(slime.inAir) slime.playAnim('lg_slime_ph3_trans_air_trans');
+					else slime.playAnim('lg_slime_ph3_trans',true);
+					
+					slime.transitionTask = slime.setInterval(s => {
+						for(var i = 0, a = slime.hitbox.A_overlaps, floor; i<a.length;i++)
+							if(a[i].tags.indexOf('floor')!=-1) {
+								floor = true;
+								break;
+							}
+						if(slime.inAir && floor) {
+							//Play anim
+							slime.inAir = false;
+							slime.playAnim('lg_slime_ph3_trans',true);
+							slime.clearInterval(slime.transitionTask);
+						}
+					},0);
+					
+					if(difficulty > 0) slime.setTimeout(a => {
+						!data.players_dead && data.playEvent('TombstoneIntro',[slime.hitbox.x]);
+					},slime.data.phase3TransitionTime);
+					
+					break;
+					
+				case "TombstoneIntro":
+					var posX = evtData[0];
+					
+					//Create
+					var tomb = data.TombstoneBoss = new b5.RectActor();
+					
+					tomb.setPosition(posX, -730);
+					tomb.setSize(20,400);
+					
+					tomb._layer = data.SlimeBoss.hitbox.layer+1;
+					
+					world.PlayerLayer.addActor(tomb);
+					tomb.initBody('dynamic',true);
+					tomb.addFixtureSelf(0.2,0,0);
+					tomb.fill_style = 'transparent';
+					
+					tomb.data = currentPhase.data.tombstone;
+					
+					//Hittable
+					var tombHit = tomb.hurtbox = new b5.ArcActor();
+					tombHit.radius = 90;
+					tombHit.visible = false;
+					tombHit.layer = tomb.layer +1;
+					world.PlayerLayer.addActor(tombHit);
+					tombHit.initBody('collider',true);
+					tombHit.addFixtureSelf(0,0,0);
+					
+					tomb.onBodyUpdate = function() {
+						//Virtual	weld
+						tombHit.setPosition(this.x,this.y - 160);
+					}
+					
+					tombHit.tags = ["hittableEnemy"];
+					
+					tomb.hp = tomb.maxHp = tomb.data.maxHp;
+					
+					data.currentPhaseBoss = tomb;
+					
+					tombHit.onBulletHit = function(bullet) {
+						tomb.addFilter(enemyHitShader.filter);
+				  	tomb.setTimeout(t=>{
+				  		t.data.removeFilter(enemyHitShader.filter);
+				  	},0.07);
+				  	
+				  	tomb.hp -= bullet.damage * currentPhase.damageMultiplier;
+				  	data.bossData.health -= bullet.damage * currentPhase.damageMultiplier;
+				  	
+				  	if(tomb.hp < 0) {
+				  		tomb.hurtbox.tags = [];
+				  		tomb.body.SetActive(false);
+				  		tomb.Sprite.playAnim('tomb_death',true);
+				  	}
+					}
+					
+					//Sprite
+					tomb.Sprite = new b5.Actor();
+					tomb.Sprite.atlas = scene.findResource('TombAtlas','brush');
+					tomb.addActor(tomb.Sprite);
+					tomb.Sprite._y = -88;
+					tomb.Sprite._scale = 0.97;
+					tomb.Sprite.playAnim('tomb_fall');
+					
+					//Move dust
+					var md = tomb.dust1 = new b5.Actor();
+					md.atlas = scene.findResource('TombDustAtlas','brush');
+					md._y = 151;
+					md._ox = -20;
+					md.visible = false;
+					md._scale = md.bscale = 0.81;
+					tomb.addActor(md);
+					
+					//Disable collisions
+					for(var i = 0, a = data.getActivePlayers(); i < a.length; i++) {
+						tomb.disableCollision(a[i]);
+					}
+					
+					tomb.disableCollision(data.SlimeBoss.hitbox);
+					
+					tomb.pAddEvt = scene.events.on('playeradded', player => {
+						tomb.disableCollision(player);
+					});
+					
+					tomb.inAir = true;
+					tomb.wallCollide = false;
+					tomb.turns = 0;
+					tomb.facing = 0;
+					tomb.smashReady = false;
+					tomb.playersOnSight = false;
+					tomb.smash = false;
+					
+					//Sfx
+					scene.findResource('TombFallSfx','sound').play();
+					
+					let slamRepeats = 0,
+					slamRepeatsMax = 12,
+					playSlamAnimAndThen = function() {
+						tomb.Sprite.playAnimWithEnd('tomb_slam',slamRepeats < slamRepeatsMax ? playSlamAnimAndThen : 
+							a => {
+								a.playAnimWithEnd('tomb_slam_trans', 
+								  s => data.playEvent('TombstoneDoNext',[tomb.x,tomb.y,[-1,1][b5.Maths.randomRange(0,1)],data.levelData.currentPhase])
+						    );
+						  });
+						slamRepeats++;
+					}
+					
+					{
+					let dustfacing = 0;
+					tomb.tombstoneAnimController = tomb.setInterval(d => {
+						let air = true,
+						wall = false,
+						wallX = 0,
+						_this = d.data;
+						
+						tomb.playersOnSight = false;
+						
+						for(var i = 0, ols = _this.A_overlaps; i < ols.length; i++) {
+							if(ols[i].tags.indexOf('floor') != -1 && air) air = false;
+							if(ols[i].tags.indexOf('wall') != -1 && !wall) {
+								wall = true;
+								wallX = ols[i].x > _this.x ? 1 : -1;
+							}
+							if(ols[i].tags.indexOf('player') != -1 && Math.abs(_this.x) - Math.abs(ols[i].x) < 50) {
+								_this.playersOnSight = true;
+								if(_this.smashReady) return _this.smashReady = false,	data.playEvent('TombstoneSmashPrepare',[_this.x,_this.y,_this.facing]);
+							}
+						}
+						
+						if(_this.facing != dustfacing) {
+							
+							if(_this.facing == 0) _this.dust1.playAnimWithEnd('tomb_move_dust_reverse', e => {
+								e.visible = false;
+							});
+							else {
+								_this.dust1.visible = true;
+								_this.dust1._scale_x = -_this.facing * _this.dust1.bscale;
+								
+								//Depending on if it was already moving
+								if(dustfacing == 0) _this.dust1.playAnimWithEnd('tomb_move_dust_intro', e => {
+									e.playAnim('tomb_move_dust',true);
+								});
+								else _this.dust1.playAnimWithEnd('tomb_move_dust_reverse', e => {
+									e.playAnimWithEnd('tomb_move_dust_intro', a => {
+										a.playAnim('tomb_move_dust',true);
+									});
+								});
+							}
+							
+							dustfacing = _this.facing;
+						}
+						
+						if(_this.wallCollide != wall && _this.Sprite.current_anim.indexOf('slam') == -1 && _this.Sprite.current_anim != "tomb_fall") {
+							_this.wallCollide = wall;
+							
+							if(wall && !_this.smash) {
+								let turn = wallX > 0 ? 'left':'right';
+								_this.facing = 0;
+								_this.turns++;
+								_this.Sprite.playAnimWithEnd('tomb_turn_'+turn+'_from_side',l => {
+									l.playAnim('tomb_move_'+turn,true);
+									_this.facing = -wallX;
+									data.playEvent('TombstoneDoNext',[_this.x,_this.y,[-1,1][b5.Maths.randomRange(0,1)],data.levelData.currentPhase]);
+									
+									//Sfx
+									var ssfx = scene.findResource('TombstoneSlideSfx'+b5.Maths.randomRange(1,5),'sound');
+									ssfx.setGain(0.5);
+									ssfx.play();
+								});
+							}
+						}
+						
+						if(_this.inAir != air) {
+							_this.inAir = air;
+							
+							if(!air) {
+								//Slam
+								data.SlimeBoss.hitbox.release(true);
+								_this.setSize(350,400);
+								
+								playSlamAnimAndThen();
+								
+								//Stop listening player updates
+								scene.events.off(data.SlimeBoss.pAddEvt);
+								
+								//Shake
+								data.shakeCamera(19,0,5);
+								
+								//Particles
+								data.spawnParticle('TombSlamDust',_this);
+								data.levelData.currentPhase != "Tombstone" && (
+									data.spawnParticle('SlimeExplode',_this),
+									data.SlimeBoss.clearHitboxes()
+								);
+								
+								data.levelData.currentPhase = "Tombstone";
+								//Dispose	smSlime textures, free memory
+								const btms = data.SlimeBoss.atlas.bitmaps;
+								btms[0].unload();
+								btms[1].unload();
+								btms[2].unload();
+								btms[3].unload();
+								
+							}
+							
+						}
+						
+					},0);
+					}
+					
+					break;
+				case "TombstoneDoNext":
+					var pos = {x:evtData[0],y:evtData[1]},
+					tomb = data.TombstoneBoss,
+					faceTo = evtData[2],
+					smtr = tomb.data.smashAfterRandomTurnsCount;
+					
+					tomb.setPosition(pos.x,pos.y);
+					
+					if(tomb.facing == 0) {
+						let turn = faceTo < 0 ? 'left':'right';
+						tomb.facing = faceTo;
+						tomb.Sprite.playAnimWithEnd('tomb_turn_'+turn+'_from_center', l => {
+							l.playAnim('tomb_move_'+turn,true);
+							tomb.facing = faceTo;
+						});
+					}
+					
+					tomb.turns == 0 && scene.findResource('TombstoneTauntSfx'+b5.Maths.randomRange(1,5),'sound').play();
+					
+					tomb.clearInterval(tomb.hSpeedUpdateT);
+					
+					if(tomb.turns > b5.Maths.randomRange(smtr[0],smtr[1])) tomb.smashReady = true;
+					
+					if(!tomb.smashReady || !tomb.playersOnSight) {
+						let accel = 0;
+						tomb.hSpeedUpdateT = tomb.setInterval(t => {
+							accel < 1 && (accel += t.data.data.acceleration * game.speed);
+							accel > 1 && (accel = 1);
+							t.data.body.m_linearVelocity.x = t.data.facing * t.data.data.horizSpeed * accel;
+						},0);
+					}
+					break;
+				case "TombstoneSmashPrepare":
+					var tomb = data.TombstoneBoss,
+					facingO = evtData[2];
+					
+					tomb.setPosition(evtData[0],evtData[1]);
+					tomb.body.m_linearVelocity.x = 0;
+					tomb.body.m_linearVelocity.y = 0;
+					tomb.pfacing = tomb.facing;
+					tomb.facing = 0;
+					tomb.turns = 0;
+					tomb.smash = true;
+					
+					tomb.hurtbox.tags = [];
+					
+					tomb.smashReady = false;
+					
+					scene.findResource('TombstoneSplatStartSfx','sound').play();
+					
+					//From facing to center
+				  {
+						let turn = facingO > 0 ? 'right' : 'left';
+						
+				//		tomb.Sprite.playAnimWithEnd('tomb_turn_center_from_'+turn, t => {
+							tomb.Sprite.playAnimWithEnd('tomb_smash_intro', e => {
+								e.setTimeout(m => data.playEvent('TombstoneSmash',[tomb.x,tomb.y]), tomb.data.smashWait);
+							});
+					//	});
+					}
+					
+					break;
+				case "TombstoneSmash":
+					var tomb = data.TombstoneBoss;
+					
+					tomb.setPosition(evtData[0],evtData[1]);
+					
+					scene.findResource('TombstoneSplatSfx'+b5.Maths.randomRange(1,5),'sound').play();
+					
+					tomb.Sprite.playAnimWithEnd('tomb_smash', t => {
+						data.shakeCamera(19,0,3);
+						
+						//Set enemy
+						tomb.tags = ["enemy"];
+						tomb.setSize(400,400);
+						
+						tomb.setTimeout(a => {
+							if(!data.players_dead) {
+								var _this = a.data;
+								_this.Sprite.playAnimWithEnd('tomb_smash_back', m => {
+									_this.facing = 0;
+									_this.smash = false;
+									data.playEvent('TombstoneDoNext',[_this.x,_this.y,_this.pfacing]);
+								});
+							}
+							//Restore	layer
+							_this.setTimeout(t => {
+								t.data._layer = t.data.prev_layer;
+								t.data.tags = [];
+								t.data.hurtbox.tags = ["hittableEnemy"];
+							},3/24);
+							
+						},0.3);
+					});
+					
+					//Set above player layer
+					tomb.setTimeout(t => {
+						t.data.prev_layer = t.data.layer;
+						t.data._layer = data.view.playerSubLayer + 3;
+						data.spawnParticle('TombSmashDust',tomb);
+					},5/24);
+					break;
+					
+				case 'Knockout':
+				  
+					bossData.health = 0;
+					data.SlimeBoss.tasks.clear();
+					if(difficulty == 0) data.playEvent('LG_SlimeTransitionPH3');//[slime.hitbox.x,slime.hitbox.y,facing]);
+					
+					thisActor.onDeath && thisActor.onDeath();
+					scene.data.onBossDeath && scene.data.onBossDeath();
+					
+					break;
+					
+				default:
+				  void 0;
+			}
+		}
+		
+		if(!data.levelData.fightStarted) data.playEvent('SlimeIntro');
+		
+		//Basic defeat manager
+		var dead = false,
+		bossData;
+
+		thisActor.onTick = function() {
+			bossData = scene.data.bossData; //Fix object error in guest
+			
+			if (scene.data.levelData.fightStarted) {
+				//Do things
+				
+				if (bossData.health <= 0 && !dead && data.currentPhaseBoss.hp <= 0) {
+					dead = true;
+					
+					data.playEvent('Knockout'); //Handler
+				}
+			}
+			
+		}
+		
+	}
+};

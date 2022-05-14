@@ -10,7 +10,7 @@ try{b5}catch(e){b5={}}
 
 b5.Cordova = {
 	file: !!(window.cordova && window.cordova.file),
-	orientation: !!(screen.lockOrientation && screen.unlockOrientation),
+	orientation: !!(screen.lockOrientation && screen.unlockOrientation) && (window.cordova ? cordova.platformId != "browser" : !1),
 	statusbar: !!window.StatusBar,
 	fullscreen: !!window.AndroidFullScreen
 };
@@ -19,9 +19,15 @@ b5.Cordova = {
 * FileSystem
 *
 */
+
+internalStorage = null;
+requestFileSystem(LocalFileSystem.PERSISTENT, 0, fs => {
+	internalStorage = fs.root;
+});
+
 b5.File = {
 	resolve: b5.Cordova.file && function(path,file,o) {
-		var e = path.replace('file://','').replace('/storage/emulated/0/','/sdcard/'),
+		var e = path.replace('file://','').replace(/\/storage\/emulated\/.*?\//g,'/sdcard/'),
 		t = "", n = {isFile:false, isDir:false};
 	  resolveLocalFileSystemURL('cdvfile://localhost' + (!e.startsWith('/') ? '/'+e : e) + (!e.endsWith('/')? "/" : ''), dirFS => {
 	  	o.type == "file" && dirFS.getFile(file, { create: o.create||false, exclusive: false }, fileEntry => {
@@ -42,7 +48,9 @@ b5.File = {
         	s = i.substr(0,i.lastIndexOf('/')+1);
         	
         	i = i.substr(i.lastIndexOf('/')+1);
-        	var c = new DirectoryEntry(i, s.replace(/sdcard\/|storage\/emulated\/0\/|file:\/\/\//g,'/').replace(/\/\//g,'/') + i, fileEntry.filesystem);
+        	var entry = s.replace(/sdcard\/|storage\/emulated\/.*?\/|file:\/\/\//g,'').replace(/\/\//g,'/') + i,
+        	c = new DirectoryEntry(i, entry, fileEntry.filesystem);
+        	
          	fileEntry[o.copy ? 'copyTo' : o.move && 'moveTo'](c, o.to.name, o.onload, o.onerror);
           return;
         }
@@ -68,7 +76,7 @@ b5.File = {
         	s = i.substr(0,i.lastIndexOf('/')+1);
         	
         	i = i.substr(i.lastIndexOf('/')+1);
-        	var c = new DirectoryEntry(i, s.replace('file:///storage/emulated/0','') + i, dirEntry.filesystem);
+        	var c = new DirectoryEntry(i, s.replace(/file:\/\/\/storage\/emulated\/.*?\//g,'/') + i, dirEntry.filesystem);
         	c.nativeURL = c.toURL().replace('cdvfile://localhost/sdcard/','');
          	dirEntry[o.copy ? 'copyTo' : o.move && 'moveTo'](c, o.to.name, o.onload, o.onerror);
           return;
@@ -121,6 +129,7 @@ b5.File.write = function(file, text, add, pos) {
 	}
 	else {
 		//Write to persistent storage instead
+		localStorage.removeItem(file);
 		localStorage.setItem(file, text);
 		setTimeout(a => n.onwrite && n.onwrite(),10);
 	}
@@ -162,7 +171,7 @@ b5.File.copyDir = function(src,dest) {
 },
 b5.File.createDir = function(dir) {
 	var n = { oncreate: null, onerror: null };
-	if( b5.Cordova.file && !dir.startsWith('filesystem:') ) {
+	if( b5.Cordova.file && !dir.startsWith('filesystem:')) {
 		var e = dir.lastIndexOf('/')+1,
 		t = dir.substr(0,e),
 		o = dir.substr(e);
@@ -172,14 +181,14 @@ b5.File.createDir = function(dir) {
 },
 b5.File.delete = function(type, entry) {
 	var n = { ondelete: null, onerror: null };
-	if( b5.Cordova.file && !file.startsWith('filesystem:') ) {
+	if( b5.Cordova.file && !file.startsWith('filesystem:')) {
 		var e = entry.lastIndexOf('/')+1,
 		t = entry.substr(0,e),
 		o = entry.substr(e);
 		b5.File.resolve(t, o, {remove: true, type: type, onload: (r)=>{n.ondelete && n.ondelete(r)}, onerror: (r)=>{n.onerror && n.onerror(r)}});
 	}
 	else {
-		localStorage.removeItem(null, entry);
+		localStorage.removeItem(entry);
 	}
 	return n;
 },
@@ -230,7 +239,7 @@ b5.File.listDir = function(dir, filter) {
 b5.Cordova.orientation ? b5.Utils.SetOrientation = function(e) {
 	e ? screen.lockOrientation(e) : screen.unlockOrientation();
 } : b5.Utils.SetOrientation = function(e) {
-	try{e ? screen.orientation.lock('landscape') : screen.orientation.unlock()}
+	try{e ? screen.orientation.lock(e) : screen.orientation.unlock()}
 	catch(e) { console.warn(e) }
 }
 

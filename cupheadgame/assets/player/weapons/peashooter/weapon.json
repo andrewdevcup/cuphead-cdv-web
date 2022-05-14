@@ -3,7 +3,7 @@
 	"damage": 4,
 	"supermeter_score": 2.48,
 	"delay": 0.11,
-	"scale": 0.8,
+	"scale": 0.83,
 	"despawnTime": 1.3,
 	"ex": {
 		"speed": 45,

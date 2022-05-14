@@ -21,7 +21,7 @@ bitmap_index,sx,sy,sw,sh,ox,oy,notes
 0,640,256,128,128,0,0,Y-level-spread
 0,768,256,128,128,0,0,Y-menu
 0,907,0,55,54,0,0,Pause
-1,0,0,512,512,0,0,DPAD
+1,0,0,256,256,0,0,DPAD
 0,908,57,87,30,0,0, hide gui arrow
 0,908,88,87,30,0,0, show gui arrow
 0,907,124,64,55,0,0, hand point

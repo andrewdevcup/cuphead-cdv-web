@@ -1,0 +1,34 @@
+{
+	"tomb_slam": {
+		"indices":[23,22,21],"speed":24
+	},"tomb_slam_trans": {
+		"indices":[42,41,40,39],"speed":24
+	},"test": {
+		"indices":[39,6],"speed":1
+	},"tomb_smash_intro": {
+		"indices":[24,25,26,27],"speed":24
+	},"tomb_fall": {
+		"indices":[6],"speed":1
+	},"tomb_move_left": {
+		"indices":[7,8,9,10,9,8],"speed":24
+	},"tomb_move_right": {
+		"indices":[14,15,16,17,16,15],"speed":24
+	},"tomb_turn_right_from_center": {
+		"indices":[18,19,20],"speed":24
+	},"tomb_turn_left_from_center": {
+		"indices":[11,12,13],"speed":24
+	},"tomb_center_from_right": {
+		"indices":[20,19,18],"speed":24
+	},"tomb_turn_center_from_left": {
+		"indices":[13,12,11],"speed":24
+	},"tomb_turn_left_from_side": {
+		"indices":[14,20,19,18,11,12,13],"speed":24
+	},"tomb_turn_right_from_side": {
+		"indices":[7,13,12,11,18,19,20],"speed":24
+	},"tomb_death": {
+		"indices":[0,1,2,3,4,5,4,3,2,1],"speed":24
+	},"tomb_smash": {
+		"indices":[28,29,30,31,32,34],"speed":24
+	},"tomb_smash_back": {
+		"indices":[35,33,31,30,36,37,38,39],"speed":24
+	}}

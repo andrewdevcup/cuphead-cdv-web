@@ -1,0 +1,587 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [-390,100],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 6,
+		"playerLayer": 4,
+		"playerSubLayer": 7,
+		"zoom": 1.05,
+		"world_depth": 1.29,
+		"cameraExtents": [-16,0,16,0],
+		"cameraRange": 0.028
+	},
+	"physicsObjects": [
+		{
+			"name": "LevelFloor",
+			"type": "RectActor",
+			"size": [2048, 10],
+			"detectionSize": [2048,12],
+			"pos": [0, 250],
+			"color": "blue",
+			"visible": false,
+			"layer": 3,
+			"sub_layer": 2,
+			"tags": ["floor"],
+			"detectionTags": ["floor"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 900],
+			"detectionSize": [20,900],
+			"pos": [-630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 3,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["wall","ignoreBullets"],
+			"body": {
+				"friction": 0,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 900],
+			"detectionSize": [20,900],
+			"pos": [640, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall","ignoreBullets"],
+			"detectionTags": [],
+			"body": {
+				"friction": 0,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		}
+	],
+	"worldObjects": [{
+		"name": "BG-Far",
+		"type": "",
+		"size": [1435,555],
+		"pos": [0,0],
+		"visible": true,
+		"bitmap": "FarForestBitmap",
+		"tags": [],
+		"layer": 0,
+		"sub_layer": 0,
+		"scale": 1,
+		"fit": "FitSize"
+	},
+	{
+		"name": "Evergreens",
+		"type": "",
+		"size": [1396,400],
+		"pos": [0,-205],
+		"visible": true,
+		"bitmap": "EvergreenBitmap",
+		"tags": [],
+		"layer": 1,
+		"sub_layer": 0,
+		"scale": 1
+	},
+	{
+		"name": "ForestBG",
+		"type": "",
+		"size": [1458,601],
+		"pos": [0,-190],
+		"visible": true,
+		"bitmap": "ForestBitmap",
+		"tags": [],
+		"layer": 2,
+		"sub_layer": 0,
+		"scale": 1
+	},
+	{
+		"name": "ForestStream",
+		"type": "",
+		"size": [10,10],
+		"pos": [90,0],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_anim": "stream",
+		"anim_loop": true,
+		"tags": [],
+		"layer": 2,
+		"sub_layer": 1,
+		"scale": 1
+	},
+	{
+		"name": "GroundMain",
+		"type": "",
+		"size": [1435,555],
+		"pos": [0,-5],
+		"visible": true,
+		"bitmap": "MainGroundBitmap",
+		"tags": [],
+		"layer": 4,
+		"sub_layer": 0,
+		"scale": 1,
+		"properties": {
+			"scale_x": 1.07,
+			"scale_y": 1.7
+		}
+	},
+	{
+		"name": "woodstick",
+		"type": "",
+		"size": [10,10],
+		"pos": [-210,130],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 1,
+		"script": "woodstick.cup"
+	},
+	{
+		"name": "rock1",
+		"type": "",
+		"size": [10,10],
+		"pos": [-540,140],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 1,
+		"script": "randomRock.cup"
+	},
+	{
+		"name": "rock2",
+		"type": "",
+		"size": [10,10],
+		"pos": [390.0,140],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 1,
+		"script": "randomRock.cup"
+	},
+	{
+		"name": "rock3",
+		"type": "",
+		"size": [10,10],
+		"pos": [440.0,140],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 1,
+		"script": "randomRock.cup"
+	},
+	{
+		"name": "rock4",
+		"type": "",
+		"size": [10,10],
+		"pos": [500.0,200],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 1,
+		"base_frame": 9
+	},
+	{
+		"name": "Top-Ground-Leaves1",
+		"type": "",
+		"size": [100,100],
+		"pos": [-540,-310],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 12,
+		"tags": [],
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 0.9
+	},
+	{
+		"name": "Top-Ground-Leaves2",
+		"type": "",
+		"size": [100,100],
+		"pos": [400,-330],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 11,
+		"tags": [],
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 0.9
+	},
+	{
+		"name": "Top-Ground-Leaves3",
+		"type": "",
+		"size": [100,100],
+		"pos": [510,-300],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 10,
+		"tags": [],
+		"layer": 4,
+		"sub_layer": 1,
+		"scale": 0.9
+	},
+	{
+		"name": "Top-Ground1",
+		"type": "",
+		"size": [100,100],
+		"pos": [-440,280],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 3,
+		"tags": [],
+		"layer": 6,
+		"sub_layer": 0,
+		"scale": 0.8
+	},
+	{
+		"name": "Top-Ground2",
+		"type": "",
+		"size": [100,100],
+		"pos": [320,250],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 4,
+		"tags": [],
+		"layer": 6,
+		"sub_layer": 0,
+		"scale": 0.8
+	},
+	{
+		"name": "Top-Leaves1",
+		"type": "",
+		"size": [100,100],
+		"pos": [110,-300],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 0,
+		"tags": [],
+		"layer": 5,
+		"sub_layer": 4,
+		"scale": 0.95
+	},
+	{
+		"name": "Top-Leaves2",
+		"type": "",
+		"size": [100,100],
+		"pos": [550,-320],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 1,
+		"tags": [],
+		"layer": 5,
+		"sub_layer": 4,
+		"scale": 1
+	},
+	{
+		"name": "LightRaysBack",
+		"type": "",
+		"size": [705,661],
+		"pos": [-640,0],
+		"visible": false,
+		"bitmap": "LightRayBackBitmap",
+		"base_frame": 1,
+		"tags": [],
+		"layer": 5,
+		"sub_layer": 1,
+		"scale": 1.3,
+		"lighter": true
+	},
+	{
+		"name": "LightRaysFront1",
+		"type": "",
+		"size": [705,661],
+		"pos": [-300,0],
+		"visible": true,
+		"bitmap": "LightRayFrontBitmap",
+		"base_frame": 1,
+		"tags": [],
+		"layer": 5,
+		"sub_layer": 1,
+		"scale": 1,
+		"lighter": false,
+		"properties": {
+			"rotation": -0.3
+		}
+	},
+	{
+		"name": "LightRaysFront2",
+		"type": "",
+		"size": [705,661],
+		"pos": [600,0],
+		"visible": true,
+		"bitmap": "LightRayFrontBitmap",
+		"base_frame": 1,
+		"tags": [],
+		"layer": 5,
+		"sub_layer": 1,
+		"scale": 1,
+		"lighter": false,
+		"properties": {
+			"rotation": -0.6
+		}
+	},
+	{
+		"name": "Top-Leaves3",
+		"type": "",
+		"size": [100,100],
+		"pos": [-560,-280],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 2,
+		"tags": [],
+		"layer": 6,
+		"sub_layer": 0,
+		"scale": 0.95
+	},
+	{
+		"name": "Top-Leaves4",
+		"type": "",
+		"size": [100,100],
+		"pos": [575,-280],
+		"visible": true,
+		"atlas": "SceneryAtlas",
+		"base_frame": 5,
+		"tags": [],
+		"layer": 6,
+		"sub_layer": 0,
+		"scale": 0.95
+	},
+	{
+		"name": "BossObject",
+		"type": "",
+		"pos": [0,0],
+		"size": [0,0],
+		"tags": ["boss"],
+		"layer": 6,
+		"sub_layer": 0
+	}],
+	"resources": {
+		"bitmap": [
+			{
+				"name": "FarForestBitmap",
+				"src": "scenes/slime/slime_bg_bg_far_forest.png"
+			},
+			{
+				"name": "EvergreenBitmap",
+				"src": "scenes/slime/PRECOMP-slime_bg_bg_evergreens.png"
+			},
+			{
+				"name": "ForestBitmap",
+				"src": "scenes/slime/PRECOMP-slime_bg_bg_forest.png"
+			},
+			{
+				"name": "SceneryBitmap",
+				"src": "scenes/slime/SpriteAtlasTexture_Scenery-0.png"
+			},
+			{
+				"name": "MainGroundBitmap",
+				"src": "scenes/slime/slime_bg_mg_main_ground.png"
+			},
+			{
+				"name": "LightRayBackBitmap",
+				"src": "scenes/slime/__REPLACE__back_rays.png"
+			},
+			{
+				"name": "LightRayFrontBitmap",
+				"src": "scenes/slime/__REPLACE__front_rays.png"
+			},
+			{
+				"name": "LightRayMidBitmap",
+				"src": "scenes/slime/__REPLACE__mid_rays.png"
+			},
+			{
+				"name": "SlimeMugshot",
+				"src": "scenes/slime/death_card_mugshot_slime.png"
+			},
+			{
+				"name": "LgSlimeMugshot",
+				"src": "scenes/slime/death_card_mugshot_slime2.png"
+			},
+			{
+				"name": "TombSlimeMugshot",
+				"src": "scenes/slime/death_card_mugshot_slime3grave.png"
+			},
+			{
+				"automatize": {
+					"name": "SlimeBitmap%i",
+					"start": 0,
+					"end": 7,
+					"pad": 1,
+					"src": "scenes/slime/slime/SpriteAtlasTexture_Slime-#.png"
+				}
+			},
+			{
+				"name": "smallDustBitmap",
+				"src": "scenes/slime/SpriteAtlasTexture_SmallDust-0.png"
+			},
+			{
+				"name": "largeDustBitmap0",
+				"src": "scenes/slime/SpriteAtlasTexture_largeDust-0.png"
+			},
+			{
+				"name": "largeDustBitmap1",
+				"src": "scenes/slime/SpriteAtlasTexture_largeDust-1.png"
+			},
+			{
+				"name": "questionMarksBitmap",
+				"src": "scenes/slime/SpriteAtlasTexture_QuestionMarks-0.png"
+			}
+		],
+		"brush": [
+			{
+				"name": "SceneryAtlas",
+				"bitmaps": ["SceneryBitmap"],
+				"frames": "scenes/slime/SpriteAtlasTexture_Scenery.csv",
+				"anims": "scenes/slime/scenery.anims.json"
+			},
+			{
+				"name": "SlimeAtlas",
+				"bitmaps": {
+					"name-prefix": "SlimeBitmap%i",
+					"start": 0,
+					"end": 7
+				},
+				"frames": "scenes/slime/slime/SpriteAtlasTexture_Slime.csv",
+				"anims": "scenes/slime/slime/slime.anims.json"
+			},
+			{
+				"name": "smallDustAtlas",
+				"bitmaps": ["smallDustBitmap"],
+				"frames": "scenes/slime/SpriteAtlasTexture_SmallDust.csv",
+				"anims": "scenes/slime/smdust.anims.json"
+			},
+			{
+				"name": "largeDustAtlas",
+				"bitmaps": ["largeDustBitmap0","largeDustBitmap1"],
+				"frames": "scenes/slime/SpriteAtlasTexture_largeDust.csv",
+				"anims": "scenes/slime/lgdust.anims.json"
+			},
+			{
+				"name": "questionMarksAtlas",
+				"bitmaps": ["questionMarksBitmap"],
+				"frames": "scenes/slime/SpriteAtlasTexture_QuestionMarks.csv",
+				"anims": "scenes/slime/questionMarks.anims.json"
+			}
+		],
+		"sound": [
+			{
+				"name": "MUS_Slime",
+				"src": "scenes/slime/MUS_Slime.ogg",
+				"category": "music",
+				"loop": true,
+				"options": {
+					"equalizer": true,
+					"limiter": true
+				}
+			},
+			{
+				"automatize": {
+					"name": "SlimeSmallJumpSfx%i",
+					"start": 1,
+					"end": 4,
+					"pad": 2,
+					"src": "scenes/slime/AudioClip/sfx_slime_small_jump_##.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "SlimeSmallLandSfx%i",
+					"start": 1,
+					"end": 5,
+					"pad": 2,
+					"src": "scenes/slime/AudioClip/sfx_slime_small_land_##.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "SlimeStretchSfx%i",
+					"start": 1,
+					"end": 2,
+					"pad": 2,
+					"src": "scenes/slime/AudioClip/sfx_slime_small_stretch_punch_##.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "SlimeBigJumpSfx%i",
+					"start": 1,
+					"end": 5,
+					"pad": 2,
+					"src": "scenes/slime/AudioClip/sfx_slime_big_jump_##.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "SlimeBigLandSfx%i",
+					"start": 1,
+					"end": 6,
+					"pad": 2,
+					"src": "scenes/slime/AudioClip/sfx_slime_big_land_##.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "SlimeBigPunchSfx%i",
+					"start": 1,
+					"end": 4,
+					"pad": 2,
+					"src": "scenes/slime/AudioClip/sfx_slime_big_punch_##.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"automatize": {
+					"name": "SlimeBigPunchVoiceSfx%i",
+					"start": 1,
+					"end": 6,
+					"pad": 2,
+					"src": "scenes/slime/AudioClip/sfx_slime_big_punch_voice_##.ogg",
+					"reuse": true,
+					"category": "sfx"
+				}
+			},
+			{
+				"name": "SlimeSmallTransformSfx",
+				"src": "scenes/slime/AudioClip/sfx_slime_small_transform.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "SlimeBigDeathSfx",
+				"src": "scenes/slime/AudioClip/sfx_slime_big_death_01.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "SlimeBigDeathVoiceSfx",
+				"src": "scenes/slime/AudioClip/sfx_slime_big_death_voice_01.ogg",
+				"category": "sfx"
+			}
+		]
+	}
+}

@@ -92,6 +92,10 @@ b5.export = function(world, scene, data, game) {
 	  mgsh.bitmap === b5.Bitmap.SOLID && mgsh.available && (mgsh.atlas = scene.findResource(currentPhase.mugshot.atlas,'brush'), mgsh.current_frame = currentPhase.mugshot.frame || 0);
 	  
 	  mgsh.setSize(220,215);
+	  mgsh.onTick = function() {
+	  	this.bitmap && this.available && this.setSize(215*(this.bitmap.resource.width/this.bitmap.resource.height),215);
+	  }
+	  mgt = mgsh
 	  mgsh.ignore_atlas_size = true;
 	  mgsh.x = mgsh.available ? currentPhase.mugshot.offset[0] : 0;
 	  mgsh.y = -170 + (mgsh.available ? currentPhase.mugshot.offset[1] : 0);
@@ -118,7 +122,7 @@ b5.export = function(world, scene, data, game) {
 	  //Music effects
 	  //Slow down
 	  for(var i=0, snd = game.Music.sounds; i < snd.length; i++) {
-	  	snd[i].Tween('playbackRate',0.7,1.12);
+	  	snd[i].Tween('playbackRate',snd[i].playback_speed*0.7,1.12);
 	  	snd[i].limiter && snd[i].setCompressor(-60,0,0.01,0.03,0.06);
 	  }
 	  

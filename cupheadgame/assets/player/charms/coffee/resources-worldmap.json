@@ -1,0 +1,15 @@
+{
+	"bitmap": [
+		{
+			"name": "CoffeeEquipIcon",
+			"src": "player/charms/coffee/SpriteAtlasTexture_Coffee-0.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "coffee:CHARM_EQUIP_ICON",
+			"bitmaps": ["CoffeeEquipIcon"],
+			"frames": "player/charms/coffee/SpriteAtlasTexture_Coffee.csv"
+		}
+	]
+}

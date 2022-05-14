@@ -1,0 +1,131 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [-350,0],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 1,
+		"playerLayer": 1,
+		"playerSubLayer": 3,
+		"zoom": 1.06,
+		"world_depth": 1.0,
+		"cameraExtents": [-2,0,2,0],
+		"cameraRange": 0.01
+	},
+	"physicsObjects": [
+		{
+			"name": "LevelFloor",
+			"type": "RectActor",
+			"size": [2048, 10],
+			"detectionSize": [2048,12],
+			"pos": [0, 300],
+			"color": "blue",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["floor"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [-630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [""],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		}
+	],
+	"worldObjects": [{
+		"name": "BG",
+		"type": "",
+		"size": [1280,720],
+		"pos": [0,0],
+		"visible": true,
+		"atlas": "bg-atlas",
+		"appendTo": "scene_background",
+		"sub_layer": 0,
+		"scale": 1.02,
+		"fit": "FitSize",
+		"properties": {
+			"frame_speed": 24
+		}
+	},
+	{
+		"name": "CupheadsNightmare",
+		"type": "",
+		"size": [236,583],
+		"pos": [0,0],
+		"visible": true,
+		"bitmap": "cuphead",
+		"scale": 0.7,
+		"layer": 1,
+		"sub_layer": 0
+	}
+	],
+	"resources": {
+		"bitmap": [
+			{
+				"name": "bgb-0",
+				"src": "scenes/cupsnm/background-0.png"
+			},
+			{
+				"name": "bgb-1",
+				"src": "scenes/cupsnm/background-1.png"
+			},
+			{
+				"name": "cuphead",
+				"src": "scenes/cupsnm/cupheads_nightmare.png"
+			}
+		],
+		"brush": [
+			{
+				"name": "bg-atlas",
+				"bitmaps": ["bgb-0","bgb-1"],
+				"frames": "scenes/cupsnm/background.frames.json"
+			}
+		],
+		"sound": [
+			{
+				"name": "MUS_Cuphead",
+				"src": "scenes/cupsnm/otherworldly_foe_lohweo.ogg",
+				"category": "music",
+				"loop": true
+			}
+		]
+	}
+}

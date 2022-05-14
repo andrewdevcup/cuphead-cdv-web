@@ -43,7 +43,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				bullet.x = thisPlayer.x + pos[0];
 				bullet.y = thisPlayer.y + pos[1];
 				bullet.despawnTime = !small ? wpnData.despawnTime: wpnData.despawnTimeSmall;
-				bullet.damage = wpnData.damage * thisPlayer.data.damageMultiplier;
+				bullet.damage = (wpnData.damage * thisPlayer.data.damageMultiplier) / scene.data.players.activePlayers.length;
 				bullet.time = 0;
 				bullet.fill_style = 'transparent';
 				bullet.tags = ["playerBullet"];
@@ -259,7 +259,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				exb.x = thisPlayer.x + ax*35;
 				exb.y = thisPlayer.y + ay*35;
 				exb.despawnTime = wpnData.ex.despawnTime;
-				exb.damage = wpnData.ex.damage * thisPlayer.data.damageMultiplier;
+				exb.damage = (wpnData.ex.damage * thisPlayer.data.damageMultiplier) / scene.data.players.activePlayers.length;
 				exb.time = 0;
 				exb.fill_style = "transparent";
 				//	exb.fill_style = 'transparent';

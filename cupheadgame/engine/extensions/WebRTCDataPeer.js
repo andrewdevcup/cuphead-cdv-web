@@ -71,25 +71,6 @@
 			e.onOpen && e.onOpen();
 		}
 	};
-	Peer.sdp = `v=0\r
-o=- % IN IP4 127.0.0.1\r
-s=- \r
-t=0 0\r
-a=group:BUNDLE 0\r
-a=extmap-allow-mixed\r
-a=msid-semantic: WMS\r
-m=application 9 UDP/DTLS/SCTP webrtc-datachannel\r
-c=IN IP4 0.0.0.0\r
-a=ice-ufrag:%\r
-a=ice-pwd:%\r
-a=ice-options:trickle\r
-a=fingerprint:%\r
-a=setup:%\r
-a=mid:0\r
-a=sctp-port:5000\r
-a=max-message-size:262144\r
-`;
-Peer.gen = " generation 0 ufrag % network-cost 999";
 	Peer.prototype.offer = function(onOffer) {
 		var e = this,
 		t = e.peerConnection;
@@ -129,65 +110,41 @@ Peer.gen = " generation 0 ufrag % network-cost 999";
 		var c = atob(code.trim()),
 		t = c.substr(1,c.indexOf('\n')-1),
 		s = c.substr(t.length+2),
-		i = null,
-		d = Peer.sdp,
-		ufrag = "";
+		i = null;
 		
 		//Offer/answer
-		s = s.substr(0,s.indexOf('%i')).split('\n');
-		for(var i = 0, l = [1,9,10,12,13];i<l.length; i++) {
-			d = d.replace("%",s[i]);
-			l[i] == 9 && (ufrag = s[i]);
-		}
+		s = s.substr(0,s.indexOf('%i'));
 		//Ice
 		i = c.substr(c.indexOf('%i')+3).split('\n');
 
 		for(var a = 0, ice = []; a < i.length; a++) {
 			var enc = i[a].split(' ')[4],
-			nenc = enc ? _decode(enc) : (enc = ""),
-			gen = Peer.gen.replace('%',ufrag);
+			nenc = enc ? _decode(enc) : (enc = "");
 			ice.push({
-				candidate: ((enc.startsWith("À".charCodeAt(null)) || !enc) ? 'candidate:'+i[a]:'candidate:'+i[a].replace(enc,nenc)) + gen, 
+				candidate: _decode(i[a]), //((enc.startsWith("À".charCodeAt(null)) || !enc) ? i[a]:i[a].replace(enc,nenc)), 
 				sdpMid: "0", 
 				sdpMLineIndex: 0
 			});
 		}
 		//Accept offer / answer
-		c.startsWith('%o') ? this.connectRAW({type: 'offer', sdp: d}, ice, x => {
+		c.startsWith('%o') ? this.connectRAW({type: 'offer', sdp: s}, ice, x => {
 			onConnect && onConnect(this.getCode());
-		}) : this.acceptRAW({type: 'answer', sdp: d}, ice);
+		}) : this.acceptRAW({type: 'answer', sdp: s}, ice);
 		}catch(e){this.onError && this.onError(e)}
 	};
 	Peer.prototype.getCode = function() {
 		var e = this.session,
-		lines = [1,9,10,12,13],
-		codes = [],
 		values = e.sdp.replace(/\r/g,'').split('\n');
 		
-		//Extract
-		for(var i = 0; i < lines.length; i++) {
-			var l = values[lines[i]];
-			switch(lines[i]) {
-				case 1:
-					codes.push(l.substr(l.indexOf('- ')+2,l.indexOf(' IN')-4));
-					break;
-				case 9:
-				case 10:
-				case 12:
-				case 13:
-					codes.push(l.substr(l.indexOf(':')+1));
-			}
-		}
 		for(var i = 0,ice="";i<this.ice.length;i++){
-			var enc = this.ice[i].candidate.split(' ')[4],
-			cand = "",
-			nenc = _encode(enc);
-			cand = !enc.startsWith("À".charCodeAt(null)) ?this.ice[i].candidate.replace(enc,nenc):this.ice[i].candidate;
-			cand = cand.substr(0,cand.indexOf('generation')-1);
-			ice += '\n'+ cand;
+//			var enc = this.ice[i].candidate.split(' ')[4],
+	//		cand = "",
+	//		nenc = _encode(enc);
+//			cand = !enc.startsWith("À".charCodeAt(null)) ?this.ice[i].candidate.replace(enc,nenc):this.ice[i].candidate;
+			ice += '\n'+ _encode(this.ice[i].candidate);
 		}
-		return e && this.ice ? btoa('%'+e.type[0] + "\n" + codes.join('\n') +'\n' + (e.sdp.endsWith("\n")?"":"\n") + "%i"+ ice.replace(/candidate:/g,''))
-	: (this.onError && this.onError('Connect to a WiFi network'), null);
+		return e && this.ice ? btoa('%'+e.type[0] + "\n" + values.join('\n') + (e.sdp.endsWith("\n")?"":"\n") + "%i"+ ice)
+	: null;
 	};
 	Peer.prototype.send = function(msg) {
 		this.dataChannel.readyState === "open" && this.dataChannel.send(msg);

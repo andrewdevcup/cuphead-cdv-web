@@ -33,14 +33,14 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		  if(ol[i].tags.indexOf('Parryable') != -1 && flags.parryActive) {
 		  	var	l = ol[i];
 		  	
-		  	if(!game.Multiplayer.isGuest) {
-		  		thisPlayer.parry(l.parryScore);
-		  		l.onParry && l.onParry(thisPlayer);
+		  	thisPlayer.parry(l.parryScore);
+		  	l.onParry && l.onParry(thisPlayer);
 		  		
-		  		game.Multiplayer.isHost && game.Multiplayer.sendToGuest('DISPATCH_EVENT',['objectparried',[l.id,thisPlayer.name]]);
-		  		//Spawn particles
-		  		data.spawnPlayerParticle('parrySpark',l);
-		  	}
+		  	//Sync multiplayer
+		  	scene.events.dispatch('objectparried',[l.id,thisPlayer.name, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+		  		
+		  	//Spawn particles
+		  	data.spawnPlayerParticle('parrySpark',l);
 		  	break;
 		  }
 	},0);
@@ -175,10 +175,12 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
       	for(var a = 0; a < ols.length; a++) {
       		var ol = ols[a];
       		//Enemy overlap
-      	  if( ol.tags.indexOf("enemy") != -1 && !flags.intangible && hitboxes[i].name != "ParryHitbox") {
+      	  if( ol.tags.indexOf("enemy") != -1 && !flags.intangible && hitboxes[i].name != "ParryHitbox" && flags.hittable) {
       	  	overlap = true;
-      	  	flags.damageHit = flags.hittable;
-      	  	flags.damageHit && thisPlayer.onEnemyHit(ol);//ol.onPlayerHit && ol.onPlayerHit(thisPlayer);
+      	  	flags.damageHit = true;
+      	  	//Sync
+  			  	scene.events.dispatch('playerhit',[thisPlayer.name, flags.heartPoints, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+      	  	thisPlayer.onEnemyHit(ol);
       	  	break;
       	  }
       	  //Npc overlap

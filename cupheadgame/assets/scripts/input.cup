@@ -364,6 +364,7 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 		var btnDpad = createBtn('Dpad', 243, 243);
 		btnDpad.atlas = guiBtnAtlas;
 		btnDpad.current_frame = 22; //Dpad
+		/*
 		btnDpad.pad = new b5.Actor();
 	//	btnDpad.pad.radius = 30;
 	//	btnDpad.pad.fill_style = "black";
@@ -373,10 +374,7 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 		btnDpad.pad.current_frame = 26;
 		btnDpad.pad._scale = 0.9;
 		btnDpad.addActor(btnDpad.pad);
-		btnDpad.pad.onTick = function() {
-			var p2 = b5.Game.Multiplayer.isPlayer2;
-		//	this.current_frame = b5.Game.Flags.inMainGame ? b5.Game.SaveSlots.currentSaveSlot.isPlayer1Mugman ? p2?16:17: p2?17:16: 18;
-		}
+		*/
 		btnDpad.axis = {
 			x: 0,
 			y: 0
@@ -387,32 +385,17 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 			tpy = (pos.y-this.y)/this.scale_y;
 			this.axis.x = b5.Maths.cap(tpx/this.range, -1, 1);
 			this.axis.y = b5.Maths.cap(tpy/this.range, -1, 1);
-			this.pad.setPosition(tpx, tpy);
 		};
 		btnDpad.onMoveTouch = function(pos) {
 			var tpx = b5.Maths.cap((pos.x-this.x)/this.scale_x,-(btnDpad.w/2)*btnDpad.scale,(btnDpad.w/2)*btnDpad.scale),
 			tpy = b5.Maths.cap((pos.y-this.y)/this.scale_y,-(btnDpad.h/2)*btnDpad.scale,(btnDpad.h/2)*btnDpad.scale);
+			
 			this.axis.x = b5.Maths.cap(tpx/this.range, -1, 1);
 			this.axis.y = b5.Maths.cap(tpy/this.range, -1, 1);
-			this.pad.setPosition(tpx, tpy);
-			
-			var dx = -tpx,
-	  	dy = -tpy;
-		
-		this.pad.current_frame = 25;
-		if(Math.abs(dx) > .1 && Math.abs(dy) > .1) {
-			var s = Math.sign(dx);
-			this.pad._rotation = -Math.atan2(dy*s,-Math.abs(dx));
-	  	s && (this.pad._scale_x = s);
-		}
-		
-		this.pad.last_pos = {x:this.pad.x,y:this.pad.y};
 		}
 		btnDpad.onEndTouch = function() {
 			this.axis.x = 0;
 			this.axis.y = 0;
-			this.pad.setPosition(0, 0);
-			this.pad.current_frame = 26;
 		};
 		gui.addActor(btnDpad);
 
@@ -533,8 +516,8 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 				i != "HideShow" && (i == "DPAD" || i == "Pause"? this.buttons[i].setScale(dpad_scale, dpad_scale): this.buttons[i].setScale(btn_scale, btn_scale));
 
 				//Adjust margins
-				this.buttons[i].dock_x = i != "DPAD" && i != "Pause" ? X_docking_reverse: i != "Pause" ? X_docking: b5.Actor.Dock_None;
-				this.buttons[i].dock_y = i != "Pause" ? b5.Actor.Dock_Bottom: b5.Actor.Dock_Top;
+				this.buttons[i].dock_x = i != "DPAD" && i != "Pause" ? X_docking_reverse: i != "Pause" && i != "HideShow" ? X_docking: (i=="HideShow"?b5.Actor.Dock_Left:b5.Actor.Dock_None);
+				this.buttons[i].dock_y = i != "Pause" && i!= "HideShow"? b5.Actor.Dock_Bottom: b5.Actor.Dock_Top;
 				this.buttons[i].margin = margins[i];
 			};
 

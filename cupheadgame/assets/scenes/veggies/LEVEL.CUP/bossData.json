@@ -52,20 +52,20 @@
 			]
 		},
   	{
-  		"damageMultiplier": 1,
+  		"damageMultiplier": 0.99,
   		"data": {
 				"potato": {
 					"shoot1Count": 4,
 					"shoot2Count": 4,
 					"shoot3Count": 4,
 					"shoot1Rythm": 1.1,
-					"waitAndShoot2Delay": 1.9,
+					"waitAndShoot2Delay": 1.8,
 					"shoot2Rythm": 0.82,
-					"waitAndShoot3Delay": 1.9,
+					"waitAndShoot3Delay": 1.8,
 					"shoot3Rythm": 0.66,
-					"waitAndShoot1Delay": 1.9,
-					"projectileSpeed": 34,
-					"projectileSpeedFast": 37,
+					"waitAndShoot1Delay": 1.8,
+					"projectileSpeed": 35,
+					"projectileSpeedFast": 38,
 					"maxHp": 400
 				},
 				"onion": {
@@ -74,13 +74,13 @@
 					"tearsRandomTimeRanges": [
 						[0.9, 1.3], [0.6,1], [0.7, 0.8]
 					],
-					"tearSpeed": 28,
+					"tearSpeed": 32,
 					"TearSpawnRanges": [[-610, -230],[230, 610]],
 					"SpawnPinkTearBetweenNSpawns": [6,9],
 					"cryingSequence": [0.55, 1.3, 0.7, 10, 0.7, 20, 0.7, 20, 0.7]
 				},
 				"raddish": {
-					"maxHp": 300,
+					"maxHp": 425,
 					"speed": 31,
 					"acceleration": 410
 				},
@@ -88,9 +88,9 @@
 					"rings": 5,
 					"ringsShoot": 3,
 					"ringSpeed": 35,
-					"carrotBombSpeed": 10,
+					"carrotBombSpeed": 11,
 					"carrotBombRandomTimeRanges": [
-						[1.4,3], [1.6,4]
+						[0.9,3], [1.6,3.8]
 					],
 					"carrotFireBeamTimeRanges": [5.5,6],
 					"carrotHypnoRingRythm": 1.8,

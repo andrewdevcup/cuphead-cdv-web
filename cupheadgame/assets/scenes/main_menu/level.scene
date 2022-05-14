@@ -359,6 +359,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 					case 1: //Start
 						slotsCard._av = true;
 						this._av = false;
+						game.Flags.pausingEnabled = false;
 						break;
 					case 2: //Options
 						//Show pause menu
@@ -487,6 +488,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 					slotsCard._av = false;
 					world.findActor('MainMenuLabel')._av = true;
 					game.PauseMenu.playSfx();
+					game.Flags.pausingEnabled = true;
 					
 					b5.Game.UiButtons.setButtons([{
 						"text": "texts.ui_confirm",
@@ -542,6 +544,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 					this.btnR_pressed = true;
 					game.PauseMenu.playSfx();
 					data.slot_page = "MultiplayerRoom";
+					
 
 					//Look for rooms
 					
@@ -571,30 +574,56 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 									if(+r[0] == 1) {
 										var data = JSON.secParse(r[1]);
 										
+										mul.startGuest();
+										
 										game.LoadScene(data.currentScene, false, true, {
 											show_anim: 'fade', show_speed: 0.34, hide_anim: 'open', hourglass: true
 										});
-										mul.startGuest();
 										
 										mul.events.off(curLevelEvt);
 									}
 								});
 							}
 						});
-						
+						mul.isGuest = true;
 						var openEvt = mul.events.on('guest:open', function() {
 					  	mul.guest.send('0Ξ'); //Query slot data
 					  	mul.events.off(openEvt);
 						});
 						
 					}, function() {
+						b5.Game.Multiplayer.isGuest = false;
 						data.slot_page = "LocalSaves";
 					});
 				  
 				} else if (!btnR) this.btnR_pressed = false;
+				
+				if (btnR && !this.btnR_pressed) {
+					this.btnR_pressed = true;
+					
+				} else if (!btnR) this.btnR_pressed = false;
 
 				break;
-				
+			  case "MultiplayerRoom":
+			  	if (btnB && !this.btnB_pressed) {
+					this.btnB_pressed = true;
+					//Go back
+					slotsCard._av = false;
+					world.findActor('MainMenuLabel')._av = true;
+					game.PauseMenu.playSfx();
+					game.Flags.pausingEnabled = true;
+					
+					b5.Game.UiButtons.setButtons([{
+						"text": "texts.ui_confirm",
+						"actionButton": "jump"
+					}]);
+					
+					b5.Game.Multiplayer.guest.close();
+					b5.Game.Multiplayer.isGuest = false;
+					data.slot_page = "LocalSaves";
+		
+				} else if (!btnB) this.btnB_pressed = false; //Reset
+			  break;
 		}
 	}
 

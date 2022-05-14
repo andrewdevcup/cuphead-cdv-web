@@ -35,8 +35,8 @@ b5.LoadScene = function(world, scene, data, game) {
   	burstB.layer = 1;
   	burstB.atlas = burstF.atlas;
   	burstF.back = burstB;
-  	burstB._scale = 1.3;
-  	burstF._scale = 1.47;
+  	burstB.setScale(1.3,1.1);
+  	burstF.setScale(1.47, 1.27);
   	burstF.play = function() {
   		this.back.visible = false;
   		this.playAnim('burst_front');

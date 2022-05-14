@@ -1,3 +1,24 @@
+//Database to store codes (firebase)
+b5.MPDB = firebase.database(firebase.initializeApp({
+  apiKey: "AIzaSyDEDZbwpiieBUtNCysg1kv9SRbtD36fZm0",
+  authDomain: "cupheadcdv-online-codestore.firebaseapp.com",
+  databaseURL: "https://cupheadcdv-online-codestore-default-rtdb.firebaseio.com",
+  projectId: "cupheadcdv-online-codestore",
+  storageBucket: "cupheadcdv-online-codestore.appspot.com",
+  messagingSenderId: "298224054194",
+  appId: "1:298224054194:web:9486a53070a1ad7204beab",
+  measurementId: "G-CY1GFMVSMH"
+}));
+
+b5.Utils.getRandomCode = function(length) {
+	var str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	for(var i = 0, c = ""; i < length; i++) {
+		var n = str[Math.round(Math.random()*(str.length-1))];
+		n = Math.random() > 0.5 ? n.toLowerCase() : n;
+		c += n;
+	}
+	return c;
+};
 //Mutiplayer variables
 b5.Game.Multiplayer = {
 	isPlayer2: false,
@@ -20,10 +41,14 @@ b5.Game.Multiplayer = {
 		prevInput_player2: Object.clone(b5.Game.Input.player2),
 		host_statep: ['new','new'],
 		guest_statep: ['new','new'],
-		tasks: {
-			
-		}
+		tasks: {},
+		DB_CODES: {
+			hostCode: "",
+			guestCode: ""
+		},
+		HOST_CODE: ""
 	},
+	DB_ENTRY: null,
 	FLAGS: [
 			"QUERY_GAME_DATA",
 			"QUERY_SCENE_DATA",
@@ -110,12 +135,12 @@ b5.Game.Multiplayer = {
 				if (sd) {
 					var pl1 = sceneMain.view.findActor(sd.player1, true),
 					pl2 = sceneMain.view.findActor(sd.player2, true),
-					plb = pl1.body,
+					plb = pl1 && pl1.body,
 					plb2 = pl2 && pl2.body,
 					crd = {
 						p1: [
-							Math.round1000(pl1.x),
-							Math.round1000(pl1.y),
+							Math.round1000(pl1?pl1.x:0),
+							Math.round1000(pl1?pl1.y:0),
 							Math.round1000(plb? plb.m_linearVelocity.x : 0),
 							Math.round1000(plb? plb.m_linearVelocity.y : 0)
 						]
@@ -139,6 +164,13 @@ b5.Game.Multiplayer = {
 			
 			this.host.send('509ΞOK');
 			break;
+		case "DISPATCH_EVENT": //Event on sceneMain.events, from guest
+		  for(var i = 0, data = inst[2].split('π'); i < data.length; i++) {
+		  	data[i] = parseValue(data[i]);
+		  }
+		  
+		  sceneMain.events.dispatch(inst[1],data);
+		  break;
 	}
 
 },
@@ -184,6 +216,15 @@ sendToGuest: function(type, msg) {
 		case 'DISPATCH_EVENT':
 			!msg[1] && (msg[1] = []);
 			this.host.send('11Ξ'+msg[0]+'Ξ'+msg[1].join('π'));
+			break;
+	}
+},
+sendToHost: function(type, msg) {
+	var data = "";
+	switch (type) {
+		case 'DISPATCH_EVENT':
+			!msg[1] && (msg[1] = []);
+			this.guest.send('11Ξ'+msg[0]+'Ξ'+msg[1].join('π'));
 			break;
 	}
 },
@@ -443,62 +484,73 @@ removePlayer2: function() {
 			b5.Game.LoadScene('title', 0, 1, {
 				hide_anim: 'open', show_anim: 'close', music_fade_speed: 0.35
 			});
-			this.isGuest = false;
 			this.guest.close();
 		} else {
 			this.isHosting = false;
-			this.isHost = false;
 			var player2 = sceneMain.data.players.player2;
 			sceneMain.data.removePlayer(player2);
 		}
 		b5.Game.Input.reset();
 	}
+	
+	this.isGuest = false;
+	this.isHost = false;
+	
+	//Clear room in database
+	try{b5.MPDB.ref(this.data.HOST_CODE).remove()}catch(e){}
 },
 startGuest: function(wsock) {
 	var flags = b5.Game.Flags;
-	flags.pausingEnabled = false;
 	this.isGuest = true;
 	this.isPlayer2 = true;
 	this.player2Joined = true;
 },
 setGuest: function(success, failure, timeout) {
-	var mlt = this;
+	var mlt = this,
+	fail = false,
+	succ = false;
   mlt.guest.close();
-	var prh = null,
-	prg = null,
-	code = "",
-	onConnect = function(c) {
-		code = c;
-
-		prg = promptAsync(b5.Game.Texts.texts.send_code_to_host, code);
-    
-    prg.then(e => {
-			if (e == null || e == "") return mlt.guest.close(),
-			failure && failure();
-
-			success && success();
-    });
-	}
-  this.session = "guest";
-	this.guest.connectionPhase = 0;
-
-	prh = promptAsync(b5.Game.Texts.texts.get_code_from_host);
-	
-	prh.then(code2 => {
-		if (code2 == null || code2 == "") {
-			failure && failure();
-		  this.guest.close();
+	var onGetHostCode = function(snapshot) {
+		var data = snapshot.val();
+		if(data && data.hostCode) {
+			//Connect to host
+			mlt.guest.connect(data.hostCode, onConnect);
+			//Off
+			mlt.DB_ENTRY.off('value', onGetHostCode);
 		}
-		else {
+		else if(!data) {
+			mlt.DB_ENTRY.off('value', onGetHostCode);
+			fail = true;
+			failure && failure();
+		}
+	},
+	onConnect = function(c) {
+		//Upload guest code to database
+		mlt.DB_ENTRY.child('guestCode').set(c)
+		   .then(s => success && success())
+		   .catch(s => failure && failure());
+	}
+	
+  this.session = "Guest";
+
+	var prh = prompt('INPUT HOST CODE','');//b5.Game.Texts.texts.get_code_from_host);
+	
+	if (prh == null || prh == "") {
+		fail = true;
+		failure && failure();
+		this.guest.close();
+	}
+	else {
+		
+		//Connect to database
+		mlt.DB_ENTRY = b5.MPDB.ref(prh);
+		
+		//Get codes
+		mlt.DB_ENTRY.on('value', onGetHostCode);
 
 		this.guest.onError = function(err) {
 			b5.Game.Multiplayer.events.dispatch('guest:error', err);
-			switch (this.connectionPhase) {
-				case 0:
-					failure && failure();
-					this.connectionPhase = 1;
-					break;
-			}
+			!fail && failure && (fail=true,failure());
 		}
 		this.guest.onOpen = function() {
 			console.log('[guest] Connected to host');
@@ -531,6 +583,8 @@ setGuest: function(success, failure, timeout) {
 			var hsp = b5.Game.Multiplayer.data.host_statep;
 			hsp[0] = st;
 			b5.Game.addCheev('[guest] ' + hsp[0], 'ice: '+hsp[1]);
+			
+			if(st == "failed" && b5.Game.Multiplayer.player2Joined) b5.Game.Multiplayer.guest.close();
 		}
 		this.guest.onIceConnectionState = st => {
 			var hsp = b5.Game.Multiplayer.data.host_statep;
@@ -538,10 +592,9 @@ setGuest: function(success, failure, timeout) {
 			b5.Game.addCheev('[guest] ' + hsp[0], 'ice: '+hsp[1]);
 		}
 
-		this.guest.connect(code2, onConnect);
+	//	this.guest.connect(code2, onConnect);
 		
 		}
-	});
  
 },
 HostStarted: false,
@@ -551,27 +604,52 @@ setHost: function(success, failure) {
 	//Prepare
 	var host = this.host,
 	succ = false,
+	m = b5.Game.Multiplayer,
+	onCodesUpdate = function(snapshot) {
+		var data = snapshot.val();
+		if(data && data.guestCode && !succ) {
+			 host.connect(data.guestCode);
+			 
+			 succ = true;
+			 m.DB_ENTRY.off('value', onCodesUpdate);
+			 success && success();
+		}
+		else if(!data) {
+			m.DB_ENTRY.off('value', onCodesUpdate);
+			failure && failure();
+		}
+	}
 	startPrompt = function() {
-		var code = host.getCode(),
-		prg = promptAsync(b5.Game.Texts.texts.send_code_to_guest, code),
-		prh = null;
+		var code = host.getCode();
+		
+		//Clear previous code entries
+		try{b5.MPDB.ref(m.data.HOST_CODE).remove()}catch(e){}
+		
+		//Generate room code
+		m.data.HOST_CODE = b5.Utils.getRandomCode(6);
+		
+		//Reference entry in database
+		m.DB_ENTRY = b5.MPDB.ref(m.data.HOST_CODE);
+		
+		//Set initial data
+		m.DB_ENTRY.set({
+			hostCode: code,
+			guestCode: ""
+		})
+		.then(_ => {
+			//On entry set, wait for guest code on update
+			m.DB_ENTRY.on('value', onCodesUpdate);
+		})
+		.catch(_ => {
+			//On error
+			failure && failure();
+			m.data.HOST_CODE = "";
+			m.DB_ENTRY = null;
+		});
     
-    prg.then(code1 => {
-  		if (code1 == null || code1 == "") return host.close(),
-  		failure && failure();
-
-  		prh = promptAsync(b5.Game.Texts.texts.get_code_from_guest);
-  		
-  		prh.then(code2 => {
-  			if (code2 == null || code2 == "") return host.close(),
-		 		failure && failure();
-
-	  		host.connect(code2);
-  		});
-    });
 	}
 	
-	this.session = "host";
+	this.session = "Host";
 	
 	this.host.offer(e => console.log('[host] Started'));
 	this.host.onIceReady = e => startPrompt();
@@ -582,10 +660,13 @@ setHost: function(success, failure) {
 		b5.Game.Multiplayer.events.dispatch('host:open');
 		
 		b5.Game.addCheev(b5.Game.Texts.texts.player2Connected, b5.Game.Texts.texts.waitForPlayerJoin);
+		
+		//Clear room in database
+  	try{b5.MPDB.ref(this.data.HOST_CODE).remove()}catch(e){}
 	}
 	this.host.onError = function(e) {
 		console.log('[host] Peer Error. Error Object Below');
-		console.log(e);
+		console.log(e)
 		!succ && failure && failure();
 		b5.Game.Multiplayer.events.dispatch('host:error', e);
 	}
@@ -603,6 +684,7 @@ setHost: function(success, failure) {
 		
 		b5.Game.Multiplayer.onGuestDisconnected();
 		b5.Game.Multiplayer.events.dispatch('host:close');
+		b5.Game.Multiplayer.data.HOST_CODE = "";
 	}
 	
 	//Connection states
@@ -623,6 +705,21 @@ resetConnect: function() {
 	this.guest.close();
 }
 
+};
+
+b5.Game.Multiplayer.canExecute = function(player) {
+	return (!this.isHost && !this.isGuest) ||
+		(this.isHost && player.id != "playerTwo") ||
+		(this.isGuest && player.id != "playerOne");
+};
+
+b5.Game.Multiplayer.sendToNone = f => void 0;
+b5.Game.Multiplayer.target = function() {
+	switch(this.session) {
+		case 'Host': return 'Guest';
+		case 'Guest': return 'Host';
+		default: return 'None';
+	}
 };
 
 b5.Game.Multiplayer.events.on('host:close',r => {

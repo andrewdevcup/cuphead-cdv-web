@@ -118,7 +118,7 @@ b5.export = function(world, scene, data, game) {
 		ply.h = 0;
 		ply.cull = false;
 		ply.setBodySize(phyb.size[0],phyb.size[1]);
-		ply.fill_style = game.Flags.debugShowHitboxes ? "green": "transparent";
+		ply.fill_style = game.Flags.debugShowHitboxes ? "#00800080": "transparent";
 		ply.name = player;
 		ply.tag = "player";
 		ply.id = playerid;
@@ -180,6 +180,7 @@ b5.export = function(world, scene, data, game) {
 				hbx.activeTime = h.times;
 				hbx.visible = !!game.Flags.debugShowHitboxes;
 				hbx.tag = player +"hitbox" + (h.name == "ParryHitbox" ? '-intangible':'');
+				hbx.tags = ["player","hitbox"];
 			}
 		}
 		
@@ -310,9 +311,26 @@ b5.export = function(world, scene, data, game) {
 		data.players_dead = true;
 		game.Flags.pausingEnabled = false;
 	  
-	  scene.events.dispatch('allplayersdead');
-  	data.playFightText('YouDied', data.showDeathCard);
+	  if(!game.Multiplayer.isGuest) {
+	  	scene.events.dispatch('allplayersdead');
+   
+    	data.playFightText('YouDied', data.showDeathCard);
+	  }
 	};
+	
+	scene.events.on('allplayersdead', evtdata => {
+		if(!evtdata) evtdata = [];
+		if(game.Multiplayer.isGuest && evtdata[0] == 1) {
+			data.playFightText('YouDied', data.showDeathCard);
+		}
+		else if(game.Multiplayer.isHost) game.Multiplayer.sendToGuest("DISPATCH_EVENT",['allplayersdead',[1]]);
+	});
+	
+	//Show death screen if player one dies and player two exits
+	scene.events.on('playerremoved', e => {
+		for(var i = 0, a = data.getActivePlayers(); i < a.length; i++) 
+		  if(a[i].flags.heartPoints <= 0) return void data.allPlayersDead();
+	});
 
 	data.playersIntroAnimation = function() {
 		app.setTimeout(function() {

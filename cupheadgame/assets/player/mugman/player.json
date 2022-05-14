@@ -47,8 +47,8 @@
 			"size": [65,110],
 			"onJumping_size": [60,60],
 			"onRunning_size": [110,110],
-			"onDashing_size": [140,60],
-			"onDashing_size_ground": [140,110]
+			"onDashing_size": [100,60],
+			"onDashing_size_ground": [100,110]
 		}
 	},
 	"variables": {

@@ -8,8 +8,8 @@
 * PLEASE DO NOT CLAIM THE SOURCE CODE / PARTS OF IT AS YOURS
 *
 */
-RELEASE_CODENAME = "Beta";
-RELEASE_VER = 1;
+RELEASE_CODENAME = "Pre-Beta";
+RELEASE_VER = 2;
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -49,7 +49,7 @@ b5.Splash = function() {
 		lbp.style.width = Math.round(p*100)+"%"
 	}
 	div.destroy = function() {
-		document.body.removeChild(this);
+		try{document.body.removeChild(this);}catch(e){}
 		img.src = "";
 	}
 	div.loadingBar = lb;
@@ -57,7 +57,19 @@ b5.Splash = function() {
 }
 
 
+
 b5.onload = function() {
+	
+//Add buttons for mobile devices to flip the screen
+if(b5.Utils.IsMobile()) {
+var mbtn = document.createElement('button');
+mbtn.textContent = "Fullscreen";
+document.body.appendChild(mbtn);
+mbtn.onclick = function() {
+	b5.Utils.SetFullscreen(true);
+	b5.Utils.SetOrientation('landscape');
+}
+}
 
 //Extensions
 //b5.Utils.loadJS(internalDir +'engine/extensions/xml2js.js').onload = function() {
@@ -83,6 +95,7 @@ new FontFace('CupheadVogueExtraBold', `url("${internalDir+'assets/fonts/truetype
 b5.dbgtxt.style.font = "8pt CupheadVogueExtraBold";
 b5.dbgtxt.style.textAlign = "center";
 b5.dbgtxt.style.paddingLeft = "0%";
+self.addEventListener('resize',a => b5.dbgtxt.style.marginTop = "2%",!1);
 b5.dbgtxt.style.width = "inherit"
 b5.dbgtxt.style.marginBlock = "inherit";
 b5.dbgtxt.style.overflow = "hidden";
@@ -93,6 +106,18 @@ b5.loadgame = function() {
 	window.onerror = function (e, t, o, a) {
 		console.show();
 		console.error(e+'\n'+t+'\n'+o+':'+a);
+		app.splash.destroy();
+		switch(true) {
+			case +o == 86 && +a == 68:
+				console.log('CLEAR APP DATA');
+				break;
+			case e.indexOf('replaceAll is') > -1:
+				console.log('UPDATE WEBVIEW');
+				break;
+			case e.indexOf('Video') > -1:
+				console.log('STORAGE ERROR');
+				break;
+		}
 	};
 	
 	PIXI.settings.CREATE_IMAGE_BITMAP = true
@@ -178,7 +203,7 @@ b5.loadgame = function() {
 	b5.Game = {
 		readConfig: function() {
 			b5.Game.cfg = b5.INI.parse(b5.File.readSync(b5.Paths.config));
-			if (b5.Game.cfg.__fmt__[0][1].indexOf('# Base')>-1) b5.Game.cfg.__fmt__[0][1] = "# Main configuration file";
+			//if (b5.Game.cfg.__fmt__[0][1].indexOf('# Base')>-1) b5.Game.cfg.__fmt__[0][1] = "# Main configuration file";
 		},
 		saveConfig: function(onSave, onFail) {
 			var e = b5.File.write(b5.Paths.config, b5.INI.stringify(b5.Game.cfg));
@@ -215,7 +240,7 @@ b5.loadgame = function() {
 				b5.Game.screenfx && (vcfg.screenfx_enabled ? b5.Game.screenfx.activate() : b5.Game.screenfx.deactivate());
 				//Resolution
 				var res = vcfg.resolution,
-				aspect_ratio = (vcfg.aspectRatio || '16:9').split(':');
+				aspect_ratio = (vcfg.aspectRatio || "16:9").split(':');
 				aspect_ratio = +aspect_ratio[0] / +aspect_ratio[1];
 				app.setResolution(Math.ceil(res * aspect_ratio), res);
 				//Aspect ratio
@@ -236,13 +261,16 @@ b5.loadgame = function() {
 				});*/
 				
 				//Texture resolution
+				if(vcfg.textureQuality == void 0) vcfg.textureQuality = 0.6;
 				app.texture_resolution = vcfg.textureQuality;
 				
-				app.async_texture_decoding = vcfg.threadedTextureDecoding;
 				app.display.setAntialiasingEnabled(vcfg.antialiasing);
 				//Effects
 			  app[vcfg.colorFX ? 'addFilter' : 'removeFilter'](b5.Filters.color.filter);
 			  
+			  if(vcfg.asyncTextureDecoding === void	0) vcfg.asyncTextureDecoding = false;
+			  
+			  app.async_texture_decoding = !!vcfg.asyncTextureDecoding;
 			}
 			//Audio config
 			if (section == "audio" || !section) {
@@ -298,7 +326,7 @@ b5.loadgame = function() {
 	//Copy base save files
 	if (!b5.File.exists(b5.Paths.saves)) createSaveFiles();
 	
-	setTimeout(()=>{b5.PreStartup()},1000);
+	setTimeout(()=>{b5.PreStartup()},1200);
 	
 	b5.PreStartup = function() {
 		
@@ -309,9 +337,7 @@ b5.loadgame = function() {
 		app.addScene(scene_GUI);
 		scene_GUI._layer = 2;
 		app.focus_scene = scene_GUI;
-
-		
-
+	
 b5.Game.importObject = function(name) { //console.warn('Import: '+name)
 let scr = "",
 res = null;
@@ -362,7 +388,7 @@ b5.Game.parseResources = function(json, scene) {
 		  		  res.bitmaps.indexOf(scene.bitmaps[b].name) > -1 && c.push(scene.bitmaps[b]);
 		  		 
 		  		let atlas = new b5.ImageAtlas(res.name, c),
-		  		generate = res.frames.endsWith('.json');
+		  		generate = res.frames && res.frames.endsWith('.json');
 		  		
 		  		atlas.framesId = atlas.animsId = loadId;
 		  		
@@ -419,6 +445,9 @@ b5.Game.parseResources = function(json, scene) {
 		  	break;
 		  	case 'shader':
 		  		scene.addResource(new b5.Shader(res.name, b5.Paths.assets + res.src, res.async), 'shader', res.persist);
+		  	break;
+		  	case 'raw':
+		  		scene.addResource(new b5.Raw(res.name, b5.Paths.assets + res.src, true), 'raw');
 		  	break;
 		  }
 		  loadId++;
@@ -723,9 +752,9 @@ app.now > l+1000 ? (fpt = fptc+1,
   fptc = 0, 
   l = app.now,
   app.getMemoryUsage(),
-  app.updateInfoText()
+app.updateInfoText()
 ): fptc++;
-
+  
 
 
 }
