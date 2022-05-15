@@ -61,7 +61,7 @@ b5.Splash = function() {
 b5.onload = function() {
 	
 //Add buttons for mobile devices to flip the screen
-if(b5.Utils.IsMobile()) {
+if(b5.Utils.IsMobile() && cordova.platformId == "browser") {
 var mbtn = document.createElement('button');
 mbtn.textContent = "Fullscreen";
 document.body.appendChild(mbtn);
@@ -268,9 +268,9 @@ b5.loadgame = function() {
 				//Effects
 			  app[vcfg.colorFX ? 'addFilter' : 'removeFilter'](b5.Filters.color.filter);
 			  
-			  if(vcfg.asyncTextureDecoding === void	0) vcfg.asyncTextureDecoding = false;
+			//  if(vcfg.asyncTextureDecoding === void	0) vcfg.asyncTextureDecoding = true;
 			  
-			  app.async_texture_decoding = !!vcfg.asyncTextureDecoding;
+			  app.async_texture_decoding = true; // !!vcfg.asyncTextureDecoding;
 			}
 			//Audio config
 			if (section == "audio" || !section) {

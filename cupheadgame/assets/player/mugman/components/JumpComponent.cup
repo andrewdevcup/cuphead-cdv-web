@@ -32,12 +32,12 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		
 		for (var i = 0; i < overlaps.length; i++) if (Math.round(thisPlayer.body.m_linearVelocity.y) >= 0) {
 			if (overlaps[i].tags.indexOf('floor') != -1 && thisPlayer.y < overlaps[i].y - (overlaps[i].h/2)) {
-				flags.inAir = false; break
+				flags.inAir = false; break;
 			} else if (overlaps[i].tags.indexOf('platform')>-1 && overlaps[i].playersOver[thisPlayer.name] && !flags.inPlatform && !flags.droppingPlatform) {
 				flags.inAir = false; flags.inPlatform = true; break
 			}
-		}/*
-		if (overlaps.length == 0) {
+		}
+	/*	if (overlaps.length == 0) {
 			flags.inAir = true;
 			flags.inPlatform = false;
 		}*/

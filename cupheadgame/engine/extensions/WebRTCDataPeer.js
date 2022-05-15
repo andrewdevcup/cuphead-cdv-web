@@ -168,11 +168,11 @@
 		this.reset(!0);
 	};
 	var _encode=e=>{
-		for(var i=0,n="";i<e.length;i++)n+= e[i]!=="."?String.fromCharCode(+e[i].charCodeAt(0)+6):String.fromCharCode(2);
+		for(var i=0,n="";i<e.length;i++)n+=String.fromCharCode(+e[i].charCodeAt(0)+5);
 		return n;
 	},
 	_decode=e=>{
-		e=e.replaceAll(String.fromCharCode(2),'.');for(var i=0,n="";i<e.length;i++)n+=e[i]!="."?String.fromCharCode(e[i].charCodeAt(0)-6):".";
+		for(var i=0,n="";i<e.length;i++)n+=String.fromCharCode(e[i].charCodeAt(0)-5);
 		return n;
 	};
 })();

@@ -52,7 +52,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				thisPlayer.updateAnimations = true;
 				flags.parryActive = false;
 				//Spawn particle
-				data.spawnPlayerParticle('dashDust',thisPlayer);
+			  data.spawnPlayerParticle('dashDust',thisPlayer);
 				//Play sfx 
 				dashsfx[b5.Maths.randomRange(0,2)].play();
 				

@@ -373,7 +373,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	scene.events.on('playerhit', d => {
 		//Get HP score from max between players
 		for(var i = 0, p = world.findActorsByTagName('player',true), hp = 0; i < p.length; i++) {
-			hp = Math.max(p[i].flags.heartPoints-1, hp);
+			hp = Math.min(Math.max(p[i].flags.heartPoints-1, hp), sceneData.Max_Scores.hp);
 		}
 		scene.data.Statistics.hp = hp;
 	});
@@ -450,14 +450,14 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	scene.events.on('enemydeath', evtdata => {
 		if(evtdata[1] == "send") {
 			var target = game.Multiplayer.target();
-			game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['enemydeath',[evtdata[0], target]]);
+		  game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['enemydeath',[evtdata[0], target]]);
 		}
 		else if(evtdata[1] == game.Multiplayer.session) {
-			var obj = world.findActorById(evtdata[0],true);
-			if(obj && !obj.evt_destroy && obj.onDeath) {
-				obj.evt_destroy = true;
-				obj.onDeath();
-			}
+	  	var obj = world.findActorById(evtdata[0],true);
+	  	if(obj && !obj.evt_destroy && obj.onDeath) {
+	  		obj.evt_destroy = true;
+	  		obj.onDeath();
+	  	}
 		}
 	});
 

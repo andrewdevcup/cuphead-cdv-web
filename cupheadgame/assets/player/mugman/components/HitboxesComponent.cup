@@ -30,16 +30,16 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	hitboxes.ParryHitbox.setInterval(function(task) {
 		var ol = task.data.A_overlaps; 
 		for(var i = 0; i < ol.length; i++)
-		  if(ol[i].tags.indexOf('Parryable') != -1 && flags.parryActive) {
+		  if(ol[i].tags.indexOf('Parryable') != -1 && (flags.parryActive || task.data.hitbox_active)) {
 		  	var	l = ol[i];
 		  	
-		  	thisPlayer.parry(l.parryScore);
+		 		thisPlayer.parry(l.parryScore);
 		  	l.onParry && l.onParry(thisPlayer);
 		  		
 		  	//Sync multiplayer
-		  	scene.events.dispatch('objectparried',[l.id,thisPlayer.name, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
-		  		
-		  	//Spawn particles
+		 		scene.events.dispatch('objectparried',[l.id,thisPlayer.name, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+
+		 		//Spawn particles
 		  	data.spawnPlayerParticle('parrySpark',l);
 		  	break;
 		  }
@@ -119,7 +119,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
       
       //Disable all
       for(var i in hitboxes) {
-      	hitboxes[i].hitbox_active = false;
+      	if(i != 'ParryHitbox') hitboxes[i].hitbox_active = false;
       }
       
       //States
@@ -128,7 +128,6 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
       else if(ca.indexOf('duck') > -1) hitboxes.DuckingHitbox.hitbox_active = true;
       else if(ca.indexOf('jump') > -1 || ca.indexOf('air') > -1) {
       	hitboxes.JumpingHitbox.hitbox_active = true;
-      	ca == "jump_parry" && (hitboxes.ParryHitbox.hitbox_active = true);
       }
       else if(ca.indexOf('dash') > -1) thisPlayer.setInterval(task=>{
       		if(atlas.current_frame>=hitboxes.DashingHitbox.activeTime[0]) {
@@ -137,6 +136,10 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
       		}
       	},0);
       
+      
+      for(var i in hitboxes) {
+      	hitboxes[i].visible = game.Flags.debugShowHitboxes && hitboxes[i].hitbox_active;
+      }
       
       //Set physicsBody Size
       var pb = data[thisPlayer.name].body.physicsBody;
@@ -179,7 +182,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
       	  	overlap = true;
       	  	flags.damageHit = true;
       	  	//Sync
-  			  	scene.events.dispatch('playerhit',[thisPlayer.name, flags.heartPoints, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+  			   	scene.events.dispatch('playerhit',[thisPlayer.name, flags.heartPoints, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
       	  	thisPlayer.onEnemyHit(ol);
       	  	break;
       	  }
