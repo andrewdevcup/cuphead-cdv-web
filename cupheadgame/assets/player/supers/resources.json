@@ -1,0 +1,24 @@
+{
+	"bitmap": [
+		{
+			"automatize": {
+				"name": "SpeedLinesBitmap%i",
+				"start": 1,
+				"end": 16,
+				"pad": 4,
+				"src": "player/supers/common/super_speed_lines_####.png"
+			}
+		}
+	],
+	"brush": [
+		{
+			"name": "SuperSpeedLinesAtlas",
+			"bitmaps": {
+				"start": 1,
+				"end": 16,
+				"name-prefix": "SpeedLinesBitmap%i"
+			},
+			"frames": "player/supers/common/SpeedLines.frames.json"
+		}
+	]
+}

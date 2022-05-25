@@ -1,0 +1,62 @@
+{
+	"bitmap": [
+		{
+			"name": "SuperBeamBitmap0",
+			"src": "player/supers/superart1/SpriteAtlasTexture_Beam-0.png"
+		},
+		{
+			"name": "SuperBeamBitmap1",
+			"src": "player/supers/superart1/SpriteAtlasTexture_Beam-1.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "SuperBeamAtlas",
+			"bitmaps": ["SuperBeamBitmap0", "SuperBeamBitmap1"],
+			"frames": "player/supers/superart1/SpriteAtlasTexture_Beam.csv",
+			"anims": "player/supers/superart1/beam.anims.json"
+		}
+	],
+	"sound": [
+  	{
+	  	"automatize": {
+				"name": "BeamStartSfx%i",
+				"start": 1,
+				"end": 4,
+				"pad": 2,
+				"src": "player/supers/superart1/AudioClip/sfx_player_super_beam_start_##.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+	  },
+	  {
+	  	"automatize": {
+				"name": "BeamMilkExplosionSfx%i",
+				"start": 1,
+				"end": 4,
+				"pad": 2,
+				"src": "player/supers/superart1/AudioClip/sfx_player_superbeam_milk_explosion_##.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+	  },
+	  {
+	  	"automatize": {
+				"name": "BeamEndSfx%i",
+				"start": 1,
+				"end": 4,
+				"pad": 2,
+				"src": "player/supers/superart1/AudioClip/sfx_player_super_beam_end_ground_##.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+	  },
+	  {
+	  	"name": "BeamLoopSfx",
+	  	"src": "player/supers/superart1/AudioClip/sfx_player_super_beam_firing_loop.ogg",
+	  	"reuse": true,
+	  	"loop": true,
+	  	"category": "sfx"
+	  }
+	]
+}

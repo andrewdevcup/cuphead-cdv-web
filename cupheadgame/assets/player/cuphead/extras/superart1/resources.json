@@ -1,0 +1,13 @@
+{
+	"read": "This JSON is exclusive for SUPER ART 1 CUP script, it should not be loaded using game.parseResources() directly.",
+	"bitmap": [{
+		"name": "CupheadSuperArtIBitmap0",
+		"src": "player/@player@/extras/superart1/SpriteAtlasTexture_PlayerSuperArtI-0.png"
+	}],
+	"brush": [{
+		"name": "@player@:SuperArt1Atlas",
+		"bitmaps": ["CupheadSuperArtIBitmap0"],
+		"frames": "player/@player@/extras/superart1/SpriteAtlasTexture_PlayerSuperArtI.csv",
+		"anims": "player/@player@/extras/superart1/superart1.anims.json"
+	}]
+}

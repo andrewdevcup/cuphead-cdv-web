@@ -1,0 +1,4 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,80,80,0,0, equip_icon_charm_parry_attack_0001
+0,80,0,80,80,0,0, equip_icon_charm_parry_attack_0002
+0,160,0,80,80,0,0, equip_icon_charm_parry_attack_0003

@@ -1,0 +1,231 @@
+return function(thisPlayer, flags, world, scene, game, superData) {
+	//Setup actions
+	
+	let MusicEffectOn = function() {
+		for(let i = 0, a = game.Music.sounds; i < a.length; i++) {
+			a[i]._pspeed = a[i].playback_speed;
+			a[i].Tween('playbackRate',a[i]._pspeed * 1.45,0.45);
+			a[i].Tween('gain:output', a[i].output_gain * 0.4, 0.45);
+			scene.setTimeout(m => a[i].Tween('gain:reverb',4.2 * game.cfg.Audio.master * game.cfg.Audio.music, 0.5), 0.45);
+		}
+	},
+	MusicEffectOff = function() {
+		for(let i = 0, a = game.Music.sounds; i < a.length; i++) {
+			a[i].Tween('gain:reverb',0, 0.1);
+			a[i].Tween('gain:output', game.cfg.Audio.master * game.cfg.Audio.music, 0.25);
+			a[i].Tween('playbackRate',a[i]._pspeed || 1,0.26);
+			delete a[i]._pspeed;
+		}
+	},
+	PrepareSuper = function(a_sprite, backdrop, speedlines, beam) {
+		backdrop.destroy();
+		speedlines.destroy();
+		
+		a_sprite.sendToBack();
+		a_sprite.playAnimWithEnd('pre_loop', a => {
+			beam.visible = true;
+			beam.playAnimWithEnd('beam_intro', e => e.playAnim('beam_loop',true));
+			a.playAnim('loop',true);
+			
+			//Set hitbox active
+			wbeam = beam
+			beam.setInterval(f => {
+				for(let i = 0, b = beam.A_overlaps, c = null; i < b.length; i++) {
+					if((c = b[i]).tags.indexOf('hittableEnemy') != -1) {
+						scene.data.shakeCamera(7,0,0.8);
+						/*
+						c._body_prev_type = c.body.GetType();
+						c.body.SetType(0);
+						c.setTimeout(g => g.data.body.SetType(g.data._body_prev_type),0.15);
+						*/
+						//Particle
+						var p = new	b5.Actor();
+						p.atlas = beam.atlas;
+						p.onAnimEnd = p.destroy;
+						p.playAnim('splash');
+						beam.parent.addActor(p);
+						p._layer = beam.layer;
+						p._scale = 1.15;
+						
+						p.setPosition(
+							b5.Maths.pos(beam.x, c.x, 0.6) + b5.Maths.randomRange(-130,130),
+							b5.Maths.pos(beam.y,c.y,0.6) + b5.Maths.randomRange(-130,130)
+						);
+						
+						c.onBulletHit && c.onBulletHit({damage: 8});
+					}
+				}
+			},12/60);
+			
+		});
+		
+		scene.findResource('BeamLoopSfx','sound').play();
+		scene.findResource('BeamMilkExplosionSfx'+b5.Maths.randomRange(1,4),'sound').play();
+	};
+	
+	flags.SUPER = false;
+	
+	//Resources (independant for each player)
+	if(!scene.findResource(thisPlayer.name+"SuperArtIResources","raw")) scene.addResource(
+		new b5.Raw(thisPlayer.name+"SuperArtIResources", b5.Paths.player+thisPlayer.name+"/extras/superart1/resources.json", true, fdata => {
+			//Load resources
+			game.parseResources(fdata.replaceAll("@player@",thisPlayer.name), scene);
+			scene.tryLoadNextResource();
+		},true),
+		"raw"
+	);
+	scene.tryLoadNextResource();
+	
+	thisPlayer.ExecuteSuper = function(facing) {
+		game.Flags.playerCanExecuteSuper = false;
+		scene.world.m_sleep = true;
+		flags.SUPER = true;
+		
+		for(var i = 0; i < world.actors.length; i++) {
+			world.actors[i].active = false;
+			world.actors[i] === world.PlayerLayer && i++;
+		}
+		game.Flags.pausingEnabled = false;
+		
+		thisPlayer.body.SetActive(false);
+		flags.controllable = false;
+		let phittable = flags.hittable;
+		flags.hittable = false;
+		thisPlayer.stopShooting();
+		
+		thisPlayer.visible = false;
+		
+		MusicEffectOn();
+		
+		scene.findResource('BeamStartSfx'+b5.Maths.randomRange(1,4),'sound').play();
+		
+		//Add sprites
+	 	const ArtSprite = new b5.Actor(),
+	 	Backdrop = new b5.RectActor(),
+	 	SuperFX = new	b5.Actor(),
+	 	SpeedLines = new b5.Actor(),
+	 	Beam = new b5.Actor(),
+	 	target = world["Layer"+(scene.data.view.playerLayer+1)];
+	 	
+	  ArtSprite.atlas = scene.findResource(thisPlayer.name+':SuperArt1Atlas','brush');
+	 	target.addActor(ArtSprite);
+	 	
+	 	SuperFX.atlas = ArtSprite.atlas;
+	 	target.addActor(SuperFX);
+	  
+	  Backdrop.fill_style = "black";
+	  Backdrop.opacity = 0;
+	  Backdrop.TweenTo('opacity',0.5,0.15);
+	  Backdrop.setSize(scene.w,scene.h);
+	  Backdrop._scale = scene.data.view.zoom;
+	  target.addActor(Backdrop);
+	  
+	  Backdrop.onTick = function() {
+	  	//Keep 
+	  	this.setPosition(-this.parent.absPos.x,-this.parent.absPos.y);
+	  	SpeedLines.setPosition(this.x,this.y);
+	  }
+	  
+	  ArtSprite.sendToBack();
+	  Backdrop.sendToBack();
+	  
+	  SuperFX._layer = 1;
+	  
+	  SpeedLines.atlas = scene.findResource('SuperSpeedLinesAtlas','brush');
+	  SpeedLines.frame_speed = 24;
+	  SpeedLines.fit = b5.Actor.FitSize;
+	  SpeedLines.opacity = 0;
+	  SpeedLines.TweenTo('opacity',1,0.1);
+	  target.addActor(SpeedLines);
+	  
+	  SpeedLines.sprite.zeroTintAlpha = true;
+	  
+	  SpeedLines._layer = 1;
+	  	
+	 	ArtSprite.playAnimWithEnd('intro', f => {
+	 		scene.setTimeout(m => {
+	 			PrepareSuper(f,Backdrop, SpeedLines, Beam);
+	 		},0.6);
+	 	});
+  	
+	  ArtSprite.setPosition(thisPlayer.x + thisPlayer.Sprite.ox,thisPlayer.y + thisPlayer.Sprite.oy);
+	  ArtSprite._scale = thisPlayer.Sprite.scale;
+	  ArtSprite._scale_x = thisPlayer.Sprite.scale * facing;
+	  
+	  SuperFX.setPosition(ArtSprite.x - (26 * thisPlayer.Sprite._scale * facing),ArtSprite.y - (31 * thisPlayer.Sprite._scale));
+	  SuperFX._scale = ArtSprite._scale * 2;
+	  SuperFX._scale_x = ArtSprite.scale_x * 2;
+	  
+	  SuperFX.playAnimWithEnd('super_fx', u => u.destroy());
+		
+		const PAUSELISTENER = app.events.once('pause', f => {
+			//Disable	echo
+			if(flags.SUPER) {
+				for(var i = 0, a = game.Music.sounds; i < a.length; i++) {
+					a[i].Tween('gain:reverb',0, 0.25);
+					a[i].Tween('gain:output', game.cfg.Audio.master * game.cfg.Audio.music, 0.25);
+				}
+			}
+		});
+		
+		//Unsubscribe
+		scene.events.once('unload', a => a.events.off(PAUSELISTENER));
+		
+		//Super Beam
+		Beam.cull = false;
+		Beam.setSize(1300,330);
+		Beam.setPosition(thisPlayer.x + (640 * facing), thisPlayer.y - 30);
+		world.PlayerLayer.addActor(Beam);
+		Beam.initBody('collider',true);
+		Beam.atlas = scene.findResource('SuperBeamAtlas','brush');
+		Beam.visible = false;
+		Beam.addFixtureSelf();
+		Beam._ox = -250;
+		Beam._scale = 1.19;
+		Beam._scale_x *= Math.sign(facing);
+		
+		Beam._layer = thisPlayer.layer + 1;
+		
+		
+		scene.setTimeout(a => {
+			for(var i = 0; i < world.actors.length; i++) {
+				world.actors[i].active = true;
+			}
+			scene.world.m_sleep = false;
+			thisPlayer.data.supermeter = 0;
+			game.Flags.pausingEnabled = !scene.data.players_dead;
+			
+			scene.setTimeout(b => {
+				MusicEffectOff();
+				
+				thisPlayer.body.SetActive(true);
+				flags.controllable = true;
+				flags.hittable = phittable;
+				flags.SUPER = false;
+				
+				game.Flags.playerCanExecuteSuper = true;
+				
+				thisPlayer.visible = true;
+				
+				Beam.release();
+				Beam.playAnimWithEnd('beam_outro', f => f.destroy());
+				
+				ArtSprite.destroy();
+				
+				scene.findResource('BeamLoopSfx','sound').stop();
+				scene.findResource('BeamEndSfx'+b5.Maths.randomRange(1,4),'sound').play();
+		
+				
+				thisPlayer.body.m_linearVelocity.y = -thisPlayer.data.jumpSpeed * 1.4;
+			},2.3);
+			
+		},1.1);
+		
+	};
+	
+	return {
+		onTick: function() {
+			//Upddate
+		}
+	};
+};

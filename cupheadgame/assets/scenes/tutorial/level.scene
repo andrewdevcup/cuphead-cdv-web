@@ -523,7 +523,8 @@ b5.addSceneResources = function(scene, data, game) {
 		false,
 		{
 			equalizer: true,
-			limiter: true
+			limiter: true,
+			reverb: true
 		});
 	mus_tuto.output_gain = game.Music.volume;
 	mus_tuto.onDestroy = game.Music.remove;

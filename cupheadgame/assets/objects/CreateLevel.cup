@@ -65,6 +65,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 			world.actors[i].x2 = world.ox * a;
 			world.actors[i].y2 = world.oy * a;
 			world.actors[i].dirty();
+			world.actors[i].parallax_multiplier = a;
 			a *= data.view.world_depth;
 		}
 		for (var i = data.view.playerLayer-1, a = 1; i > 0; i--) {
@@ -72,6 +73,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 			a = i/(data.view.playerLayer-1)*(data.view.world_depth / data.view.world_depth);
 			world.actors[i].x2 = world.ox * a;
 			world.actors[i].y2 = world.oy * a;
+			world.actors[i].parallax_multiplier = a;
 			world.actors[i].dirty();
 			
 		}
@@ -450,12 +452,11 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	scene.events.on('enemydeath', evtdata => {
 		if(evtdata[1] == "send") {
 			var target = game.Multiplayer.target();
-		  game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['enemydeath',[evtdata[0], target]]);
+		  game.Multiplayer.isHost && game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['enemydeath',[evtdata[0], target]]);
 		}
 		else if(evtdata[1] == game.Multiplayer.session) {
 	  	var obj = world.findActorById(evtdata[0],true);
-	  	if(obj && !obj.evt_destroy && obj.onDeath) {
-	  		obj.evt_destroy = true;
+	  	if(obj && obj.onDeath) {
 	  		obj.onDeath();
 	  	}
 		}

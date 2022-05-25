@@ -9,7 +9,7 @@
 *
 */
 RELEASE_CODENAME = "Pre-Beta";
-RELEASE_VER = 2;
+RELEASE_VER = 3;
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -61,7 +61,7 @@ b5.Splash = function() {
 b5.onload = function() {
 	
 //Add buttons for mobile devices to flip the screen
-if(b5.Utils.IsMobile() && cordova.platformId == "browser") {
+if(b5.Utils.IsMobile() && (cordova.platformId == "browser"|| window.DebugBuild)) {
 var mbtn = document.createElement('button');
 mbtn.textContent = "Fullscreen";
 document.body.appendChild(mbtn);
@@ -86,6 +86,7 @@ mbtn.onclick = function() {
 
 b5.loadgame()
 
+/*
 b5.dbgtxt = document.createElement('p');
 b5.dbgtxt.style.position='absolute';
 document.body.appendChild(b5.dbgtxt);
@@ -99,7 +100,13 @@ self.addEventListener('resize',a => b5.dbgtxt.style.marginTop = "2%",!1);
 b5.dbgtxt.style.width = "inherit"
 b5.dbgtxt.style.marginBlock = "inherit";
 b5.dbgtxt.style.overflow = "hidden";
-};
+*/
+
+b5.dbgtxt = new b5.LabelActor();
+b5.dbgtxt._scale = 0.5;
+b5.dbgtxt.dock_y = b5.Actor.Dock_Top;
+b5.dbgtxt.oy = -60;
+}
 
 b5.loadgame = function() {
 	console.hide();
@@ -434,6 +441,7 @@ b5.Game.parseResources = function(json, scene) {
 		  					b.destroyOnEnd && (sound.destr = b.destroyOnEnd);
 		  				}
 		  				else {
+		  					sound.setReverbGain(0);
 		  					sound.output_gain = this.Music.volume;
 		  					this.Music.add(sound);
 		  					sound.onDestroy = this.Music.remove;
@@ -723,12 +731,17 @@ app.getMemoryUsage = function() {
   })
 }
 
+scene_GUI.addActor(b5.dbgtxt);
+b5.dbgtxt._layer = 20;
+b5.dbgtxt.font = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
+
 app.updateInfoText = function() {
-	b5.dbgtxt.innerHTML = (window.debugText||"")+//'--p1--\n'+ Obj2(b5.Game.Input.player1)+"\n--p2--\n"+Obj2(b5.Game.Input.player2)+'\n'
+	b5.dbgtxt.clearFormat();
+	b5.dbgtxt.setTextFmt( (window.debugText||"")+//'--p1--\n'+ Obj2(b5.Game.Input.player1)+"\n--p2--\n"+Obj2(b5.Game.Input.player2)+'\n'
 (!sceneMain.areResourcesLoaded()? _loadingtext()+' |':_statusText())+ " "+RELEASE_CODENAME + " "+ RELEASE_VER + " | "+
   fpt +'fps' + ' mem: '+ 
   (app.memoryUsage.indexOf('.') != -1 ? app.memoryUsage : app.memoryUsage.replace('%','.0%')) +
-  ' dC: '+app.display.drawCount
+  ' dC: '+app.display.drawCount)
 }
 
 app.onTick = function() {
@@ -754,7 +767,7 @@ app.now > l+1000 ? (fpt = fptc+1,
   app.getMemoryUsage(),
 app.updateInfoText()
 ): fptc++;
-  
+//app.updateInfoText()
 
 
 }
@@ -764,7 +777,7 @@ function _loadingtext() {
 	for(var i = 0, a = sceneMain.countLoadedResources() / sceneMain.countLoadableResources(); i < r.length; i++) {
 		var s = Math.floor(.2+r.length*a);
 		if(s > -1 && i < s) {
-			t += `<span style="color:green">${r[i]}</span>`
+			t += `&f[#008000]${r[i]}&f`
 		}
 		else t += r[i]
 	}
@@ -772,8 +785,8 @@ function _loadingtext() {
 }
 function _statusText() {
 	switch(app.texture_state) {
-		case "uploading": return '<span style="color:yellow">UPLOADING</span> |';
-		case "reading": return '<span style="color:blue">READING</span> |';
+		case "uploading": return '&f[#ffff00]UPLOADING&f |';
+		case "reading": return '&f[#0000ff]READING&f |';
 		default: return "";
 	}
 }

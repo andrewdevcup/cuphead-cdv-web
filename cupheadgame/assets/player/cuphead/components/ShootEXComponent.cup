@@ -84,8 +84,24 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		};
 	}
 	
+	thisPlayer.startSuper = function(facing) {
+		this.ExecuteSuper(facing);
+	}
+	
 	//Guest events
 	scene.events.on('playerex', evtdata => {
+		if(thisPlayer.name == evtdata[0]) {
+			if(evtdata[4] == "send") {
+				var target = game.Multiplayer.target();
+				game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playerex',[evtdata[0],evtdata[1],target]]);
+			}
+			else if(evtdata[4] == game.Multiplayer.session) {
+				!flags.SUPER && thisPlayer.startEX(evtdata[1]);
+			}
+		}
+	});
+	
+	scene.events.on('playersuper', evtdata => {
 		if(thisPlayer.name == evtdata[0]) {
 			if(evtdata[4] == "send") {
 				var target = game.Multiplayer.target();
@@ -96,6 +112,9 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			}
 		}
 	});
+	
+	//Super
+	thisPlayer.Super = new data.Super(thisPlayer.equipedSuper, thisPlayer);
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {
 		//This is a loop function
@@ -111,10 +130,18 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 
 				if (shootex && !flags.shootingEX) {
 				
-					//Sync
-					scene.events.dispatch('playerex',[thisPlayer.name, Math.round1000(thisPlayer.data.supermeter), axis_x, axis_y, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+					//Check for super 
+					if(thisPlayer.data.supermeter >= thisPlayer.data.max_supermeter_score && thisPlayer.equipedSuper != "empty" && game.Flags.playerCanExecuteSuper) {
+						scene.events.dispatch('playersuper',[thisPlayer.name, Math.sign(thisPlayer.data.facing), game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+						thisPlayer.startSuper && thisPlayer.startSuper(Math.sign(thisPlayer.data.facing));
+					}
+					else {
+						//Sync
+						scene.events.dispatch('playerex',[thisPlayer.name, Math.round1000(thisPlayer.data.supermeter), axis_x, axis_y, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
 					
-					thisPlayer.startEX(thisPlayer.data.supermeter,axis_x,axis_y);
+						thisPlayer.startEX(thisPlayer.data.supermeter,axis_x,axis_y);
+					}
+					
 				}
 
 			}

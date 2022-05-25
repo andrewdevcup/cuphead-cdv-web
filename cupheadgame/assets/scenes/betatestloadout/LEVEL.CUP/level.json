@@ -152,7 +152,20 @@
 		"name": "ParryCharmSwitch",
 		"type": "",
 		"size": [60,60],
-		"pos": [180,-50],
+		"pos": [93,-50],
+		"tags": ["Parryable"],
+		"add_collider": true,
+		"visible": true,
+		"bitmap": "ParryArrow",
+		"scale": 1.45,
+		"layer": 0,
+		"sub_layer": 3
+	},
+	{
+		"name": "ParrySuperSwitch",
+		"type": "",
+		"size": [60,60],
+		"pos": [245,-50],
 		"tags": ["Parryable"],
 		"add_collider": true,
 		"visible": true,
@@ -221,7 +234,8 @@
 			"category": "music",
 			"options": {
 				"equalizer": true,
-				"limiter": true
+				"limiter": true,
+				"reverb": true
 			}
 		}]
 	}

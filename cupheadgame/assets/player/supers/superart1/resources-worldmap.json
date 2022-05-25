@@ -1,0 +1,15 @@
+{
+	"bitmap": [
+		{
+			"name": "SuperArtIEquipIcon",
+			"src": "player/supers/superart1/SpriteAtlasTexture_BeamEquipIcon.png"
+		}
+	],
+	"brush": [
+		{
+			"name": "superart1:SUPER_EQUIP_ICON",
+			"bitmaps": ["SuperArtIEquipIcon"],
+			"frames": "player/supers/superart1/SpriteAtlasTexture_BeamEquipIcon.csv"
+		}
+	]
+}

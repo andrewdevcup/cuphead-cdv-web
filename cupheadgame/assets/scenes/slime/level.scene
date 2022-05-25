@@ -104,6 +104,7 @@ b5.LoadScene = function(world, scene, data, game) {
   data.Statistics.level_type = 'boss'; //For winscreen
   data.Statistics.optimalTime = 180; //Time to beat the boss for score
   
+  world.camera_speed_x = 0.12;
 };
 b5.onLoadingScreenOut = function(world, scene, data, game) {
 	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!

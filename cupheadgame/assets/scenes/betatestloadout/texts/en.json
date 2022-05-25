@@ -1,4 +1,4 @@
 {
 	"selectweapon": "SELECT WEAPON\n&f[,,,,0.6,0.6](primary, secondary)&f",
-	"selectcharm": "SELECT CHARM\n&f[,,,,0.6,0.6](will activate on level retry)&f"
+	"selectcharm": "CHARM & SUPER\n&f[,,,,0.6,0.6](will activate on level retry)&f"
 }

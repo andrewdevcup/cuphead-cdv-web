@@ -18,6 +18,12 @@ b5.LoadScene = function(world, scene, data, game) {
   //Weapon equip icon
   data.levelData.weaponList = JSON.parse(scene.findResource('WeaponsList','raw').data);
   data.levelData.charmList = JSON.parse(scene.findResource('CharmsList','raw').data);
+  data.levelData.superList = JSON.parse(scene.findResource('SupersList',"raw").data);
+  
+  //Add empty for unequip
+  //data.levelData.weaponList.push('empty')
+  data.levelData.charmList.push('empty')
+  data.levelData.superList.unshift('empty')
   
   var p1Loadout = game.SlotUtils.getPlayerLoadouts('playerOne');
 
@@ -85,11 +91,47 @@ b5.LoadScene = function(world, scene, data, game) {
     return charmIcon;
   }
   
+  data.createSuperSwitch = function(index,x,y) {
+  	var spr = data.levelData.superList.indexOf(game.GameDefIDs.supers[p1Loadout.super.toString()]);
+  	data.levelData['sIcon'+index+'Index'] = spr != -1 ? spr : index;
+  	var superIcon = new b5.Actor();
+    world.Layer0.addActor(superIcon);
+    superIcon.frame_speed = 12;
+    superIcon._layer = 2;
+    superIcon._scale = 1.2;
+    superIcon.setPosition(x,y);
+    superIcon.name = "SuperIcon-"+index;
+    superIcon.index = index;
+  
+    superIcon.updateSuperIcon = function(dontUpdateIndex) {
+      var n = 'sIcon'+this.index+'Index';
+    
+      this.rotation = -1;
+      this.TweenTo('_rotation',0,0.3,b5.Ease.quadout,true);
+    
+      data.levelData[n]++;
+  	  if(data.levelData[n] >= data.levelData.superList.length)
+        data.levelData[n] = 0;
+    
+      var super_ = data.levelData.superList[data.levelData[n]];
+      
+      this.atlas = scene.findResource(super_+':SUPER_EQUIP_ICON','brush');
+      
+    };
+    
+    superIcon.updateSuperIcon();
+    
+    return superIcon;
+  }
+  
   //Set icon
   data.weapon1Icon = data.createWeaponSwitch(0,-320,-50);
   data.weapon2Icon = data.createWeaponSwitch(1,-180,-50);
   
-  data.charm1Icon = data.createCharmSwitch(0,180,-50);
+  data.charm1Icon = data.createCharmSwitch(0,93,-50);
+  
+  data.super1Icon = data.createSuperSwitch(0,245,-50);
+  data.super1Icon.updateSuperIcon()
   
   scene.events.once('resourcesloaded', a => data.charm1Icon.updateCharmIcon());
   
@@ -137,6 +179,20 @@ b5.LoadScene = function(world, scene, data, game) {
 
   }
   
+  //Icon for super
+  var ssw = world.findActor('ParrySuperSwitch',true);
+  ssw.body.m_angularDamping = 3;
+  ssw.id = 302;
+  ssw.onParry = function(player) {
+  	this.body.m_angularVelocity = player.x > this.x ? 7 : -7;
+  	   
+    data.super1Icon.updateSuperIcon();
+  	//Save to slot
+   	var super_ = data.levelData.superList[data.levelData['sIcon0Index']];
+  	game.SlotUtils.getPlayerLoadouts(player.id).super = b5.Game.GameDefIDs.supers[super_];
+
+  }
+  
   var tgt = world.findActor('targetTest',true);
   tgt.onBulletHit = function() {
   	this.opacity = 0.3;
@@ -175,7 +231,9 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 };
 b5.addSceneResources = function(scene, data, game) {
 	//Resources that will be added to scene, this will be called before LoadScene
-  //Load weapons and charms
+  
+  //Load weapon list
+  
   scene.addResource(
   	new b5.Raw('WeaponsList', b5.Paths.player + 'weapons.json', true, ds => {
   		var data = JSON.parse(ds);
@@ -192,6 +250,8 @@ b5.addSceneResources = function(scene, data, game) {
   	'raw'
   );
   
+  //Load charm list
+  
   scene.addResource(
   	new b5.Raw('CharmsList', b5.Paths.player + 'charms.json', true, ds => {
   		var data = JSON.parse(ds);
@@ -199,6 +259,24 @@ b5.addSceneResources = function(scene, data, game) {
   		for(var i = 0; i < data.length; i++) {
   			scene.addResource(
   				new b5.Raw(data[i]+'-icondata', b5.Paths.player + 'charms/'+data[i]+'/resources-worldmap.json', true, ds1 => {
+  					game.parseResources(ds1,scene);
+  				}),
+  			 'raw'
+  			);
+  		}
+  	},true),
+  	'raw'
+  );
+  
+  //Load super list
+  
+  scene.addResource(
+  	new b5.Raw('SupersList', b5.Paths.player + 'supers.json', true, ds => {
+  		var data = JSON.parse(ds);
+  		
+  		for(var i = 0; i < data.length; i++) {
+  			scene.addResource(
+  				new b5.Raw(data[i]+'-icondata', b5.Paths.player + 'supers/'+data[i]+'/resources-worldmap.json', true, ds1 => {
   					game.parseResources(ds1,scene);
   				}),
   			 'raw'

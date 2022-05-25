@@ -1,0 +1,15 @@
+{
+	"sound": [
+		{
+			"automatize": {
+				"name": "ParryAxeSfx%i",
+				"start": 1,
+				"end": 3,
+				"pad": 2,
+				"src": "player/charms/whetstone/sfx_player_parry_axe_##.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+	  }
+	]
+}

@@ -6,7 +6,8 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	//var myvar = flags.jumping
 	
 	var stat = data.Statistics,
-	shootex = false;
+	shootex = false,
+	_super = false;
 	
 	return function(thisPlayer, flags, input, world, scene, game, data) {
 		//This is a loop function
@@ -15,15 +16,16 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
     if(shootex != flags.shootingEX) {
     	shootex = flags.shootingEX;
     	if(shootex) {
-    		var hasSuper = thisPlayer.equipedSuper != "empty",
-    		max_score = thisPlayer.data.supermeter == thisPlayer.data.max_supermeter_score;
+    		var max_score = thisPlayer.data.supermeter == thisPlayer.data.max_supermeter_score;
     	
-    		//If has parried, add one to the super score every ex that's not super
-    		//Else add 5 points
     		if(!max_score) data.addScore('super',1);
-    		else if(hasSuper) data.addScore('super',5);
-    		else data.addScore('super',1);
     	}
+    }
+    
+    if(_super != !!flags.SUPER) {
+    	_super = !!flags.SUPER;
+    	
+    	if(_super) data.addScore('super',5);
     }
     
 	};

@@ -3,22 +3,24 @@
 * HUGE Thanks to Bastian Heist!!
 */
 (function() {
-	window.Peer = function(id, iceServers, dataChannelId) {
+	window.Peer = function(id, iceServers, turnServers, dataChannelId) {
 		var s; //["stun:stun.l.google.com:19302", "stun:stun2.l.google.com:19302"]
 		if(iceServers || this.iceServers) {
 			iceServers && (this.iceServers = iceServers);
-			s = { iceServers: [{ urls: this.iceServers}], iceCandidatePoolSize: 10 };
+			turnServers && (this.turnServers = turnServers);
+			dataChannelId !== void 0 && (this.dataChannelId = dataChannelId);
+			s = { iceServers: [{ urls: this.iceServers}, ...this.turnServers], iceCandidatePoolSize: 10 };
 		}
 		this.peerConnection = new RTCPeerConnection(s);
 		this.dataChannel = this.peerConnection.createDataChannel('DataChannel',
-		{negotiated:true, id: dataChannelId || new Date().getMonth()});
+		{negotiated:true, id: this.dataChannelId /*|| new Date().getMonth()*/});
 		this.ice = [];
 		this._prevIceConnState = "new";
 		this._prevConnState = "new";
 		this.session = null;
 		this.connected = !1;
 		this.id = id || "";
-		this.dataChannelId = dataChannelId || new Date().getMonth();
+		this.dataChannelId = dataChannelId /*|| new Date().getMonth();*/
 		this.configuration = s;
 		this.CONNECTING_WAIT_ICE = !0;
 		this.OFFERED = !1;

@@ -169,7 +169,7 @@ b5.addSceneResources = function(scene, data, game) {
   
   //Music
   
-  var ek_orch = new b5.Sound('MusElderKettleOrch', data.resourcePath + 'MUS_ElderKettle_Orch.mp3', false, false, false, {equalizer:true, limiter:true, stream:false});
+  var ek_orch = new b5.Sound('MusElderKettleOrch', data.resourcePath + 'MUS_ElderKettle_Orch.mp3', false, false, false, {equalizer:true, limiter:true, stream:false, reverb: true});
   ek_orch.loop = true;
   ek_orch.output_gain = game.Music.volume;
   ek_orch.onDestroy = game.Music.remove;

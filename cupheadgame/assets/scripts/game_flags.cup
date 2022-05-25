@@ -11,6 +11,7 @@
 		inNpcDialog: false,
 		inNpcTooltip: false,
 		inputEnabled: true,
-		inPlayerJoinedScreen: false
+		inPlayerJoinedScreen: false,
+		playerCanExecuteSuper: true
 	};
 })();

@@ -15,6 +15,26 @@
 		"dialogs": [],
 		"script": "scripts/shop.cup"
 	},
+	"NPC_Flower": {
+		"dialogs": [
+			{
+				"texts": ["temp_noflower1","temp_noflower2"],
+				"times": [0.2, 0.2]
+			}
+		],
+		"cameraOffset": [-250,-50],
+		"script": "scripts/temp_flower.cup"
+	},
+	"Minero": {
+		"dialogs": [
+			{
+				"texts": ["mineyei"],
+				"times": [0.2]
+			}
+		],
+		"cameraOffset": [0,-25],
+		"script": "scripts/minero.cup"
+	},
 	"NPC_DialogTest": {
 		"cameraOffset": [-100, -100],
     "dialogs": [

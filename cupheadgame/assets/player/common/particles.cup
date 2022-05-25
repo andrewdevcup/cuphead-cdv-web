@@ -65,6 +65,7 @@ return {
 		//Random rotation
 		p.setRotation(Math.PI * b5.Maths.randomRange(-1,1,true));
 		p.tags = ['particle','playerParticle'];
+		p.name = target.name + '-parrySpark';
 		//Play anim
 		p.playAnim('parrySpark');
 		//Destroy on anim end

@@ -347,66 +347,69 @@ b5.onAllResourcesLoaded = function(world,scene,data,game) {
   //Players
   
   for(var i = 0, pl = data.loadData.players; i < pl.length; i++) {
-  	var player = new b5.Actor();
-  	player.atlas = scene.findResource(pl[i]+':WinScreen','brush');
-  	player.name = pl[i];
-  	if(i == 0) {
-  		player.x = data.layout.p1x;
-  		player.scale_x = player.atlas.facing * 1;
+  	if(!world.findActor(pl[i])) {
+	  	var player = new b5.Actor();
+	  	player.atlas = scene.findResource(pl[i]+':WinScreen','brush');
+	  	player.name = pl[i];
+	  	if(i == 0) {
+	  		player.x = data.layout.p1x;
+	  		player.scale_x = player.atlas.facing * 1;
+	  	}
+	  	else {
+	  		player.x = data.layout.p2x;
+	  		player.scale_x = player.atlas.facing * -1;
+	  	}
+	  	player.y = data.layout.y;
+	  	world.addActor(player);
+	  	player.blinkcount = b5.Maths.randomRange(0,6);
+	  	player.nextblinktime = 5;
+	  	player.blinking = false;
+	  	
+	  	//Blink sprite
+	  	var blink = new b5.Actor();
+	  	blink.atlas = player.atlas;
+	  	blink.name = pl[i]+'blink';
+	  	blink.visible=false;
+	  	if(i == 0) blink.x = data.layout.p1x;
+	  	else blink.x = data.layout.p2x;
+	  	blink.scale_x = player.scale_x;
+	  	blink.y = data.layout.y;
+	  	world.addActor(blink);
+	  	
+	  	player.blinksprite = blink;
+	  	
+	  	//Player name
+	  	var namelabel = new b5.LabelActor();
+	  	namelabel._scale = 0.75;
+	  	if(i == 0) namelabel.x = data.layout.p1x;
+	  	else namelabel.x = data.layout.p2x;
+	  	namelabel.y = 265 + data.layout.y;
+	  	namelabel.font = scene.findResource('CupheadHenrietteFont','brush');
+	  	world.addActor(namelabel);
+	  	
+	  	player.namelabel = namelabel;
+	  	
+	  	//Manually set the animation frame instead of playAnim
+	  	//Synchronize the blink and idle on low fps
+	  	//Since both animations have the same frame count, reuse current frame
+	  	//Use 'blink' animation frames for blink actor
+	  	player.onTick = function() {
+	  		if(this.blinking) {
+	  			this.blinksprite.current_frame = this.current_frame;
+	  		}
+	  	}
+	  	player.onAnimRepeat = function() {
+	  		if(this.blinking) this.blinking = false;
+	  		this.blinkcount++;
+	  		this.blinkcount > this.nextblinktime && (
+	  			this.blinksprite.visible = true,
+	  			this.blinking = true,
+	  			this.blinkcount = 0
+	  		);
+	  	}
+	  	data.players.push(player);
   	}
-  	else {
-  		player.x = data.layout.p2x;
-  		player.scale_x = player.atlas.facing * -1;
-  	}
-  	player.y = data.layout.y;
-  	world.addActor(player);
-  	player.blinkcount = b5.Maths.randomRange(0,6);
-  	player.nextblinktime = 5;
-  	player.blinking = false;
   	
-  	//Blink sprite
-  	var blink = new b5.Actor();
-  	blink.atlas = player.atlas;
-  	blink.name = pl[i]+'blink';
-  	blink.visible=false;
-  	if(i == 0) blink.x = data.layout.p1x;
-  	else blink.x = data.layout.p2x;
-  	blink.scale_x = player.scale_x;
-  	blink.y = data.layout.y;
-  	world.addActor(blink);
-  	
-  	player.blinksprite = blink;
-  	
-  	//Player name
-  	var namelabel = new b5.LabelActor();
-  	namelabel._scale = 0.75;
-  	if(i == 0) namelabel.x = data.layout.p1x;
-  	else namelabel.x = data.layout.p2x;
-  	namelabel.y = 265 + data.layout.y;
-  	namelabel.font = scene.findResource('CupheadHenrietteFont','brush');
-  	world.addActor(namelabel);
-  	
-  	player.namelabel = namelabel;
-  	
-  	//Manually set the animation frame instead of playAnim
-  	//Synchronize the blink and idle on low fps
-  	//Since both animations have the same frame count, reuse current frame
-  	//Use 'blink' animation frames for blink actor
-  	player.onTick = function() {
-  		if(this.blinking) {
-  			this.blinksprite.current_frame = this.current_frame;
-  		}
-  	}
-  	player.onAnimRepeat = function() {
-  		if(this.blinking) this.blinking = false;
-  		this.blinkcount++;
-  		this.blinkcount > this.nextblinktime && (
-  			this.blinksprite.visible = true,
-  			this.blinking = true,
-  			this.blinkcount = 0
-  		);
-  	}
-  	data.players.push(player);
   }
   
   //Scores
@@ -652,7 +655,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 			if(A_press) {
 				if(index == -1) {
 					//Back to map
-					data.loadMap();
+					!game.Multiplayer.isGuest && data.loadMap();
 					mus.onComplete = void 0;
 					index = 7;
 				}

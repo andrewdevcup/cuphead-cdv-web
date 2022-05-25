@@ -19,9 +19,11 @@ b5.export = function(world, scene, data, game) {
 	game.importObject('CreatePlayerParticles');
 	game.importObject('CreateWeapons');
 	game.importObject('CreateCharms');
+	game.importObject('CreateSuper');
 	game.importObject('CreateLevelHUD');
 
 	game.Flags.inMainGame = true;
+	game.Flags.playerCanExecuteSuper = true;
 	//Load player data
 	data.players = JSON.parse(b5.File.readSync(b5.Paths.player + 'players.json'));
 
@@ -218,6 +220,8 @@ b5.export = function(world, scene, data, game) {
 		
 		ply.equipedCharm = defs.charms[loadout.charm];
 		
+		ply.equipedSuper = defs.supers[loadout.super];
+		
 		//Add HUD
 		data.createHUD(ply, (scene.w/2) * (asPlayer2 || prevpl.length > 0 ? 1: -1), scene.h/-2);
 
@@ -294,7 +298,7 @@ b5.export = function(world, scene, data, game) {
 
 		for (var i = 0; i < players.length; i++) {
 			for (var a = 0; a < players.length; a++)
-				//Create joints with no collision so the players doesn't collide with each other
+				//Create joints with no collision so the players don't collide with each other
 			players[a] != players[i] && players[i].disableCollision(players[a]);
 
 			//Do the same with platforms so players cannot collide when they're jumping below them

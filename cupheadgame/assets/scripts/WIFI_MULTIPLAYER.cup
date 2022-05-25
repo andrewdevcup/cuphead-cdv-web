@@ -19,6 +19,24 @@ b5.Utils.getRandomCode = function(length) {
 	}
 	return c;
 };
+
+// Last Test: 01-Jul-2021 12:15 PM
+let iceServers = [
+	"stun:stun.l.google.com:19302",
+  "stun:stun2.l.google.com:19302"
+],
+turnServers = [
+    {
+      urls: "turns:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    }
+];
 //Mutiplayer variables
 b5.Game.Multiplayer = {
 	isPlayer2: false,
@@ -28,8 +46,8 @@ b5.Game.Multiplayer = {
 	session: "",
 	player2Joined: false,
 	wifiReady: false,
-	guest: new Peer('guest', ["stun:stun.l.google.com:19302", "stun:stun2.l.google.com:19302"]),
-	host: new Peer('host', ["stun:stun.l.google.com:19302", "stun:stun2.l.google.com:19302"]),
+	guest: new Peer('guest',iceServers, turnServers, 4),
+	host: new Peer('host', iceServers, turnServers, 4),
 	inputsTask: "",
 	tpTask: "",
 	data: {

@@ -177,9 +177,11 @@ b5.export = function(world, scene, data, game) {
 				
 				//Set camera back to following players
 				if(game.Flags.inWorldmap) {
-					world.camera_update = true;
-				  world.TweenTo('_ox', -world.target_x, 0.4, b5.Ease.cubicout),
-		 		  world.TweenTo('_oy', -world.target_y, 0.4, b5.Ease.cubicout)
+					
+				  world.TweenTo('_ox', -world.camera_x, 0.4, b5.Ease.cubicout),
+		 		  world.TweenToWithEnd('_oy', -world.camera_y, 0.4, b5.Ease.cubicout,	0,	false, g => {
+		 		  	world.camera_update = true;
+		 		  });
 				}
 				this.TweenToWithEnd('opacity',0,0.06,b5.Ease.linear,true,0,function() {
 					dlgbg.destroy();

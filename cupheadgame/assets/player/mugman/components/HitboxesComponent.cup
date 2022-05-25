@@ -178,9 +178,9 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
       	for(var a = 0; a < ols.length; a++) {
       		var ol = ols[a];
       		//Enemy overlap
-      	  if( ol.tags.indexOf("enemy") != -1 && !flags.intangible && hitboxes[i].name != "ParryHitbox" && flags.hittable) {
+      	  if( ol.tags.indexOf("enemy") != -1 && !flags.intangible && hitboxes[i].name != "ParryHitbox") {
       	  	overlap = true;
-      	  	flags.damageHit = true;
+      	  	if(flags.hittable) flags.damageHit = true;
       	  	//Sync
   			   	scene.events.dispatch('playerhit',[thisPlayer.name, flags.heartPoints, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
       	  	thisPlayer.onEnemyHit(ol);

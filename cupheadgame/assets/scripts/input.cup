@@ -516,8 +516,8 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 				i != "HideShow" && (i == "DPAD" || i == "Pause"? this.buttons[i].setScale(dpad_scale, dpad_scale): this.buttons[i].setScale(btn_scale, btn_scale));
 
 				//Adjust margins
-				this.buttons[i].dock_x = i != "DPAD" && i != "Pause" ? X_docking_reverse: i != "Pause" && i != "HideShow" ? X_docking: (i=="HideShow"?b5.Actor.Dock_Left:b5.Actor.Dock_None);
-				this.buttons[i].dock_y = i != "Pause" && i!= "HideShow"? b5.Actor.Dock_Bottom: b5.Actor.Dock_Top;
+				this.buttons[i].dock_x = i != "DPAD" && i != "Pause" && i != "HideShow"? X_docking_reverse: i != "Pause" && i != "HideShow" ? X_docking: (i=="HideShow"?b5.Actor.Dock_Middle:b5.Actor.Dock_None);
+				this.buttons[i].dock_y = i != "Pause" ? b5.Actor.Dock_Bottom: b5.Actor.Dock_Top;
 				this.buttons[i].margin = margins[i];
 			};
 

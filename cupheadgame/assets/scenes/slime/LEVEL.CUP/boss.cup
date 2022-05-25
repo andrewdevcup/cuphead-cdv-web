@@ -203,7 +203,8 @@ return {
 					}
 					
 					slime.pAddEvt = scene.events.on('playeradded', player => {
-						slime.disableCollision(player);
+						const p = world.findActor(player, true);
+						p && slime.disableCollision(p);
 					});
 					
 					scene.events.on('allplayersdead', a => {
@@ -391,10 +392,10 @@ return {
 							if(slime.jumps >= b5.Maths.randomRange(rjp[0],rjp[1])) for(var i = 0, ol = slime.sensorHitbox.A_overlaps, a = data.getActivePlayers(); i < a.length; i++) {
 								var n = ol.indexOf(a[i]),
 								x = a[i].x > slime.sensorHitbox.x ? 1 : -1;
-								if(n != -1 && x == facing) return data.playEvent('SlimePunchPrepare',[pos.x,pos.y,facing]);
+								if(n != -1) return data.playEvent('SlimePunchPrepare',[pos.x,pos.y,x,x!=facing?1:0]);
 							}
 							
-							data.playEvent('SlimeJumpPrepare',[pos.x,pos.y,facing]);
+							data.playEvent('SlimeJumpPrepare',[pos.x,pos.y,facing,0]);
 							break;
 						case "smSlimeTransition":
 							var slime = data.SlimeBoss;
@@ -459,12 +460,16 @@ return {
 				case 'SlimePunchPrepare':
 					var slime = data.SlimeBoss,
 					pos = {x: evtData[0], y: evtData[1]},
-					facing = evtData[2];
+					facing = evtData[2],
+					facingOpposite = !!evtData[3];
 					
 					slime.jumps = 0;
 					slime.hitbox.setPosition(pos.x,pos.y);
-					slime._scale_x = -facing;
-					slime.facing = facing;
+					
+					if(!facingOpposite) {
+						slime._scale_x = -facing;
+						slime.facing = facing;
+					}
 					
 					slime.hitbox.body.m_linearVelocity.x = 0;
 					slime.hitbox.body.m_linearVelocity.y = 0;
@@ -485,13 +490,18 @@ return {
 					}
 					
 					//Anim
-					slime.playAnimWithEnd('jump_intro_to_back', k =>
+					slime.playAnimWithEnd('jump_intro_to_back', k => {
+						if(facingOpposite) {
+							slime._scale_x = -facing;
+					  	slime.facing = facing;
+						}
 						k.playAnimWithEnd('punch_prepare', a => {
 							slime.setTimeout(m => data.playEvent('SlimePunch',[pos.x,pos.y,facing]), slime.data.punchWait);
 							
 							//Sfx
 							scene.findResource('SlimeStretchSfx'+b5.Maths.randomRange(1,2),'sound').play();
-						}));
+						});
+					});
 						
 					break;
 				case 'SlimePunch':
@@ -995,7 +1005,8 @@ return {
 					tomb.disableCollision(data.SlimeBoss.hitbox);
 					
 					tomb.pAddEvt = scene.events.on('playeradded', player => {
-						tomb.disableCollision(player);
+						const p = world.findActor(player, true);
+						p && slime.disableCollision(p);
 					});
 					
 					tomb.inAir = true;
@@ -1015,7 +1026,7 @@ return {
 						tomb.Sprite.playAnimWithEnd('tomb_slam',slamRepeats < slamRepeatsMax ? playSlamAnimAndThen : 
 							a => {
 								a.playAnimWithEnd('tomb_slam_trans', 
-								  s => data.playEvent('TombstoneDoNext',[tomb.x,tomb.y,[-1,1][b5.Maths.randomRange(0,1)],data.levelData.currentPhase])
+								  s => !data.players_dead && data.playEvent('TombstoneDoNext',[tomb.x,tomb.y,[-1,1][b5.Maths.randomRange(0,1)],data.levelData.currentPhase])
 						    );
 						  });
 						slamRepeats++;

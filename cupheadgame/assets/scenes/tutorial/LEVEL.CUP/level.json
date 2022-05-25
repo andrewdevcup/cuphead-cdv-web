@@ -6,8 +6,9 @@
 		}
 	},
 	"view": {
-		"layers": 1,
+		"layers": 2,
 		"playerLayer": 1,
+		"playerSubLayer": 1,
 		"zoom": 0.9,
 		"world_depth": 1,
 		"cameraExtents": [0,0,2842,0],

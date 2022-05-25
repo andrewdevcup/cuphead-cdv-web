@@ -487,7 +487,8 @@
 				"loop": true,
 				"options": {
 					"equalizer": true,
-					"limiter": true
+					"limiter": true,
+					"reverb": true
 				}
 			},
 			{

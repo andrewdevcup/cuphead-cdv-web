@@ -6,7 +6,7 @@
 		}
 	},
 	"view": {
-		"layers": 1,
+		"layers": 2,
 		"playerLayer": 1,
 		"playerSubLayer": 3,
 		"zoom": 1.06,
@@ -101,11 +101,13 @@
 		"bitmap": [
 			{
 				"name": "bgb-0",
-				"src": "scenes/cupsnm/background-0.png"
+				"src": "scenes/cupsnm/background-0.png",
+				"resolution": 1
 			},
 			{
 				"name": "bgb-1",
-				"src": "scenes/cupsnm/background-1.png"
+				"src": "scenes/cupsnm/background-1.png",
+				"resolution": 1
 			},
 			{
 				"name": "cuphead",

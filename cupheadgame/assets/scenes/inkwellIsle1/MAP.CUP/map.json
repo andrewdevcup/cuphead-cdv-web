@@ -147,26 +147,28 @@
 	{
 		"name": "SmallIslandBridgeFrontTop",
 		"type": "",
-		"size": [10,10],
+		"size": [100,100],
 		"pos": [-550,90],
 		"visible": true,
 		"layer": 3,
 		"tags": ["TopDeco"],
 		"scale": 1,
 		"atlas": "BridgesAtlas",
-		"base_frame": 1
+		"base_frame": 1,
+		"cull": false
 	},
 	{
 		"name": "SmallIslandBridgeBackTop",
 		"type": "",
-		"size": [10,10],
+		"size": [100,100],
 		"pos": [-553,-30],
 		"visible": true,
 		"layer": 3,
 		"tags": ["TopDeco"],
 		"scale": 1,
 		"atlas": "BridgesAtlas",
-		"base_frame": 0
+		"base_frame": 0,
+		"cull": false
 	},
 	{
 		"name": "TopLevelPieces2",
@@ -258,6 +260,74 @@
 		"base_anim": "slime",
 		"cull": false,
 		"anim_loop": true
+	},
+	{
+		"name": "NPC_Flower",
+		"type": "Rect",
+		"size": [150,150],
+		"pos": [1508,-194],
+		"visible": true,
+		"layer": 2,
+		"tags": ["NPC"],
+		"add_collider": true,
+		"scale": 1,
+		"color": "transparent"
+	},
+	{
+		"name": "Flower_Entrance",
+		"type": "",
+		"size": [150,150],
+		"pos": [2720,-110],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 2,
+		"scale": 1.2,
+		"atlas": "LevelsIconsAtlas",
+		"base_anim": "flower",
+		"cull": false,
+		"anim_loop": true
+	},
+	{
+		"name": "Minero_G",
+		"type": "",
+		"size": [100,100],
+		"pos": [-722, 1200],
+		"visible": true,
+		"add_collider": true,
+		"appendTo": "MAP",
+		"tags": ["NPC"],
+		"sub_layer": 0,
+		"scale": 0.47,
+		"cull": false,
+		"atlas": "MineroAtlas",
+		"base_anim": "idle",
+		"anim_loop": true
+	},
+	{
+		"name": "Minero",
+		"type": "Rect",
+		"size": [100,100],
+		"pos": [-1923,1148],
+		"visible": true,
+		"layer": 2,
+		"tags": ["NPC"],
+		"add_collider": true,
+		"scale": 1,
+		"color": "transparent"
+	},
+	{
+		"name": "Night",
+		"type": "",
+		"size": [150,150],
+		"pos": [-570, 1200],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 0,
+		"scale": 0.9,
+		"cull": false,
+		"atlas": "NightAtlas",
+		"base_frame_speed": 12,
+		"anim_loop": true
 	}
 	],
 	"resources": {
@@ -305,6 +375,14 @@
 			{
 				"name": "DecoTree",
 				"src": "scenes/inkwellIsle1/world1_tree_island.png"
+			},
+			{
+				"name": "MineroBitmap",
+				"src": "fanservice/TheMineroMCD.png"
+			},
+			{
+				"name": "NightBitmap",
+				"src": "fanservice/Night-0.png"
 			}
 		],
 		"brush": [
@@ -323,6 +401,17 @@
 				"name": "MiscDecoAtlas",
 				"bitmaps": ["Deco", "DecoTree"],
 				"frames": "scenes/inkwellIsle1/SpriteAtlasTexture_Misc.csv"
+			},
+			{
+				"name": "MineroAtlas",
+				"bitmaps": ["MineroBitmap"],
+				"frames": "fanservice/TheMineroMCD.json",
+				"anims": "fanservice/TheMineroMCD.anims.json"
+			},
+			{
+				"name": "NightAtlas",
+				"bitmaps": ["NightBitmap"],
+				"frames": "fanservice/Night.csv"
 			}
 		],
 		"sound": [
