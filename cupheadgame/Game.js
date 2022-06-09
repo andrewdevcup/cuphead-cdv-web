@@ -314,7 +314,25 @@ b5.loadgame = function() {
 	var createSaveFiles = function() {
 		console.log('Creating Save Files')
 		b5.File.createDir(appResDir + 'saves').oncreate = function() {
-			console.log('SavingData...0')
+		  
+		  var sav = b5.Paths.saves + 'cuphead_player_data_v1_slot_#.sav',
+		  sav0 = sav.replace('#','0'),
+		  sav1 = sav.replace('#','1'),
+		  sav2 = sav.replace('#','2');
+		  
+		  if(!b5.File.exists(sav0)) {
+		  	console.log("Saving data... 0");
+		  	setTimeout(f => b5.File.extractAsset(internalDir + 'saves/cuphead_player_data_v1_slot_0.sav', sav0), 200);
+		  }
+		  if(!b5.File.exists(sav0)) {
+		  	console.log("Saving data... 1");
+		  	setTimeout(f => b5.File.extractAsset(internalDir + 'saves/cuphead_player_data_v1_slot_1.sav', sav1), 200);
+		  }
+		  if(!b5.File.exists(sav2)) {
+		  	console.log("Saving data... 2");
+		  	setTimeout(f => b5.File.extractAsset(internalDir + 'saves/cuphead_player_data_v1_slot_2.sav', sav2), 200);
+		  }
+		/*	console.log('SavingData...0')
 			b5.File.extractAsset(internalDir + 'saves/cuphead_player_data_v1_slot_0.sav', b5.Paths.saves + 'cuphead_player_data_v1_slot_0.sav', function() {
 				console.log('SavingData...1')
 				b5.File.extractAsset(internalDir + 'saves/cuphead_player_data_v1_slot_1.sav', b5.Paths.saves + 'cuphead_player_data_v1_slot_1.sav', function() {
@@ -323,7 +341,7 @@ b5.loadgame = function() {
 						console.log('done');
 					});
 				})
-			})
+			})*/
 		}
 	}
 	if (!b5.File.exists(b5.Paths.config)) {
