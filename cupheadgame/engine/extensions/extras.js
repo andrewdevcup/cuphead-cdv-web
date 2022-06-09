@@ -27,6 +27,8 @@ String.prototype.indexesOf = function(n) {
 	c;
 };
 
+String.prototype.capitalize = function(t){if("number"==typeof t&&t>=0){var e=[this.slice(0,t),this.slice(t,t+1),this.slice(t+1)];return e[0]+(e[1]?e[1].toUpperCase():"")+e[2]}var n=this.split(" ");return(n=n.map((function(t){return t.length>0?t[0].toUpperCase()+t.slice(1):""}))).join(" ")}
+
 //Similar to linux: Fill integer value with zeros for a specified unit
 Number.prototype.zfill = function(s) {
 	return String(this).padStart(s, "0");
@@ -123,6 +125,14 @@ self.fetch = function(url, options) {
 						a(new Blob([r.response]));
 						ArrayBuffer.detach(r.response);
 					}, r.onerror = e => m(e);
+					r.send();
+				});
+			},
+			blob2: f => {
+				return new Promise((a, m) => {
+					r.open('GET', url, !0),
+					r.responseType = 'blob';
+					r.onload = e => a(r.response), r.onerror = e => m(e);
 					r.send();
 				});
 			},

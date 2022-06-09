@@ -58,6 +58,12 @@ b5.LoadScene = function(world, scene, data, game) {
   game.importObject('CreateCommonBossLevelResources');
   game.importObject('CreateBoss');
   
+  //Update presence in discord
+  game.DiscordSession.updateActivity({
+  	details: "Botanic Panic! | " + game.d_getDifficulty(data.Statistics.skill),
+  	state: game.d_printPlayersAndHP()
+  });
+  
   data.Statistics.level_type = 'boss'; //For winscreen
   data.Statistics.optimalTime = 150; //Time to beat the boss for score
   

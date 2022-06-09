@@ -8,6 +8,11 @@ b5.LoadScene = function(world, scene, data, game) {
   game.importObject('CreatePlayer');
 
   scene.findResource('MUS_Cuphead','sound').loop_start = 4.435;
+  
+  game.DiscordSession.updateActivity({
+  	details: "Cuphead's Nightmare | EXTREME",
+  	state: "I'M THE EVIL PART OF YOUR HEART. YOU CAN'T BEAT	ME."
+  });
 };
 b5.onLoadingScreenOut = function(world, scene, data, game) {
 	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!

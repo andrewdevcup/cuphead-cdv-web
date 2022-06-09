@@ -16,7 +16,7 @@ b5.Splash = function() {
   img = new Image(),
   lb = document.createElement('div'),
   lbp = document.createElement('div');
-	img.src = internalDir + 'engine/res/powered_dark.png';
+	img.src = internalDir + 'engine/res/logo_dark.png';
 	div.onresize = function() {
 		var s = this.style, e = b5.app.canvas.style;
 		s.width = e.width,
@@ -28,7 +28,7 @@ b5.Splash = function() {
 		s.display = "grid";
 		s.alignItems = s.justifyItems = "center";
 		
-		img.style.width = "70%";
+		img.style.width = "25%";
 		
 	  lb.style.width = "86%";
 	  
@@ -154,7 +154,7 @@ b5.loadgame = function() {
 
 
 	dev = {
-		fastcoding: 0,
+		fastcoding: 1,
 		loadscene: 'notice', //8
 		data: {players:['cuphead','mugman'],difficulty:1}
 	};
@@ -171,6 +171,8 @@ b5.loadgame = function() {
 		b5.Game.Multiplayer.sendToGuest('HIDE_LS');
 		b5.Game.SceneLoader.AllLoaded();
 	}
+	
+
 
 	//Set screen mode
 	b5.Utils.SetBackButtonEnabled(false);
@@ -275,9 +277,14 @@ b5.loadgame = function() {
 				//Effects
 			  app[vcfg.colorFX ? 'addFilter' : 'removeFilter'](b5.Filters.color.filter);
 			  
-			//  if(vcfg.asyncTextureDecoding === void	0) vcfg.asyncTextureDecoding = true;
+			  //Removals
+			  if(vcfg.asyncTextureDecoding !== void	0) delete vcfg.asyncTextureDecoding;
 			  
-			  app.async_texture_decoding = true; // !!vcfg.asyncTextureDecoding;
+			  //Additions
+			  if(vcfg.fastTextureDecoding === void 0) vcfg.fastTextureDecoding = false;
+			  
+			  app.fast_texture_decoding = vcfg.fastTextureDecoding;
+			  
 			}
 			//Audio config
 			if (section == "audio" || !section) {
@@ -364,6 +371,36 @@ return b5.export = null,
 object;
 };
 
+  b5.Game.d_getDifficulty = function(d) {
+  	switch(d) {
+  		case 0: return 'Simple';
+  		case 2: return 'Extreme';
+  		default: return 'Regular';
+  	}
+  }
+	b5.Game.d_printPlayersAndHP = function() {
+		if(sceneMain.data.players) {
+			for(var i = 0, n = "", a = sceneMain.data.players.activePlayers; i < a.length; i++) {
+				var p = sceneMain.findActor(a[i],true);
+				
+				n += a[i].capitalize() + " " + (p.flags.heartPoints > 0 ? p.flags.heartPoints + "HP" : "DEAD") + (i+1 < a.length ? " | ":"");
+			}
+			return n;
+		}
+		return "";
+	}
+	b5.Game.d_printPlayersMap = function() {
+		if(sceneMain.data.players) {
+			for(var i = 0, n = "", a = sceneMain.data.players.activePlayers; i < a.length; i++) {
+				var p = sceneMain.findActor(a[i],true);
+				
+				n += a[i].capitalize() + (i+1 < a.length ? " | ":"");
+			}
+			return n;
+		}
+		return "";
+	}
+	
 b5.Game.parseResources = function(json, scene) {
 	var resources = typeof json === "string" ? JSON.parse(json) : json,
 	loadId = 0;

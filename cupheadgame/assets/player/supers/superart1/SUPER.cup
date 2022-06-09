@@ -6,7 +6,7 @@ return function(thisPlayer, flags, world, scene, game, superData) {
 			a[i]._pspeed = a[i].playback_speed;
 			a[i].Tween('playbackRate',a[i]._pspeed * 1.45,0.45);
 			a[i].Tween('gain:output', a[i].output_gain * 0.4, 0.45);
-			scene.setTimeout(m => a[i].Tween('gain:reverb',4.2 * game.cfg.Audio.master * game.cfg.Audio.music, 0.5), 0.45);
+			scene.setTimeout(m => a[i].Tween('gain:reverb',4 * game.cfg.Audio.master * game.cfg.Audio.music, 0.5), 0.45);
 		}
 	},
 	MusicEffectOff = function() {
@@ -117,7 +117,7 @@ return function(thisPlayer, flags, world, scene, game, superData) {
 	  Backdrop.opacity = 0;
 	  Backdrop.TweenTo('opacity',0.5,0.15);
 	  Backdrop.setSize(scene.w,scene.h);
-	  Backdrop._scale = scene.data.view.zoom;
+	  Backdrop._scale /= scene.data.view.zoom;
 	  target.addActor(Backdrop);
 	  
 	  Backdrop.onTick = function() {

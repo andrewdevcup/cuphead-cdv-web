@@ -2,6 +2,7 @@
 	"cup": [
 		"sound.cup",
 		"game_flags.cup",
+		"discord_session.cup",
 	  "screenfx.cup",
 		"loading_screen.cup",
 		"scene_loader.cup",

@@ -1,0 +1,121 @@
+return {
+	BossObject: function(thisActor, world, scene, data, game) {
+		var difficulty = scene.data.Statistics.skill;
+		
+		//Explosions after Knockout
+		thisActor.onDeath = function() {
+			scene.events.once('after-knockout',()=>{
+				scene.data.createBossExplosionsEmitter(x,y,r,t);
+			});
+		};
+		
+		//After sting, load winscreen or any other scene
+		//If winscreen, pass statistics and players to evaluate grade
+		scene.events.once('onfightwin:nextscene', ()=>{
+			!game.Multiplayer.isGuest && b5.Game.LoadScene('winscreen', 0, 0, {
+				show_anim: 'fade',
+				show_speed: 2,
+				hide_anim: 'fade',
+				hide_speed: 0.35,
+				hourglass: false
+			}, {
+				stats: Object.clone(scene.data.Statistics),
+				players: scene.data.players.activePlayers,
+				fromLevelID: data.levelID
+			});
+		});
+		
+		scene.events.on('playEvent',e =>data.playEvent(e[0],e[1],true));
+		
+		//Event system to synchronize host and guest
+		
+		data.playEvent = function(evt, evtData, eventFromHost) {
+			if(game.Multiplayer.isHosting)
+				game.Multiplayer.sendToGuest('PLAY_EVENT',[evt,evtData]);
+				
+			if(!game.Multiplayer.isGuest || eventFromHost) switch(evt) {
+				case "FlowerIntro":
+					
+					var flowerObj = data.FlowerBoss = new b5.Actor(),
+					flower = new b5.Actor(),
+					flowerBlink = new b5.Actor();
+					
+					flowerObj.Sprite = flower;
+					flowerObj.BlinkSprite = flowerBlink;
+					flowerObj.addActor(flower);
+					flowerObj.addActor(flowerBlink);
+					
+					flowerObj._layer = 1;
+					world.PlayerLayer.addActor(flowerObj);
+					
+					
+					flower.atlas = scene.findResource('FlowerAtlasPH1','brush');
+					flowerBlink.atlas = flower.atlas;
+					flowerBlink.visible = false;
+					flowerBlink.active = false;
+					
+					flower.playAnim('idle',true);
+					
+					flowerObj._scale = 0.97;
+					flowerObj.setPosition(400,-10);
+					
+					flower.idleLoopCount = 0;
+					
+					flower.onAnimRepeat = function() {
+						//Is on idle?
+						if((this.current_anim == "idle" && (this.idleLoopCount++, true)) && this.idleLoopCount > b5.Maths.randomRange(3,5)) {
+							this.next_blink = true;
+							this.idleLoopCount = 0;
+						}
+					}
+					
+					flower.activeBlink = function() {
+						flowerBlink._av = true;
+						this._av = false;
+						
+						flowerBlink.playAnimWithEnd('idle_blink', f => this.offBlink());
+					}
+					
+					flower.offBlink = function() {
+						this._av = true;
+						flowerBlink._av = false;
+						
+					}
+					
+					flower.onTick = function() {
+						//Check for idle anim and blink
+						if(this.current_frame < 1 && this.next_blink) {
+							this.next_blink = false;
+							this.activeBlink();
+						}
+					}
+					
+					break;
+				default:
+				  void 0;
+			}
+		}
+		
+		data.playEvent('FlowerIntro');
+		
+		//Basic defeat manager
+		var dead = false,
+		bossData;
+
+		thisActor.onTick = function() {
+			bossData = scene.data.bossData; //Fix object error in guest
+			
+			if (scene.data.levelData.fightStarted) {
+				//Do things
+				
+				if (bossData.health <= 0 && !dead) {
+					dead = true;
+					
+					data.playEvent('Knockout'); //Handler
+				}
+			}
+			
+		}
+		
+	}
+};

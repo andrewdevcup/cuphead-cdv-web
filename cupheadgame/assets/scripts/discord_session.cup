@@ -1,0 +1,66 @@
+(function() {
+	b5.Game.DiscordLogged = parseValue(localStorage.getItem('discordLogged'));
+	
+	b5.Game.DiscordSession = {
+		data: JSON.parse(localStorage.getItem('discordSession')),
+		activity: {
+			application_id: "971820323806806036",
+			name: 'Cuphead CDV',
+			details: ' ',
+			state: " ",
+			largeImageKey: "971826208826327062",
+			largeImageText: RELEASE_CODENAME + " " + RELEASE_VER,
+			startTimestamp: Date.now()
+		},
+		started: false
+	};
+	
+	b5.Game.DiscordSession.start = function(token, inMenu) {
+		const _this = b5.Game.DiscordSession;
+		_this.started = true;
+		
+		return new Promise( (res,rej) => {
+			_this.presence = new DiscordGatewayRPC(token);
+			_this.presence.createClient();
+			_this.presence.onReady = function(client) {
+				localStorage.setItem('discordLogged', b5.Game.DiscordLogged = true);
+				
+			  localStorage.setItem('discordSession', JSON.stringify(
+			  	b5.Game.DiscordSession.data = {
+				  	avatarUrl: 'http://cdn.discordapp.com/avatars/'+client.user.id+'/'+client.user.avatar,
+				  	username: client.user.username,
+			  		discriminator: client.user.discriminator,
+				  	token: token
+			  	}
+			  	));
+			  
+			  if(inMenu) {
+			  	_this.activity.details = "Main Menu";
+			  	_this.activity.state = "Don't Deal With The Devil";
+			  }
+		    b5.Game.DiscordSession.presence.setActivity(_this.activity);
+		    
+			  res();
+			}
+		});
+	}
+	b5.Game.DiscordSession.logout = function() {
+		this._started = false;
+		delete localStorage["discordSession"];
+		localStorage["discordLogged"] = b5.Game.DiscordLogged = false;
+		
+		this.presence.close();
+		
+	}
+	
+	b5.Game.DiscordSession.updateActivity = function(properties) {
+		if(!this.started) return;
+		for(var i in properties) this.activity[i] = properties[i];
+		this.presence.setActivity(this.activity);
+	}
+	
+	if(b5.Game.DiscordLogged && !b5.Game.DiscordSession.started) {
+		b5.Game.DiscordSession.start(b5.Game.DiscordSession.data.token);
+	}
+	
+})();

@@ -148,6 +148,8 @@ b5.export = function(world, scene, data, game) {
 		}
 
 		data.players.activePlayers.push(player);
+		
+		scene.events.dispatch('playeradded',player);
 
 	};
 
@@ -159,6 +161,8 @@ b5.export = function(world, scene, data, game) {
 			data.players.activePlayers.indexOf(p), 1);
 		delete data[p];
 		game.Multiplayer.player2Joined = false;
+		
+		scene.events.dispatch('playerremoved',player);
 
 	};
 
@@ -169,6 +173,24 @@ b5.export = function(world, scene, data, game) {
 	game.Multiplayer.player2Joined && myexports.createPlayer(
 		data.players.player2, true
 	);
+	
+	scene.events.on('playerremoved', e => {
+  	//Update presence in discord
+  	scene.setTimeout(f => {
+  		game.DiscordSession.updateActivity({
+    		state: game.d_printPlayersMap()
+  		});
+  	},0.25);
+  });
+	
+	scene.events.on('playeradded', e => {
+  	//Update presence in discord
+  	scene.setTimeout(f => {
+  		game.DiscordSession.updateActivity({
+    		state: game.d_printPlayersMap()
+  		});
+  	},0.25);
+  });
 
 	data.initializePlayers = function() {
 		var players = world.findActorsByTagName('player', true);

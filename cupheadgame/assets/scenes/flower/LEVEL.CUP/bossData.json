@@ -1,0 +1,72 @@
+{
+	"health": 1300,
+	"maxHealth": 1300,
+	"difficultyAndPhases": [
+		{
+			"damageMultiplier": 1,
+			"data": {
+				"phase1": {
+				}
+			},
+			"phases": [
+				{
+					"health": 0,
+					"deathCardMessage": "flower",
+					"mugshot": {
+						"bitmap": "FlowerMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 650,
+					"deathCardMessage": "flower-form2",
+					"mugshot": {
+						"bitmap": "FlowerMugshot2",
+						"offset": [0,0]
+					}
+				}
+			]
+		},
+  	{
+			"damageMultiplier": 1,
+			"data": {
+				"phase1": {
+					"laserProbability": 0.45,
+					"laserUpProbability": 0.5,
+					"laserDownProbability": 0.5,
+					"laserChargeDuration": 0.9,
+					"laserHoldDuration": 0.9,
+					"magicHandsProbability": 0.6,
+					"boomerang": {
+						"speed": 30,
+						"turnaroundTime": 0.6
+					},
+					"acornAttack": {
+						"acorns": 4,
+						"acornSpeed": 40,
+						"acornAcceleration": 600
+					}
+				}
+			},
+			"phases": [
+				{
+					"health": 0,
+					"deathCardMessage": "flower",
+					"mugshot": {
+						"bitmap": "FlowerMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 650,
+					"deathCardMessage": "flower-form2",
+					"mugshot": {
+						"bitmap": "FlowerMugshot2",
+						"offset": [0,0]
+					}
+				}
+			]
+		},
+		{}
+	]
+}

@@ -1,5 +1,5 @@
 return {
-	BossName: function(thisActor, world, scene) {
+	BossName: function(thisActor, world, scene, data, game) {
 		var difficulty = scene.data.Statistics.skill;
 		
 		//Explosions after Knockout

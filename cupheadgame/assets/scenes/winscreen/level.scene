@@ -9,6 +9,12 @@ b5.LoadScene = function(world, scene, data, game) {
   game.Flags.inLevel = false;
   game.GUI.disableButtons('B,X,Y,L,R,DPAD');
   
+ 	//Update presence in discord
+ 	game.DiscordSession.updateActivity({
+  	details: "The Results!",
+   	state: "Grade..."
+ 	});
+  
   //Texts
   new b5.Raw('Texts',data.resourcePath + 'texts/'+game.cfg.Language.lang+'.json',true, txts=>{
   	data.Texts = JSON.parse(txts);
@@ -528,6 +534,11 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 					world.clearInterval(anim_random_grades);
 					data.grade = grade;
 					gradefinal.play();
+					
+					//Update presence in discord
+				 	game.DiscordSession.updateActivity({
+				   	state: "Grade... " + data.gradeTable[grade]
+				 	});
 					
 					//Circle
 					var circ = world.findActor('GradeCircle',true);

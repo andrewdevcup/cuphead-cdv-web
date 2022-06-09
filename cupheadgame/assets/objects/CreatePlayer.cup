@@ -332,9 +332,32 @@ b5.export = function(world, scene, data, game) {
 	
 	//Show death screen if player one dies and player two exits
 	scene.events.on('playerremoved', e => {
+		game.DiscordSession.updateActivity({
+    	state: game.d_printPlayersAndHP()
+  	});
+  		
 		for(var i = 0, a = data.getActivePlayers(); i < a.length; i++) 
 		  if(a[i].flags.heartPoints <= 0) return void data.allPlayersDead();
 	});
+	
+	scene.events.on('playeradded', e => {
+  	//Update presence in discord
+  	scene.setTimeout(f => {
+  		game.DiscordSession.updateActivity({
+    		state: game.d_printPlayersAndHP()
+  		});
+  	},0.25);
+  });
+	
+  scene.events.on('playerhit', e => {
+  	//Update presence in discord
+  	scene.setTimeout(f => {
+  		game.DiscordSession.updateActivity({
+    		state: game.d_printPlayersAndHP()
+  		});
+  	},0.25);
+  });
+  
 
 	data.playersIntroAnimation = function() {
 		app.setTimeout(function() {

@@ -4,6 +4,12 @@ b5.LoadScene = function(world, scene, data, game) {
 	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
 	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
   
+  //Update presence	on Discord
+  game.DiscordSession.updateActivity({
+  	details: 'The Introduction',
+  	state: 'Page 1'
+  });
+  
   //Show only A and B buttons
   game.GUI.disableButtons('Pause,X,Y,L,R,DPAD');
   
@@ -108,6 +114,12 @@ b5.LoadScene = function(world, scene, data, game) {
     			case 10: scene.findResource('IntroDevilKick', 'sound').play();
     		}
     	},0.1);
+    	
+    	//Update presence	on Discord
+     game.DiscordSession.updateActivity({
+  	  	state: "Page " + book.current_page.toString()
+		 });
+  
   	};
   	
   	//Fade text

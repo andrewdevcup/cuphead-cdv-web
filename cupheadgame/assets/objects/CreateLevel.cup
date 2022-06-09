@@ -250,8 +250,9 @@ b5.export = function(world, scene, sceneData, game, importData) {
 						if (v < 0 && playersOver[ols[b].name]) {
 							playersOver[ols[b].name] = false;
 							this.disableCollision(ols[b]);
-						} else if (v >= 0 && !playersOver[ols[b].name] && ols[b].y < this.y) { //&& ols[b].y > this.y-(this.h+ols[b].h)
+						} else if (v >= 0 && !playersOver[ols[b].name] && ols[b].y < this.y - this.h && (!ols[b]["new_platform_"+this.name] || (ols[b].x > this.x - (this.w/2) && ols[b].x < this.x + (this.w/2)))) { //&& ols[b].y > this.y-(this.h+ols[b].h)
 							playersOver[ols[b].name] = true;
+							ols[b]["new_platform_"+this.name] = true;
 							this.enableCollision(ols[b]);
 						}
 					}

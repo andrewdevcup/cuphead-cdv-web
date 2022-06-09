@@ -4,6 +4,12 @@ b5.LoadScene = function(world, scene, data, game) {
 	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
 
 	game.GUI.disableButtons('Pause');
+	
+	//Update presence in discord
+	game.DiscordSession.updateActivity({
+  	details: "Main Menu",
+  	state: "Don't Deal With The Devil"
+  });
 
 	//Background
 	var bg = new b5.Actor;
@@ -129,26 +135,28 @@ b5.LoadScene = function(world, scene, data, game) {
 		
 		return slot;
 	}
-
+  
 	//Text
 	var menulabel = new b5.LabelActor;
 	menulabel.font = scene_GUI.findResource('CupheadVogueExtraBoldFont', 'brush');
 	menulabel.name = "MainMenuLabel";
-	menulabel.line_height = 40;
-	menulabel._scale = 1;
-	menulabel.y2 = -70;
+	menulabel.line_height = 40; //42
+	menulabel._scale = 0.95;//
+	menulabel.y2 = -70;//-100
 	menulabel.round_pixels = false;
 	world.addActor(menulabel);
 	menulabel.text = "placeholder";
 	menulabel.fill_style = "#575755";
 	//Text selection
 	data.menu_label_selection = 1;
+	data.menu_option_length = 4;
 	//Draw
 	menulabel.onDraw = function() {
 		var txt = game.Texts.texts;
 		
 		this.text = txt.main_menu_start + "\n"+
 		            txt.main_menu_options + "\n"+
+		            (game.DiscordLogged ? txt.main_menu_discord_off : txt.main_menu_discord_on) +"\n"+
 		            txt.main_menu_exit;
 
 		this.setFormatLine(data.menu_label_selection-1, 0, 0, ['white'], true);
@@ -158,6 +166,45 @@ b5.LoadScene = function(world, scene, data, game) {
 	data.axis_y_pressed = true;
 	data.btnA_pressed = true;
 
+  //Discord user avatar and name
+  let Davatar = new b5.Actor(),
+  Dname = new b5.LabelActor();
+  
+  Davatar.setSize(110,110);
+  Davatar.setPosition(480,-230);
+  Dname.setPosition(480,-145);
+  Dname._scale = 0.55;
+  Dname.line_height = 45;
+  Davatar.name = "DiscordAvatar"
+  Dname.name = "DiscordName";
+  Dname.font = scene_GUI.findResource('CupheadMemphisFont','brush');
+  
+  world.addActor(Davatar);
+  world.addActor(Dname);
+  
+  Davatar.visible = Dname.visible = false;
+  
+  if(game.DiscordLogged) {
+  	if(!game.DiscordSession.started) void 0;/* game.DiscordSession.start(game.DiscordSession.data.token, true).then(fg => {
+	 	 Davatar.visible = Dname.visible = true;
+    
+	   Davatar.bitmap = scene.addResource(
+  	  	new	b5.Bitmap('davatar', game.DiscordSession.data.avatarUrl),
+    	  'bitmap');
+      
+  	  Dname.text = game.DiscordSession.data.username + "\n" + (game.DiscordSession.data.discriminator||"");
+  	});*/
+  	else {
+  		Davatar.visible = Dname.visible = true;
+    
+	   Davatar.bitmap = scene.addResource(
+  	  	new	b5.Bitmap('davatar', game.DiscordSession.data.avatarUrl),
+    	  'bitmap');
+      
+  	  Dname.text = game.DiscordSession.data.username + "\n" + (game.DiscordSession.data.discriminator||"");
+
+  	}
+  }
 
 	//Prepare save data
 	/*
@@ -343,8 +390,8 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 				data.axis_y_pressed = true;
 				//On Axis
 				data.menu_label_selection += axis_y;
-				if (data.menu_label_selection == 4) data.menu_label_selection = 1; //Reset to first
-				if (data.menu_label_selection == 0) data.menu_label_selection = 3; //Set to last
+				if (data.menu_label_selection == data.menu_option_length+1) data.menu_label_selection = 1; //Reset to first
+				if (data.menu_label_selection == 0) data.menu_label_selection = data.menu_option_length; //Set to last
 				//Play select sfx (reuse from PauseMenu)
 				game.PauseMenu.playSfx();
 			} else if (!axis_y) data.axis_y_pressed = false; //Reset
@@ -365,7 +412,39 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 						//Show pause menu
 						game.PauseMenu.show();
 						break;
-					case 3: //Exit
+					case 3: //Discord
+						if(!game.DiscordLogged) {
+							var tk = prompt(game.Texts.texts.discord_token);
+							
+							if(tk) {
+								game.DiscordSession.start(tk, true).then(f => {
+									game.DiscordLogged = true;
+								
+									var dav = world.findActor('DiscordAvatar',true),
+									dna = world.findActor('DiscordName',true);
+								
+									dav.visible = dna.visible = true;
+								
+								  dav.bitmap = scene.addResource(
+  								 	new	b5.Bitmap('davatar', game.DiscordSession.data.avatarUrl),
+  						  	 'bitmap');
+      
+  								 dna.text = game.DiscordSession.data.username + "\n" + game.DiscordSession.data.discriminator;
+  							 
+								});
+								
+							}
+						}
+						else {
+							//Logout
+							game.DiscordSession.logout();
+							var dav = world.findActor('DiscordAvatar',true),
+							dna = world.findActor('DiscordName',true);
+								
+							dav.visible = dna.visible = false;
+						}
+						break;
+					case 4: //Exit
 						navigator.app ? navigator.app.exitApp(): window.close();
 						break;
 				}
@@ -417,6 +496,10 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 	data.onresumeevt = app.events.on('resume', u=>{
 		b5.Game.UiButtons.show();
 		b5.Game.UiButtons.setButtons([
+/*			{
+				text: b5.Game.DiscordLogged ? "texts.main_menu_discord_off":"texts.main_menu_discord_on",
+				actionButton: "wpn"
+			},*/
 			{
 				"text": "texts.ui_confirm",
 				"actionButton": "jump"
@@ -779,5 +862,6 @@ b5.onSceneUnload = function(world, scene, data, game, clearResources) {
 //For sounds, scene loader does it automatically when calling stopMusic or fadeOutMusic
 
   app.events.off(data.onresumeevt);
+  app.events.off(data.discordlogevt)
 };
 

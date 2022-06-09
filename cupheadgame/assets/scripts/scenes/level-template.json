@@ -1,0 +1,94 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [-400,0],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 6,
+		"playerLayer": 4,
+		"playerSubLayer": 3,
+		"zoom": 1.04,
+		"world_depth": 1.3,
+		"cameraExtents": [-13,0,13,0],
+		"cameraRange": 0.012
+	},
+	"physicsObjects": [
+		{
+			"name": "LevelFloor",
+			"type": "RectActor",
+			"size": [2048, 10],
+			"detectionSize": [2048,12],
+			"pos": [0, 300],
+			"color": "blue",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["floor"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [-630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [""],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [580, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		}
+	],
+	"worldObjects": [{
+		"name": "BG",
+		"type": "Rect",
+		"size": [1280,720],
+		"pos": [0,0],
+		"visible": true,
+		"atlas": "",
+		"appendTo": "scene_background",
+		"sub_layer": 0,
+		"scale": 1.02,
+		"fit": "FitSize"
+	}
+	],
+	"resources": {
+		"bitmap": [
+		],
+		"brush": [
+		],
+		"sound": [
+		]
+	}
+}

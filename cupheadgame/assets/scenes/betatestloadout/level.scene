@@ -7,6 +7,11 @@ b5.LoadScene = function(world, scene, data, game) {
   game.importObject('CreateLevel').init();
   game.importObject('CreatePlayer');
   
+  game.DiscordSession.updateActivity({
+  	details: "Equip Room | " + game.d_getDifficulty(data.Statistics.skill),
+  	state: game.d_printPlayersAndHP()
+  });
+  
   var weaponlabel = world.findActor('SelectWeaponText',true),
   charmlabel = world.findActor('SelectCharmText',true);
   

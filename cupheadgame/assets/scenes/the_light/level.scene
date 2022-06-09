@@ -12,6 +12,12 @@ b5.LoadScene = function(world, scene, data, game) {
 	game.importObject('CreateCommonBossLevelResources');
 	game.importObject('CreateBoss');
 	
+	//Update presence in discord
+  game.DiscordSession.updateActivity({
+  	details: "The Light | " + game.d_getDifficulty(data.Statistics.skill),
+  	state: game.d_printPlayersAndHP()
+  });
+	
   var light = world.findActor('TheLight',true);
 	light.bitmap = scene.findResource('Light','bitmap');
 	

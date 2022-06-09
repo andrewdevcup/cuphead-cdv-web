@@ -5,6 +5,12 @@ b5.LoadScene = function(world, scene, data, game) {
 	game.importObject('CreateLevel').init();
 	game.importObject('CreateCommonPlatformingResources');
 	game.importObject('CreatePlayer');
+	
+	//Update presence in discord
+  game.DiscordSession.updateActivity({
+  	details: "The Tutorial | " + game.d_getDifficulty(data.Statistics.skill),
+  	state: game.d_printPlayersAndHP()
+  });
 
 	data.levelID = 0; //Tutorial
 	
