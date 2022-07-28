@@ -126,7 +126,7 @@
 
 		this.setActivity = function(data,type) {
 			this.activity = data;
-			this.socket.send(JSON.stringify({
+			this.socket.readyState === 1 && this.socket.send(JSON.stringify({
 				op: 3,
 				d: {
 					activities: [{

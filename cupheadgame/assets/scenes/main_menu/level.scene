@@ -140,16 +140,16 @@ b5.LoadScene = function(world, scene, data, game) {
 	var menulabel = new b5.LabelActor;
 	menulabel.font = scene_GUI.findResource('CupheadVogueExtraBoldFont', 'brush');
 	menulabel.name = "MainMenuLabel";
-	menulabel.line_height = 40; //42
-	menulabel._scale = 0.95;//
-	menulabel.y2 = -70;//-100
+	menulabel.line_height = 45; //42
+	menulabel._scale = 0.85;//
+	menulabel.y2 = -150;//-100
 	menulabel.round_pixels = false;
 	world.addActor(menulabel);
 	menulabel.text = "placeholder";
 	menulabel.fill_style = "#575755";
 	//Text selection
 	data.menu_label_selection = 1;
-	data.menu_option_length = 4;
+	data.menu_option_length = 5;
 	//Draw
 	menulabel.onDraw = function() {
 		var txt = game.Texts.texts;
@@ -157,7 +157,8 @@ b5.LoadScene = function(world, scene, data, game) {
 		this.text = txt.main_menu_start + "\n"+
 		            txt.main_menu_options + "\n"+
 		            (game.DiscordLogged ? txt.main_menu_discord_off : txt.main_menu_discord_on) +"\n"+
-		            txt.main_menu_exit;
+		            txt.main_menu_dlc +"\n"+
+		            txt.main_menu_credits;
 
 		this.setFormatLine(data.menu_label_selection-1, 0, 0, ['white'], true);
 	}
@@ -429,7 +430,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
   								 	new	b5.Bitmap('davatar', game.DiscordSession.data.avatarUrl),
   						  	 'bitmap');
       
-  								 dna.text = game.DiscordSession.data.username + "\n" + game.DiscordSession.data.discriminator;
+  								 dna.text = game.DiscordSession.data.username;// + "\n" + game.DiscordSession.data.discriminator;
   							 
 								});
 								
@@ -444,8 +445,18 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 							dav.visible = dna.visible = false;
 						}
 						break;
-					case 4: //Exit
-						navigator.app ? navigator.app.exitApp(): window.close();
+					case 4: //DLC
+					
+					break;
+					case 5: //Credits
+					  if(!game.SceneLoader.load_scene) game.LoadScene('credits',true,true,{
+					  	hide_anim: 'fade',
+					  	hide_speed: 0.3,
+					  	show_anim: 'fade',
+					  	show_speed: 0.3,
+					  	hourglass: false
+					  });
+				//		navigator.app ? navigator.app.exitApp(): window.close();
 						break;
 				}
 			} else if (!btnA) data.btnA_pressed = false;

@@ -1,0 +1,66 @@
+{
+	"pages": [{
+		"left": {
+			"image": null,
+			"bigTitle": "CUPHEAD\nCDV",
+			"title": "- Credits -",
+			"text1": "Thanks to everyone who\ncontributed and supported\nthis project, appreciated!!\nThanks for playing!"
+		},
+		"right": {
+			"image": "Drew",
+			"title": "&DrewDevIl",
+			"text1": "Creator & Only Developer.\nProgramming, animating\nand compositing."
+		}
+	},
+		{
+			"left": {
+				"image": "Sonic",
+				"title": "&SONIC12649S",
+				"text1": "Helper, Admin.\nThanks a lot!"
+			},
+			"right": {
+				"image": "Minero",
+				"title": "TheMineroMCD",
+				"text1": "Helper, Beta Tester.\nThanks!"
+			}
+		},
+		{
+			"left": {
+				"image": "Doni",
+				"title": "Doni Studios",
+				"text1": "Artist, Helper,Beta Tester.\nThanks for the\nscreen buttons!\nAlso for supporting me!"
+			},
+			"right": {
+				"image": "Azukar",
+				"title": "Azukar",
+				"text1": "Artist.\nThanks for the spanish\nfight texts!"
+			}
+		},
+		{
+			"left": {
+				"image": null,
+				"bigTitle": "?",
+				"title": "???",
+				"text1": "Staff, Artist, Beta Tester\n..."
+			},
+			"right": {
+				"image": null,
+				"bigTitle": "Beta\nTesters",
+				"title": "Special Thanks!",
+				"text1": "GenoMilx, Jerecraft,\nred death, MarioG9421,\nMarcus 84, !Arre,\nFrancozkai29, night\nLyriana"
+			}
+		},
+		{},
+		{},
+		{},
+		{},
+		{},
+		{},
+		{},
+		{},
+		{
+			"right": {
+				"text1": "\n\n\n\n\n But he was never happy."
+			}
+		}]
+}

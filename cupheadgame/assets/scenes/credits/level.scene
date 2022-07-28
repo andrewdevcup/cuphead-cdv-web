@@ -1,0 +1,318 @@
+
+b5.LoadScene = function(world, scene, data, game) {
+	//scene is the main scene where resources and actors will be added
+	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
+	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
+  
+  world.camera_update = false;
+  game.Flags.pausingEnabled = false;
+  //Allow touchscreen
+  world.touchable = true;
+  game.GUI.disableButtons('X,Y,L,R,Pause,DPAD');
+  
+	const book = new b5.Actor();
+	book.atlas = scene.findResource('FanBook','brush');
+	world.addActor(book);
+	book._scale = 1.9;
+	book.name = 'BOOK';
+	
+	book.rnds = {
+		x: b5.generateRandomMovement(23),
+		y: b5.generateRandomMovement(23)
+	}
+	
+	book.setInterval(f => {
+		book.setPosition(
+			book.rnds.x(book.frame_count/10)*2.5,
+			book.rnds.y(book.frame_count/10)*2.5
+		);
+	},0);
+	
+	//Texts
+	var bTFont = scene.findResource('CupheadPosterFont','brush'),
+	tFont = scene_GUI.findResource('CupheadMemphisFont','brush');
+	
+	const textLayer = new	b5.Actor();
+	book.addActor(textLayer);
+	book.textLayer = textLayer;
+	
+	const bTitleL = new b5.LabelActor(),
+	titleL = new b5.LabelActor(),
+	text1L = new b5.LabelActor(),
+	bTitleR = new b5.LabelActor(),
+	titleR = new b5.LabelActor(),
+	text1R = new b5.LabelActor();
+	imgL = new b5.Actor(),
+	imgR = new b5.Actor();
+	
+	textLayer.addActor(imgL);
+	textLayer.addActor(imgR);
+	
+	imgL.setSize(100,100);
+	imgR.setSize(100,100);
+	
+	imgR.setPosition(102,-90);
+	imgL.setPosition(-112,-90);
+	
+	bTitleR.fill_style = bTitleL.fill_style =
+	titleL.fill_style = titleR.fill_style =
+	text1L.fill_style = text1R.fill_style = game.Styles.text_pausemenu;
+	
+	bTitleR.font = bTitleL.font = bTFont;
+	
+	titleL.font = titleR.font = scene_GUI.findResource('CupheadVogueExtraBoldFont',"brush");
+	text1L.font = text1R.font = tFont;
+	
+	textLayer.addActor(bTitleL);
+	textLayer.addActor(bTitleR);
+	textLayer.addActor(titleL);
+	textLayer.addActor(titleR);
+	textLayer.addActor(text1R);
+	textLayer.addActor(text1L);
+	
+	bTitleL.setPosition(-112,-90);
+	bTitleL._scale = bTitleR._scale = 0.75;
+	bTitleL.line_height = bTitleR.line_height = 50;
+	
+	bTitleR.setPosition(102,-90);
+	
+	titleL._scale = titleR._scale = 0.4;
+	
+	titleL.setPosition(-112,-10);
+	titleR.setPosition(102,-10);
+	
+	text1L.text_align = text1R.text_align = "left";
+	text1L._scale = text1R._scale = 0.33;
+	
+	text1L.setPosition(-198,40);
+	text1R.setPosition(13,40);
+	
+	text1L.line_height = text1R.line_height = 50;
+	
+
+	
+	var book_arrow = new b5.Actor;
+  book_arrow.bitmap = scene.findResource('BookArrow', 'bitmap');
+  book_arrow.setSize(19,24);
+  book_arrow.setPosition(180,155);
+  book_arrow.rotation = b5.Maths.degToRad(-90);
+  book_arrow.name = "BookArrow";
+  book_arrow.opacity = 0;
+  book.addActor(book_arrow);
+  book_arrow.time = 0;
+  book_arrow.spd = 3;
+  book_arrow._scale = 0.9;
+  //Animate
+  book_arrow.onTick = function() {
+  	this.time += game.speed*0.1;
+  	this.x2 = Math.cos(this.time*this.spd)*3;
+  	this.dirty();
+  };
+  
+  book.setTexts = function(btl,ttl,txl,btr,ttr,txr,imgl,imgr) {
+  	bTitleL.text = btl || "";
+  	titleL.text = ttl || "";
+  	text1L.text = txl || "";
+  	bTitleR.text = btr || "";
+  	titleR.text = ttr || "";
+    text1R.text = txr || "";
+    
+    imgL.bitmap = imgl ? scene.findResource(imgl,'bitmap') : null;
+    imgR.bitmap = imgr ? scene.findResource(imgr,'bitmap') : null
+  }
+  
+  book.setPage = function(p) {
+  	book.setTexts(
+  		p.left ? p.left.bigTitle : "",
+  		p.left ? p.left.title: "",
+  		p.left ? p.left.text1: "",
+  		p.right ? p.right.bigTitle: "",
+  		p.right ? p.right.title: "",
+  		p.right ? p.right.text1 : "",
+  		p.left ? p.left.image : null,
+  		p.right ? p.right.image : null
+  	);
+  	return p.left || p.right;
+  }
+  
+  book.returnToMenu = function() {
+  	game.LoadScene('main_menu',true,true,{
+  		show_anim: "fade",
+  		show_speed: 0.4,
+  		hide_anim: "fade",
+  		hide_speed: 0.4
+  	});
+  }
+	
+};
+b5.onAllResourcesLoaded = function(world,scene,data,game) {
+	//When scene has loaded all resources (a bit before onLoadingScreenOut)
+
+};
+b5.onLoadingScreenOut = function(world, scene, data, game) {
+	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
+  
+  const pages = scene.findResource('PageData','raw').data.pages,
+  book = scene.findActor('BOOK',true),
+  book_arrow = scene.findActor('BookArrow',true);
+  
+  book.current_frame = 1;
+  
+  book_arrow.TweenTo('opacity',1,1,b5.Ease.linear,true,2);
+  
+  book.setPage(pages[0]);
+  
+  scene.findResource('BGM','sound').play();
+  
+  let bgm = scene.findResource('BGM','sound');
+  
+  let A_press = false,
+  B_press = false,
+  currentPage = 0,
+  changingPage = false,
+  returnToMenu = false,
+  tint = 1,
+  sndTween = false;
+  
+  book.setInterval(f => {
+  	let btnA = game.Input.player1.A || game.Input.player2.A,
+  	btnB = game.Input.player1.B || game.Input.player2.B;
+  	
+  	book.tint_colour = book_arrow.tint_colour = PIXI.utils.rgb2string([tint,tint,tint]);
+  	
+  	if(btnA != A_press) {
+  		A_press = btnA;
+  		
+  		if(btnA && !changingPage) {
+  			changingPage = true;
+  			if(currentPage <= pages.length-2) {
+  				//Next page
+  				book_arrow.TweenTo('opacity',0,0,b5.Ease.linear,true,0);
+  				book.textLayer.TweenTo('opacity',0,0.25);
+  				book.setTimeout(g => {
+  					currentPage++;
+  					scene.findResource('BookPageTurn'+b5.Maths.randomRange(0,2),'sound').play(0.05);
+  					book.playAnimWithEnd('turn', h => {
+  						book.setTimeout(k=>{
+  							changingPage=false;
+  						},0.5);
+  					});
+  					book.setTimeout(i=> {
+  						book.setPage(pages[currentPage]) ? 
+  							book_arrow.TweenTo('opacity',1,1,b5.Ease.linear,true,0.5)
+  							: (
+  								tint -= 0.1,
+  								!sndTween && (sndTween = true,	bgm.Tween && bgm.Tween('gain:output',0,1.5))
+  							);
+  						book.textLayer.TweenTo('opacity',1,0.25);
+  					},0.5);
+  				},0.3);
+  			}
+  			else book.returnToMenu();
+  		}
+  		
+  	}
+  	
+  	if(btnB != B_press) {
+  		B_press = btnB;
+  		
+  		if(btnB && !returnToMenu) {
+  			returnToMenu = true;
+  			book.returnToMenu();
+  		}
+  	}
+  },0);
+  
+};
+b5.addSceneResources = function(scene, data, game) {
+	//Resources that will be added to scene, this will be called before LoadScene
+  
+  let bitmapf;
+  scene.addResource(
+  	new	b5.ImageAtlas('FanBook', [
+  		scene.addResource(
+  			bitmapf = new b5.Bitmap('FanBook-Bitmap', data.resourcePath + 'book.jpg'),
+  			'bitmap'
+  		)
+  	]),
+    'brush');
+    
+  bitmapf.resource.resolution = 1;
+    
+  scene.addResource(new b5.Raw('FanBookFrames',data.resourcePath+'book.frames.json', true, f => {
+  	let atlasbook = scene.findResource('FanBook','brush');
+  	atlasbook.frames.length == 0 && atlasbook.parseFrames(f,true);
+  }),'raw');
+  
+  scene.addResource(new b5.Raw('FanBookAnims',data.resourcePath+'book.anims.json', true, f => {
+  	let atlasbook = scene.findResource('FanBook','brush');
+  	atlasbook.parseAnims(f);
+  }),'raw');
+  
+  scene.addResource(new b5.Raw('PageData', data.resourcePath+'pages-'+game.cfg.Language.lang+'.json', true, function(f){
+  	if(typeof this.data == "string") this.data = JSON.parse(f);
+  }),'raw');
+  
+  //Import poster font
+  game.parseResources({
+  	bitmap: [{
+  		name: "CupheadPosterFontBitmap0",
+  		src: "fonts/CupheadPoster-Regular(Cyr_Lat_English)-0.png"
+  	},{
+  		name: "CupheadPosterFontBitmap1",
+  		src: "fonts/CupheadPoster-Regular(Cyr_Lat_English)-1.png"
+  	},
+  	{
+  		name: "Minero",
+  		src: "scenes/credits/minero.png"
+  	},
+  	{
+  		name: "Doni",
+  		src: "scenes/credits/doni.png"
+  	},
+  	{
+  		name: "Deluxe",
+  		src: "scenes/credits/deluxe.jpg"
+  	},{
+  		name: "Drew",
+  		src: "scenes/credits/drew.png"
+  	}],
+  	brush: [{
+  		name: "CupheadPosterFont",
+  		bitmaps: ["CupheadPosterFontBitmap0","CupheadPosterFontBitmap1"],
+  		frames: "fonts/CupheadPoster-Regular(Cyr_Lat_English).bft"
+  	}],
+  	sound: [{
+  		name: "BGM",
+  		src: "scenes/credits/saltbaker.mp3",
+  		category: "music",
+  		loop: true
+  	}]
+  },scene);
+  
+  //Book page turn
+  var sfx_pageturn1 = new b5.Sound('BookPageTurn0', b5.Paths.sceneRes+ 'intro_book_cutscene/cutscene_pageturn_00.ogg', false);
+  sfx_pageturn1.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_pageturn1, 'sound');
+  
+  var sfx_pageturn2 = new b5.Sound('BookPageTurn1', b5.Paths.sceneRes + 'intro_book_cutscene/cutscene_pageturn_01.ogg', false);
+  sfx_pageturn2.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_pageturn2, 'sound');
+  
+  var sfx_pageturn3 = new b5.Sound('BookPageTurn2', b5.Paths.sceneRes + 'intro_book_cutscene/cutscene_pageturn_02.ogg', false);
+  sfx_pageturn3.output_gain = game.Sfx.volume;
+  scene.addResource(sfx_pageturn3, 'sound');
+  
+  var book_arrow = new b5.Bitmap('BookArrow', b5.Paths.sceneRes + 'intro_book_cutscene/book_arrow.png', true);
+  scene.addResource(book_arrow, 'bitmap');
+};
+b5.onSceneUnload = function(world, scene, data, game, clearResources) {
+    //Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
+    //You can also remove created objects in b5.Game if they were created and used on the scene.
+
+};
+//DEPRECATED
+b5.UpdateScene = function(world, scene, data, game) {
+	//For updating actors and behaviors on your scene every frame
+
+};

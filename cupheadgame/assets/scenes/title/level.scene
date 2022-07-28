@@ -6,7 +6,7 @@ b5.LoadScene = function(world, scene, data, game) {
   
   //Update presence	on Discord
   game.DiscordSession.updateActivity({
-  	details: 'Title',
+  	details: 'Title Screen',
   	state: ' '
   });
   

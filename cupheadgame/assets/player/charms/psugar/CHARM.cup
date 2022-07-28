@@ -4,6 +4,7 @@ return function(thisPlayer, flags, world, scene, game, charmData) {
 	pSParry = false,
 	pDash = false,
 	sugarActive = false,
+	shootEX = false,
 	lasthp = flags.heartPoints;
 	
 	return {
@@ -48,6 +49,22 @@ return function(thisPlayer, flags, world, scene, game, charmData) {
 				if(pSParry && sugarActive) {
 					sugarActive = false;
 					thisPlayer.hitboxes[5].hitbox_active = false;
+				}
+				
+			}
+			
+			if(flags.shootingEX != shootEX) {
+				shootEX = flags.shootingEX;
+				
+				if(sugarActive && shootEX) {
+					sugarActive = false;
+					thisPlayer.hitboxes[5].hitbox_active = false;
+				}
+				
+				if(!shootEX && !sugarActive && flags.inAir && !flags.successfulParry) {
+					//Restore sugar after	ex
+					sugarActive = true;
+					thisPlayer.hitboxes[5].hitbox_active = true;
 				}
 				
 			}

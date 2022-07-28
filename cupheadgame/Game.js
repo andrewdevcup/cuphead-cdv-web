@@ -9,7 +9,7 @@
 *
 */
 RELEASE_CODENAME = "Pre-Beta";
-RELEASE_VER = 3;
+RELEASE_VER = "3.1.2"
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -154,8 +154,8 @@ b5.loadgame = function() {
 
 
 	dev = {
-		fastcoding: 1,
-		loadscene: 'notice', //8
+		fastcoding: 0,
+		loadscene: 'notice2', //8
 		data: {players:['cuphead','mugman'],difficulty:1}
 	};
 	
@@ -429,6 +429,7 @@ b5.Game.parseResources = function(json, scene) {
 		  	case "bitmap":
 		  		if(typeof res.automatize !== "object") {
 		  			var bitmap = new b5.Bitmap(res.name, b5.Paths.assets + res.src, res.preload);
+		  			if(res.resolution !== void 0) bitmap.resource.resolution = res.resolution;
 		  			scene.addResource(bitmap, i, res.persist);
 		  		}
 		  		else {
@@ -604,7 +605,6 @@ sceneMain.onPreDraw = function() {
 		b5.Filters.kBlur.uOffset[1] = (1/app.design_height) * this.BLUR_MULTIPLIER;
 	}
 }
-
 
 //Load scripts
 b5.Game.contents = JSON.parse(b5.File.readSync(b5.Paths.scripts + 'content.json'));

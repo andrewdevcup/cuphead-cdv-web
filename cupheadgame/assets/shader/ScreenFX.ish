@@ -20,11 +20,22 @@ void main(void) {
   vec3 fxColorDark = texture2D(screenfxTextureDark, vec2( !flipX ? 1.-fxCoord.x:fxCoord.x, !flipY ? 1.-fxCoord.y:fxCoord.y)).rgb;
   
   //Darks
-  color.rgb *= 1.-(fxColorDark*fxColorDark);
+  //color.rgb *= 1.-(fxColorDark*fxColorDark);
+  
   
   //Lights
-  color.rgb += fxColorLight*fxColorLight; //Black background correction
-  color.rgb /= (1.-fxColorLight); //Overexposure
+ // color.rgb += fxColorLight*fxColorLight*3.; //Black background correction
+ // color.rgb /= (1.-fxColorLight); //Overexposure
+  
+ // color.rgb *= 1.-fxColorLight;
+  
+ // color.rgb /= 1.-fxColorDark;
+   
+   color.rgb += fxColorLight*.5;
+   
+   color.rgb -= fxColorDark*.5;
+   
+   color.rgb /= 1.-(fxColorLight*fxColorLight);
   
 	gl_FragColor = color;
 }

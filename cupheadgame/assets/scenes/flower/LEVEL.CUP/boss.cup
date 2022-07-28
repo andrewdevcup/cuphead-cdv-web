@@ -54,7 +54,7 @@ return {
 					flowerBlink.visible = false;
 					flowerBlink.active = false;
 					
-					flower.playAnim('idle',true);
+					flower.playAnimWithEnd('intro',fl => fl.playAnim('idle',true));
 					
 					flowerObj._scale = 0.97;
 					flowerObj.setPosition(400,-10);

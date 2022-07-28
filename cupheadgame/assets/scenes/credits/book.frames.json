@@ -1,0 +1,9 @@
+{
+    "generate": [{
+        "atlases": [0],
+        "frame": {"x":0,"y":0,"w":682,"h":384},
+        "frames_h": 3,
+        "frames_v": 5,
+        "frame_count": 13
+    }]
+}

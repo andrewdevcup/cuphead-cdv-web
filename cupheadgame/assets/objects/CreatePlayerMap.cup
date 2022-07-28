@@ -162,7 +162,7 @@ b5.export = function(world, scene, data, game) {
 		delete data[p];
 		game.Multiplayer.player2Joined = false;
 		
-		scene.events.dispatch('playerremoved',player);
+		scene.events.dispatch('playerremoved',p);
 
 	};
 

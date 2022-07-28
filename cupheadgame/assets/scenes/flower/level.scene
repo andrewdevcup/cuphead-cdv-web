@@ -39,11 +39,11 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
   
  //Initialize multiplayer
  game.Multiplayer.Initialize(world,data);
- /*
+ 
  if(!data.levelData.fightStarted) {
 		data.playFightText('GetReady');
   	data.playersIntroAnimation();
-	}*/
+	}
 	
 	//scene.findResource('MUS_Flower','sound').play();
  
