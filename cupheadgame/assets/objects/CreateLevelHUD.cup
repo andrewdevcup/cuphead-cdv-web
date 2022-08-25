@@ -191,24 +191,24 @@ b5.export = function(world, scene, data, game) {
 
 					//Animate
 					if (this.score >= 1 && !this.full_anim) {
-						this.playAnim('CardFull-'+player.name);
+						this.playAnim('CardFull-'+player.rname);
 						this.full_anim = true;
 						this.empty_anim = false;
 						//Play sfx
 						!data[player.name].flags.successfulParry && cardFlipSfx[b5.Maths.randomRange(0, 1)].play();
 					} else if (!this.empty_anim && this.score < 1) {
-						this.playAnim('CardEmpty-'+player.name);
+						this.playAnim('CardEmpty-'+player.rname);
 						this.empty_anim = true;
 						this.full_anim = false;
 					}
 
 					if (score >= maxsc && !this.anim_max) {
 						this.anim_max = true;
-						this.playAnim('CardMax-'+player.name, true);
+						this.playAnim('CardMax-'+player.rname, true);
 					} else if (this.anim_max && score < maxsc) {
 						this.anim_max = false;
-						if (this.score >= 1) this.playAnim('CardFullIdle-'+player.name);
-						else this.playAnim('CardEmpty-'+player.name);
+						if (this.score >= 1) this.playAnim('CardFullIdle-'+player.rname);
+						else this.playAnim('CardEmpty-'+player.rname);
 					}
 				}
 			};

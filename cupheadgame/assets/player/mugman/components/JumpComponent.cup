@@ -8,7 +8,10 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	var enableHold = true,
 	jumping = false,
 	stA = false,
-	startHeight = 32768;
+	startHeight = 32768,
+	A_hold = false,
+	hold2 = false,
+	A_holdTime = 0.096;
 
 	//Sfx
 	var jumpsfx = [
@@ -20,6 +23,13 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		scene.findResource('PlayerLandSfx1', 'sound'),
 		scene.findResource('PlayerLandSfx2', 'sound')
 	];
+	
+	//Hold func
+	var unhold = function(i,h) {
+		thisPlayer.setTimeout(f => {
+			!h && i.A ? (hold2 = A_hold = true, unhold(i,1)) : A_hold = false;
+		},A_holdTime);
+	}
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {
 		//This is a loop function
@@ -41,6 +51,9 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			flags.inAir = true;
 			flags.inPlatform = false;
 		}*/
+		
+		//Hold time (fix to two jump heights)
+		//--
     
 
 		//Air state change
@@ -57,6 +70,10 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				flags.successfulParry = false;
 				flags.canShootEX = true;
 				flags.droppingPlatform = false;
+				
+				//Reset hold
+				A_hold = false;
+				hold2 = false;
 				//Spawn particle
 				data.spawnPlayerParticle('landDust', thisPlayer);
 				//Play sfx
@@ -71,6 +88,11 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		//Input A state change
 		if (input.A && !stA && flags.controllable) {
 			stA = true;
+			
+			//Change state for input and not hold (responsive parry)
+			if (flags.jumpState == 1 && input.A) {
+				flags.jumpState = 2;
+			}
 
 			//If inAir, parry
 			if (flags.inAir && flags.jumpState == 2 && !flags.dashing) {
@@ -78,11 +100,23 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				flags.jumpState = 3; //Parry
 				//On parry anim end
 				thisPlayer.updateAnimations = true;
+				
 			}
-		} else stA = false;
+			
+			//Set an initial hold time for A_holdTime
+			if(input.A) {
+				A_hold = true;
+				unhold(input);
+			}
+			else {
+				A_hold = false;
+				hold2 = false;
+			}
+			
+		} else if(!input.A) stA = false;
 
 		if (flags.controllable) {
-			if (input.A && enableHold && flags.jumpState == 0 && !flags.dashing) {
+			if (A_hold && enableHold && flags.jumpState == 0 && !flags.dashing) {
 				//Jump time
 				if (startHeight != thisPlayer.y && !(flags.ducking && flags.inPlatform)) {
 					startHeight = thisPlayer.y;
@@ -97,7 +131,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 					}
 				}
 
-			} else if (!input.A) {
+			} else if (!A_hold) {
 				if (flags.jumpState == 0) enableHold = true;
 				else if (flags.jumpState == 1) {
 					flags.jumpState = 2; //A button released
@@ -106,9 +140,13 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			}
 		}
 		var jumpHeight = !flags.damageHit && !flags.shootingEX ? startHeight - thisPlayer.data.jumpHeight : 32768;
-
+		
+		//Descend
 		if (startHeight != 32768 && thisPlayer.y > jumpHeight)
 			thisPlayer.body.m_linearVelocity.y = flags.dashing || (flags.ducking && flags.inPlatform)?  0: !flags.shootingEX ?-thisPlayer.data.jumpSpeed:0;
-		else if (thisPlayer.y < jumpHeight && flags.inAir) startHeight = 32768;
+		else if (thisPlayer.y < jumpHeight && flags.inAir) {
+			startHeight = 32768;
+			A_hold = false;
+		}
 	};
 };

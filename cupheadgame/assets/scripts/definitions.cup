@@ -16,6 +16,7 @@ b5.Game.GameDefIDs = {
 		"chaser": 1460621839,
 		"lobber": 1467024095,
 		"roundabout": 1466518900,
+		"charge": 1466416941,
 		"unused?": 1457006169,
 		"exploder": "fan-exploder"
 	},
@@ -27,13 +28,15 @@ b5.Game.GameDefIDs = {
 		"1487051212": "psugar",
 		"1500641115": "twinheart",
 		"1500621999": "whetstone",
+		"temp": "cookie",
 		"empty": 2147483647,
 		"smokebomb": 1461001046,
 		"heart": 1460832742,
 		"coffee": 1460880866,
 		"psugar": 1487051212,
 		"twinheart": 1500641115,
-		"whetstone": 1500621999
+		"whetstone": 1500621999,
+		"cookie": "temp"
 	},
 	supers: {
 		"2147483647": "empty",

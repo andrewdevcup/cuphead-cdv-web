@@ -7,6 +7,15 @@ b5.export = function(world, scene, data, game) {
 	  scene.findResource('SfxVinylScratch'+b5.Maths.randomRange(1,2),'sound').play();
 	  
 	  game.Flags.inSomeMenu = true;
+	  
+	  //Set ui buttons
+		b5.Game.UiButtons.setButtons([
+			{
+				"text": "texts.ui_confirm",
+				"actionButton": "jump"
+			}
+		]);
+		b5.Game.UiButtons.show(true);
 
 	  //Card
 	  var dCard = new b5.Actor();

@@ -21,7 +21,7 @@
 	"pause_card_resume": "RESUME",
 	"pause_card_retry": "RETRY",
 	"pause_card_removep2": "REMOVE PLAYER 2",
-	"player2Joined": "PLAYER TWO\nhas joined",
+	"player2Joined": "PLAYER TWO HAS JOINED",
 	"player2Connected": "PLAYER 2 CONNECTED",
 	"player2Disconnected": "PLAYER 2 DISCONNECTED",
 	"waitForPlayerJoin": "Wait for player to join",

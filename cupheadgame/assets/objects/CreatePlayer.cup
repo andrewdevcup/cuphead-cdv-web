@@ -34,7 +34,11 @@ b5.export = function(world, scene, data, game) {
   
   data.playerLastSpawnPosX = 0;
   
-	myexports.createPlayer = function(player, playerInput, asPlayer2, forceLoad) {
+	myexports.createPlayer = function(player, playerInput, asPlayer2, levelStarted, loadAsChalice) {
+		
+		var rPlayer = player;
+		if(loadAsChalice) player = "chalice";
+		
 		var playerPath = b5.Paths.player + player + '/',
 		playerid = !asPlayer2 ? "playerOne": "playerTwo";
 
@@ -72,10 +76,10 @@ b5.export = function(world, scene, data, game) {
 				sound.onDestroy = game.Sfx.remove;
 				sound.output_gain = game.Sfx.volume;
 				game.Sfx.add(sound);
-				scene.addResource(sound, 'sounds');
+				scene.addResource(sound, 'sound');
 			}
 		}
-		forceLoad && scene.tryLoadNextResource();
+	  scene.tryLoadNextResource();
 
 		var phyb = data[player].body.physicsBody;
 
@@ -122,6 +126,7 @@ b5.export = function(world, scene, data, game) {
 		ply.setBodySize(phyb.size[0],phyb.size[1]);
 		ply.fill_style = game.Flags.debugShowHitboxes ? "#00800080": "transparent";
 		ply.name = player;
+		ply.rname = rPlayer;
 		ply.tag = "player";
 		ply.id = playerid;
 		world.findActor("Layer"+data.view.playerLayer, true).addActor(ply);
@@ -140,7 +145,7 @@ b5.export = function(world, scene, data, game) {
 
 
 		//Spawn where
-		ply.setPosition(data.player.spawn.pos[0] - (forceLoad ? 0 : data.playerLastSpawnPosX), data.player.spawn.pos[1]);
+		ply.setPosition(data.player.spawn.pos[0] - (levelStarted ? 0 : data.playerLastSpawnPosX), data.player.spawn.pos[1]);
     
     data.playerLastSpawnPosX += phyb.size[0]*1.8;
     
@@ -229,6 +234,10 @@ b5.export = function(world, scene, data, game) {
 		ply.components = {};
 		ply.activeComponents = data[player].variables.activeComponents;
 		var cmps = data[player].components;
+		
+		//If player added after levelStarted, start with one hp
+		if(levelStarted) data[player].flags.heartPoints = 1;
+		
 		for (var i = 0; i < cmps.length; i++) {
 			var cmp = cmps[i].replace(".cup", '');
 
@@ -263,13 +272,26 @@ b5.export = function(world, scene, data, game) {
 		
 		scene.events.dispatch('playerremoved',p);
 	};
+	
+	//If both players have the cookie	equiped
+	var p1chalice = game.SlotUtils.getPlayerLoadouts('playerOne').charm == "temp",
+	p2chalice = game.SlotUtils.getPlayerLoadouts('playerTwo').charm == "temp";
+	
+	if( p1chalice && p2chalice && b5.Game.Multiplayer.player2Joined) {
+		data.loadData.RNDINT >= 128 ?
+		  p1chalice = false
+		  :
+		  p2chalice = false;
+	}
 
 	myexports.createPlayer(
-		data.players.player1, false, false
+		data.players.player1, false, false, false, 
+		p1chalice	//|| data.loadData.playerOneAsChalice
 	);
 	//Add player 2 if joined
 	game.Multiplayer.player2Joined && myexports.createPlayer(
-		data.players.player2, true, true
+		data.players.player2, true, true, false,
+		p2chalice// || data.loadData.playerTwoAsChalice
 	);
 
 	data.initializePlayers = function() {

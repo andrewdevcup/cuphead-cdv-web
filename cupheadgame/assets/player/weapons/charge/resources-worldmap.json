@@ -1,0 +1,10 @@
+{
+	"bitmap": [
+	],
+	"brush": [
+		{
+	  	"name": "charge:WEAPON_EQUIP_ICON",
+	  	"bitmaps": []
+  	}
+  ]
+}

@@ -21,7 +21,7 @@
 	"pause_card_resume": "REANUDAR",
 	"pause_card_retry": "VOLVER A INTENTAR",
 	"pause_card_removep2": "ELIMINAR JUGADOR 2",
-	"player2Joined": "Se unió el\nJUGADOR 2",
+	"player2Joined": "SE UNIÓ EL JUGADOR 2",
 	"player2Connected": "JUGADOR 2 CONECTADO",
 	"player2Disconnected": "JUGADOR 2 DESCONECTADO",
 	"waitForPlayerJoin": "Espera a que ingrese al nivel",

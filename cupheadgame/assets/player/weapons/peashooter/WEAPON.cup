@@ -23,6 +23,16 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 		scene.findResource('PeashooterLoopSfx2', 'sound')
 	],
 	sfxExHit = scene.findResource('EXShotHitSfx', 'sound');
+	
+	const WPN_FIXTURE = {
+		type: 0,
+		width: 1,
+		height: 1,
+		friction: 0,
+		restitution: 0,
+		density: 1,
+		is_sensor: true
+	};
 
 	/*Weapon behaviors*/
 	var weapon = {
@@ -52,7 +62,18 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			}
 
 			bullet.initBody(body.bodyType, body.fixedRotation, true);
-
+			
+			WPN_FIXTURE.type = b5.Shape[body.shape],
+			WPN_FIXTURE.width = body.size[0],
+			WPN_FIXTURE.height = body.size[1],
+			WPN_FIXTURE.friction = body.friction || 0,
+			WPN_FIXTURE.restitution = body.restitution || 0,
+			WPN_FIXTURE.density = body.density || 1,
+			WPN_FIXTURE.is_sensor = true;
+				
+				
+			bullet.addFixture(WPN_FIXTURE);
+			/*
 			bullet.addFixture({
 				type: b5.Shape[body.shape],
 				width: body.size[0],
@@ -61,7 +82,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				restitution: body.restitution || 0,
 				density: body.density || 1,
 				is_sensor: true
-			});
+			});*/
 
 
 			//Attach atlas
@@ -237,7 +258,17 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			}
 
 			exb.initBody(body.ex.bodyType, body.ex.fixedRotation, true);
-
+			
+			WPN_FIXTURE.type = b5.Shape[body.ex.shape],
+			WPN_FIXTURE.width = body.ex.size[0],
+			WPN_FIXTURE.height = body.ex.size[1],
+			WPN_FIXTURE.friction = body.ex.friction || 0,
+			WPN_FIXTURE.restitution = body.ex.restitution || 0,
+			WPN_FIXTURE.density = body.density || 1,
+			WPN_FIXTURE.is_sensor = true;
+				
+			exb.addFixture(WPN_FIXTURE);
+			/*
 			exb.addFixture({
 				type: b5.Shape[body.ex.shape],
 				width: body.ex.size[0],
@@ -246,7 +277,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				restitution: body.ex.restitution || 0,
 				density: body.ex.density || 1,
 				is_sensor: true
-		});
+		});*/
 
 		exb.body.m_linearVelocity.x = Math.cos(angle)*wpnData.ex.speed;
 		exb.body.m_linearVelocity.y = Math.sin(angle)*wpnData.ex.speed;

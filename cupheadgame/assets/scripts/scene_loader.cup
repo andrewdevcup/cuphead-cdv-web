@@ -143,6 +143,10 @@ b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenPropertie
 			delete b5.LoadScene;
 			
 	  	//Set load data
+	  	//With a random number to decide which player will be chalice (if selected both)
+	  	if(!loadData) loadData = { RNDINT: b5.Maths.randomRange(0,255) }
+	  	else loadData.RNDINT = b5.Maths.randomRange(0,255);
+	  	
   		var tempLoadData = sceneMain.data.loadData;
 	  	//Clear temporary scene variables
   		sceneMain.data = {

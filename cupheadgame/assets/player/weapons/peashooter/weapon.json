@@ -10,7 +10,7 @@
 		"damage": 8.33,
 		"multiHit": 3,
 		"hitDelay": 4.5,
-		"scale": 0.85,
+		"scale": 0.9,
 		"despawnTime": 3.5,
 		"consumption": 100
 	},

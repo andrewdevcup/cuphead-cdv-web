@@ -9,7 +9,7 @@
 *
 */
 RELEASE_CODENAME = "Pre-Beta";
-RELEASE_VER = "3.1.2"
+RELEASE_VER = 3;
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -138,7 +138,7 @@ b5.loadgame = function() {
 	app.disable_dock_screen = true;
 	app.global_font_scale = .55;
 	app.physics_step = 2;
-	app.min_speed = 0.10;
+	app.min_speed = 1/20;
 	app.hide_cursor = true;
 	app.texture_resolution = 1;
 	//Fill canvas to screen
@@ -154,9 +154,10 @@ b5.loadgame = function() {
 
 
 	dev = {
-		fastcoding: 0,
+		fastcoding: 1,
 		loadscene: 'notice2', //8
-		data: {players:['cuphead','mugman'],difficulty:1}
+		data: {
+		}
 	};
 	
 	// Beta tester methods
@@ -819,10 +820,9 @@ b5.Game.PauseMenu.show(b5.Game.Flags.inWorldmap ? "worldmap": b5.Game.Flags.inLe
 app.now > l+1000 ? (fpt = fptc+1,
   fptc = 0, 
   l = app.now,
-  app.getMemoryUsage(),
-app.updateInfoText()
+  app.getMemoryUsage()//, app.updateInfoText()
 ): fptc++;
-//app.updateInfoText()
+app.updateInfoText()
 
 
 }

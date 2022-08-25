@@ -1,13 +1,23 @@
 return function(thisPlayer, flags, world, scene, game, superData) {
 	//Setup actions
 	
+	let HIT_DAMAGE = 14;
+	
 	let MusicEffectOn = function() {
 		for(let i = 0, a = game.Music.sounds; i < a.length; i++) {
 			a[i]._pspeed = a[i].playback_speed;
 			a[i].Tween('playbackRate',a[i]._pspeed * 1.45,0.45);
-			a[i].Tween('gain:output', a[i].output_gain * 0.4, 0.45);
-			scene.setTimeout(m => a[i].Tween('gain:reverb',4 * game.cfg.Audio.master * game.cfg.Audio.music, 0.5), 0.45);
+			scene.setTimeout(m => {
+				a[i].Tween('gain:output', a[i].output_gain * 0.5,0.45);
+				a[i].Tween('gain:reverb',4 * game.cfg.Audio.master * game.cfg.Audio.music	* .8, 0.5)
+			},0.45);
 		}
+		
+		//Update of 1.3.2: Slow every sfx down
+	/*	for(let i = 0, c = [], b = game.Sfx.sounds; i < b.length;	i++) {
+			c[i] = b[i].playback_speed;
+			b[i].Tween('playbackRate', c[i] * 0.7, 0.25);
+		}*/
 	},
 	MusicEffectOff = function() {
 		for(let i = 0, a = game.Music.sounds; i < a.length; i++) {
@@ -52,7 +62,7 @@ return function(thisPlayer, flags, world, scene, game, superData) {
 							b5.Maths.pos(beam.y,c.y,0.6) + b5.Maths.randomRange(-130,130)
 						);
 						
-						c.onBulletHit && c.onBulletHit({damage: 8});
+						c.onBulletHit && c.onBulletHit({damage: HIT_DAMAGE});
 					}
 				}
 			},12/60);
@@ -174,14 +184,14 @@ return function(thisPlayer, flags, world, scene, game, superData) {
 		//Super Beam
 		Beam.cull = false;
 		Beam.setSize(1300,330);
-		Beam.setPosition(thisPlayer.x + (640 * facing), thisPlayer.y - 30);
+		Beam.setPosition(thisPlayer.x + (726 * facing), thisPlayer.y - 30);
 		world.PlayerLayer.addActor(Beam);
 		Beam.initBody('collider',true);
 		Beam.atlas = scene.findResource('SuperBeamAtlas','brush');
 		Beam.visible = false;
 		Beam.addFixtureSelf();
 		Beam._ox = -250;
-		Beam._scale = 1.19;
+		Beam._scale = 1.4;
 		Beam._scale_x *= Math.sign(facing);
 		
 		Beam._layer = thisPlayer.layer + 1;
@@ -195,6 +205,7 @@ return function(thisPlayer, flags, world, scene, game, superData) {
 			thisPlayer.data.supermeter = 0;
 			game.Flags.pausingEnabled = !scene.data.players_dead;
 			
+			//Timeout for super to end
 			scene.setTimeout(b => {
 				MusicEffectOff();
 				
@@ -217,7 +228,7 @@ return function(thisPlayer, flags, world, scene, game, superData) {
 		
 				
 				thisPlayer.body.m_linearVelocity.y = -thisPlayer.data.jumpSpeed * 1.4;
-			},2.3);
+			},2);
 			
 		},1.1);
 		

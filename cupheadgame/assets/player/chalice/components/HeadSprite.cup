@@ -1,0 +1,73 @@
+return function(thisPlayer, flags, input, world, scene, game, data) {
+	
+	//Head sprite	shown	when shooting and boil animations
+	//Mixed with a BodySprite
+	
+	const atlas = thisPlayer.Sprite,
+	headSprite = new b5.Actor();
+	headSprite.atlas = thisPlayer.Sprite.atlas;
+	thisPlayer.addActor(headSprite);
+	
+	thisPlayer.HeadSprite = headSprite;
+	thisPlayer.data.headTriggerShot = false;
+	
+	headSprite.setPosition(
+		atlas.ox,
+		atlas.oy
+	);
+	
+	headSprite.oScale = atlas._scale;
+	
+	let shootAngle = 0,
+	shooting = false,
+	locking = false,
+	vars,
+	axis_x = 0,
+	axis_y = 0,
+	triggerShot = false;
+
+	return function(thisPlayer, flags, input, world, scene, game, data) {
+		//This is a loop function
+		//It will be called consecutively when loadingScreenOut
+		
+		headSprite.visible =
+		headSprite.active = false;//flags.inAir && !flags.dashing && !flags.damageHit && !flags.inDoubleJump && !flags.shootingEX && flags.shooting;
+
+		if(headSprite.visible) {
+			vars = thisPlayer.data;
+			
+		  axis_x = Math.round(input.axis_x),
+			axis_y = Math.round(input.axis_y);
+			
+			//On shooting angle changed	and when shooting
+			if(shootAngle != vars.shootAngle || vars.headTriggerShot) {
+				shootAngle = vars.shootAngle;
+				
+			//		vars.headTriggerShot ?
+					//TriggerShot
+					headSprite.playAnimWithEnd(
+						!axis_y ? "shooting_straight_head":
+						axis_y < 0 ? axis_x ? "shooting_diag_up_head": "shooting_up_head":
+						axis_y > 0 ? axis_x ? "shooting_diag_down_head": "shooting_down_head":
+						"shooting_straight_head",()=>{
+					
+					//Shooting
+					headSprite.playAnim(
+						!axis_y ? "shooting_straight_boil_head":
+						axis_y < 0 ? axis_x ? "shooting_diag_up_boil_head": "shooting_up_boil_head":
+						axis_y > 0 ? axis_x ? "shooting_diag_down_boil_head": "shooting_down_boil_head":
+						"shooting_straight_boil_head", true);
+					});
+				
+				vars.headTriggerShot = false;
+			}
+			
+			headSprite.scale_x = atlas.scale_x;
+			headSprite.scale_y = atlas.scale_y;
+			headSprite.dirty();
+			
+		}
+		else shooting = false;
+   
+	};
+};

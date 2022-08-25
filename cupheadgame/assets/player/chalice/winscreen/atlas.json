@@ -1,0 +1,6 @@
+{
+	"bitmaps": ["SpriteAtlasTexture_ChaliceWinscreen-0.png"],
+	"frames": "SpriteAtlasTexture_ChaliceWinscreen.csv",
+	"anims": "chaliceWinscreen.anims.json",
+	"facing": 1
+}

@@ -1,0 +1,19 @@
+{
+	"sound": [
+	],
+	"bitmap": [
+		{
+			"name": "ChaliceGhostBitmap0",
+			"src": "player/chalice/ghost/SpriteAtlasTexture_ChaliceGhost-0.png",
+			"preload": false
+		}
+	],
+	"brush": [
+		{
+			"name": "ChaliceGhostAtlas",
+			"bitmaps": ["ChaliceGhostBitmap0"],
+			"frames": "player/chalice/ghost/SpriteAtlasTexture_ChaliceGhost.csv",
+			"anims": "player/chalice/ghost/chaliceGhost.anims.json"
+		}
+	]
+}

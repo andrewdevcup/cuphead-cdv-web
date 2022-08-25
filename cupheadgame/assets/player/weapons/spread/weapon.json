@@ -9,7 +9,7 @@
 	"despawnTimeSmall": 0.32,
 	"bulletCount": 5,
 	"exBulletCount": 8,
-	"angleRange": [31,-31],
+	"angleRange": [36,-36],
 	"exAngleRange": [-180,180],
 	"ex": {
 		"speed": 28,

@@ -375,8 +375,8 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	//Update hp Statistics
 	scene.events.on('playerhit', d => {
 		//Get HP score from max between players
-		for(var i = 0, p = world.findActorsByTagName('player',true), hp = sceneData.Max_Scores.hp; i < p.length; i++) {
-			hp = Math.min(Math.max(p[i].flags.heartPoints-1, hp), sceneData.Max_Scores.hp);
+		for(var i = 0, p = world.findActorsByTagName('player',true), hp = 0; i < p.length; i++) {
+			hp = Math.max(Math.min(p[i].flags.heartPoints-1,sceneData.Max_Scores.hp), hp);
 		}
 		scene.data.Statistics.hp = hp;
 	});

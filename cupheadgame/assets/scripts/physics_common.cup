@@ -1,3 +1,21 @@
 (function() {
 	
+	/*
+	* Physics layer for various physics objects
+  * 0 - Floor
+  * 1 - Wall
+  * 2 - Platform
+  * 3 - Bullet
+  * 4 - Player
+  * 5 - Enemy
+  * 6 - Boss
+  */
+  
+	b5.Game.FLOOR = 0,
+	b5.Game.WALL = 1,
+	b5.Game.PLATFORM = 2,
+	b5.Game.BULLET = 3,
+	b5.Game.PLAYER = 4,
+	b5.Game.ENEMY = 4,
+	b5.Game.BOSS = 6;
 })();

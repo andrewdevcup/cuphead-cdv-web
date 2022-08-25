@@ -1,0 +1,42 @@
+{
+	"speedSmall": 50,
+	"speedFull": 65,
+	"damageSmall": 6,
+	"damageFull": 46,
+	"supermeter_score": 6,
+	"supermeter_scoreFull": 46,
+	"delay": 0.14,
+	"fullChargeTime": 1.25,
+	"scale": 0.8,
+	"despawnTime": 3,
+	"ex": {
+		"speed": 0,
+		"damage": 26,
+		"scale": 0.9,
+		"despawnTime": 0.5,
+		"consumption": 100
+	},
+	"body": {
+		"shape": "TypeBox",
+		"size": [40,25],
+		"fixedRotation": true,
+		"sub_layer": 0,
+		"bodyType": "collider",
+		"hitbox": {
+			"type": "Arc",
+			"size": 15
+		},
+		"ex": {
+			"shape": "TypeBox",
+			"size": [100,100],
+			"fixedRotation": true,
+			"bodyType": "collider",
+			"sub_layer": 3,
+			"hitbox": {
+				"type": "Arc",
+				"size": 230
+			}
+		}
+	},
+	"resources": {}
+}

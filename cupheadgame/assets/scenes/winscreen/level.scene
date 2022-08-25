@@ -433,7 +433,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
   for(var i=0; i<data.players.length; i++)
   	data.players[i].playAnim('idle',true),
   	data.players[i].blinksprite.playAnim('blink'),
-  	data.players[i].namelabel.text = data.players[i].name.toUpperCase();
+  	data.players[i].namelabel.text = game.Texts.texts[data.players[i].name];
 
 	var mus = scene.findResource('WSMusic','sound');
 	mus.play();

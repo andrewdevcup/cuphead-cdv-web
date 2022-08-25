@@ -54,7 +54,7 @@
 			]
 		},
   	{
-			"damageMultiplier": 0.97,
+			"damageMultiplier": 0.99,
 			"data": {
 				"slime": {
 					"jumpChargeTime": 0.3,
@@ -87,10 +87,10 @@
 				},
 				"tombstone": {
 					"maxHp": 350,
-					"horizSpeed": 60,
-					"smashWait": 0.4,
+					"horizSpeed": 64,
+					"smashWait": 0.2,
 					"smashAfterRandomTurnsCount": [3,4],
-					"acceleration": 0.08
+					"acceleration": 0.09
 				}
 			},
 			"phases": [

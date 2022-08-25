@@ -1,0 +1,152 @@
+return function(thisPlayer, flags, input, world, scene, game, data) {
+	//Setup local variables here
+	//This function will be called when player is first created
+	//For executing actions when loading screen is being hidden,
+	//add the method thisPlayer.onLoadingScreenOut = function(){...}
+	//var myvar = flags.jumping
+
+	var shootex = false,
+	exAngle = 0,
+	atlas = thisPlayer.findActor('AtlasImage'),
+	getAngleFromEXAnim = function() {
+		var a = 0, b = thisPlayer.data.facing < 0;
+		switch(atlas.current_anim.replace(/ex_|_ground|_air/g,'')) {
+			case 'straight':
+				a = b ? -180 : 0
+				break;
+			case 'up':
+				a = -90;
+				break;
+			case 'down':
+				a = 90;
+				break;
+			case 'diag_up':
+				a = b ? -135 : -45;
+				break;
+			case 'diag_down':
+				a = b ? 135 : 45;
+				break;
+		}
+		return b5.Maths.degToRad(a);
+	},
+	exSfx = [
+		scene.findResource('PlayerWpnExSfx1', 'sound'),
+		scene.findResource('PlayerWpnExSfx2', 'sound'),
+		scene.findResource('PlayerWpnExSfx3', 'sound'),
+		scene.findResource('PlayerWpnExSfx4', 'sound')
+	],
+	spawnEX = function(ax, ay, wpn) {
+		if (flags.shootingEX) {
+			exSfx[b5.Maths.randomRange(0, 3)].play(0.22);
+			scene.data.shakeCamera(7, 0.5, 150);
+			thisPlayer.body.SetActive(!ay);
+			thisPlayer.body.m_gravityScale.y = 0;
+			thisPlayer.body.m_linearVelocity.y = 0;
+			(!ay || ax) && (
+				thisPlayer.body.m_linearVelocity.x = -Math.sign(thisPlayer.data.facing)*thisPlayer.data.baseSpeed*0.3);
+			
+			thisPlayer.data.shootAngle = getAngleFromEXAnim();
+			scene.data.spawnPlayerParticle('exDust',thisPlayer);
+			
+			var pos = [
+				thisPlayer.data.shootOffset[0],
+				thisPlayer.data.shootOffset[1]
+			];
+		  wpn.SpawnEX(pos, thisPlayer.data.shootAngle);
+		}
+	};
+
+	thisPlayer.onEXAnimEnded = function(interrupted) {
+		flags.shootingEX = false;
+		flags.jumpActioned = false;
+		thisPlayer.body.SetActive(true);
+		flags.controllable = !interrupted;
+		thisPlayer.body.m_gravityScale.y = 1;
+		flags.canShootEX = !interrupted && !flags.inAir;
+	}
+	
+	thisPlayer.startEX = function(supermeter,ax,ay) {
+		let currWpn = thisPlayer.weapons[flags.weaponIndex];
+		thisPlayer.data.supermeter = supermeter;
+		thisPlayer.data.supermeter -= currWpn.wpn.ex.consumption;
+		flags.shootingEX = true;
+		flags.canShootEX = false;
+		thisPlayer.body.SetActive(false);
+		flags.controllable = false;
+		thisPlayer.onRemove();
+
+		//Shoot ex
+		thisPlayer.updateAnimations = true;
+		var part = data.spawnPlayerParticle('exChargeUp', thisPlayer);
+
+		//Spawn
+		part.onAnimEnded = function() {
+			spawnEX(ax, ay, currWpn.data);
+		};
+	}
+	
+	thisPlayer.startSuper = function(facing) {
+		this.ExecuteSuper(facing);
+	}
+	
+	//Guest events
+	scene.events.on('playerex', evtdata => {
+		if(thisPlayer.name == evtdata[0]) {
+			if(evtdata[4] == "send") {
+				var target = game.Multiplayer.target();
+				game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playerex',[evtdata[0],evtdata[1],target]]);
+			}
+			else if(evtdata[4] == game.Multiplayer.session) {
+				!flags.SUPER && thisPlayer.startEX(evtdata[1]);
+			}
+		}
+	});
+	
+	scene.events.on('playersuper', evtdata => {
+		if(thisPlayer.name == evtdata[0]) {
+			if(evtdata[4] == "send") {
+				var target = game.Multiplayer.target();
+				game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playerex',[evtdata[0],evtdata[1],evtdata[2],evtdata[3],target]]);
+			}
+			else if(evtdata[4] == game.Multiplayer.session) {
+				!flags.shootingEX && thisPlayer.startEX(evtdata[1],evtdata[2],evtdata[3]);
+			}
+		}
+	});
+	
+	//Super
+//	thisPlayer.Super = new data.Super(thisPlayer.equipedSuper, thisPlayer);
+
+	return function(thisPlayer, flags, input, world, scene, game, data) {
+		//This is a loop function
+		//It will be called consecutively when loadingScreenOut
+		var currWpn = thisPlayer.weapons[flags.weaponIndex];
+		if (flags.controllable && thisPlayer.data.supermeter >= currWpn.wpn.ex.consumption && flags.canShoot && flags.canShootEX) {
+			var btnY = !!input.Y && !flags.dashing,
+			axis_x = Math.round(input.axis_x),
+		  axis_y = Math.round(input.axis_y);
+			
+			if (shootex != btnY) {
+				shootex = btnY;
+
+				if (shootex && !flags.shootingEX) {
+				
+					//Check for super (disable temporarily for chalice)
+					if(false && thisPlayer.data.supermeter >= thisPlayer.data.max_supermeter_score && thisPlayer.equipedSuper != "empty" && game.Flags.playerCanExecuteSuper) {
+						scene.events.dispatch('playersuper',[thisPlayer.name, Math.sign(thisPlayer.data.facing), game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+						thisPlayer.startSuper && thisPlayer.startSuper(Math.sign(thisPlayer.data.facing));
+					}
+					else {
+						//Sync
+						scene.events.dispatch('playerex',[thisPlayer.name, Math.round1000(thisPlayer.data.supermeter), axis_x, axis_y, game.Multiplayer.canExecute(thisPlayer)?'send':'no']);
+					
+						thisPlayer.startEX(thisPlayer.data.supermeter,axis_x,axis_y);
+					}
+					
+				}
+
+			}
+		}
+
+	};
+};
