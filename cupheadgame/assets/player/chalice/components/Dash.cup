@@ -30,6 +30,30 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		dashes = 0;
 		dashtime = 0;
 	}
+	
+	thisPlayer.addDashParticles = function() {
+		var p = new	b5.Actor();
+		p.atlas = scene.findResource('ChaliceFXAtlas','brush');
+		p.playAnimWithEnd('dash_pink',f => {
+			thisPlayer._dashParticle = null;
+			f.destroy();
+		});
+		thisPlayer.addActor(p);
+		p._scale = thisPlayer.Sprite._scale;
+		p._scale_x = thisPlayer.Sprite.scale_x;
+		this._dashParticle = p;
+		p.setOrigin(thisPlayer.Sprite.ox,thisPlayer.Sprite.oy);
+		
+		//Sparkles
+		var s = new b5.Actor();
+		s.atlas = p.atlas;
+		s.playAnimWithEnd('dash_sparkles', f => f.destroy());
+		thisPlayer.parent.addActor(s);
+		s.setPosition(thisPlayer.x,thisPlayer.y);
+		s.layer = thisPlayer.layer + 1;
+		s._scale = p._scale;
+		s._scale_x = p.scale_x;
+	}
 
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {
@@ -57,8 +81,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				);
 				thisPlayer.updateAnimations = true;
 				flags.parryActive = false;
-				//Spawn particle
-			  data.spawnPlayerParticle('dashDust',thisPlayer);
+				
 				//Play sfx 
 				dashsfx[b5.Maths.randomRange(0,2)].play();
 				
@@ -68,7 +91,12 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 					flags.hittable = false;
 					flags.rolling = true;
 				}
-				else flags.parryActive = true; //Parry dash
+				else {
+					//Spawn particle
+		  	  data.spawnPlayerParticle('dashDust',thisPlayer);
+		  	  thisPlayer.addDashParticles();
+					flags.parryActive = true; //Parry dash
+				}
 				
 			}
 			else {

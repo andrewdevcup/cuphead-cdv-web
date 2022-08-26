@@ -83,6 +83,7 @@
 		"parryActive": false,
 		"parrying": false,
 		"successfulParry": false,
+		"parried": false,
 		"damageHit": false,
 		"controllable": true,
 		"invincible": false,
@@ -161,6 +162,25 @@
 			"preload": false,
 			"reuse": true,
 			"category": "sfx"
+		}]
+	},
+	"extra_resources": {
+		"bitmap": [{
+			"name": "ChaliceDeathBodyBitmap0",
+			"src": "player/chalice/SpriteAtlasTexture_ChaliceDeathBody-0.png"
+		}, {
+			"name": "ChaliceFXBitmap0",
+			"src": "player/chalice/SpriteAtlasTexture_ChaliceFX-0.png"
+		}],
+		"brush": [{
+			"name": "ChaliceDeathBodyAtlas",
+			"bitmaps": ["ChaliceDeathBodyBitmap0"],
+			"frames": "player/chalice/SpriteAtlasTexture_ChaliceDeathBody.csv"
+		}, {
+			"name": "ChaliceFXAtlas",
+			"bitmaps": ["ChaliceFXBitmap0"],
+			"frames": "player/chalice/SpriteAtlasTexture_ChaliceFX.csv",
+			"anims": "player/chalice/chaliceFX.anims.json"
 		}]
 	}
 }

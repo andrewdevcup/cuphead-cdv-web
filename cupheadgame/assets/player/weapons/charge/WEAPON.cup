@@ -251,7 +251,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 	 chargeTime = 0;
 	 bulletCharged = false;
 	 
-		thisPlayer.data.triggerShot = true;
+		thisPlayer.data.triggerShot();// = true;
 		!flags.inAir && (thisPlayer.updateAnimations = true);
 		var pos = [
 			thisPlayer.data.shootOffset[0],

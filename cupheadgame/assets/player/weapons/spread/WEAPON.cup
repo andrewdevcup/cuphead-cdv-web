@@ -46,7 +46,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				b_angle = b5.Maths.pos(wpnData.angleRange[0], wpnData.angleRange[1], (i/wpnData.bulletCount)+.1) * b5.Maths.DtoRad;
 
 				//On every odd number, set small bullet
-				var small = !(i / 2 === i >> 1);
+				var small = i % 2 == 1;
 
 				//Actor with kinematic body
 				var bullet = new b5[wpnData.body.hitbox.type+'Actor'];
@@ -363,7 +363,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 		if (shootTime < wpnData.delay) shootTime += app.dt;
 		else if (!flags.dashing && !flags.damageHit) {
 			shootTime = 0;
-			thisPlayer.data.triggerShot = true;
+			thisPlayer.data.triggerShot(); //= true;
 			!flags.inAir && (thisPlayer.updateAnimations = true);
 			var pos = [
 				thisPlayer.data.shootOffset[0],

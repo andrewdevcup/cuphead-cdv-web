@@ -37,6 +37,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		world.active = false;
 		flags.parryActive = false;
 		flags.successfulParry = true;
+		flags.parried = true;
 		thisPlayer.body.SetActive(false);
 		scene.world.m_sleep = true;
 
@@ -67,6 +68,8 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		flags.jumpState = 1;
 		flags.inDoubleJump = false;
 		
+		atlas.current_anim !=	"dash" && atlas.playAnim('dash');
+		
 		//Recover dash
 		thisPlayer.resetDashes();
 		
@@ -78,11 +81,15 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	  	//Dashing sets y gravity scale to 0, so if the player does a frame perfect dash and parry, it will send him flying. Preventing that:
     	thisPlayer.body.m_linearVelocity.y = !flags.dashing ? -thisPlayer.data.jumpSpeed*thisPlayer.data.parryJumpHeightMultiplier : 0;
     	flags.parrying = true;
+    	flags.parried = false;
     	flags.jumpState = 1; //Recover parry
     	thisPlayer.body.SetActive(true);
     	game.Flags.pausingEnabled = true;
     	scene.world.m_sleep = false;
-
+    	
+    	//Remove dash particle
+	  	if(thisPlayer._dashParticle) thisPlayer._dashParticle.destroy();
+		
 		}, 0.2);
 	};
 	

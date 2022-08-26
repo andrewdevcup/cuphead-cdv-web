@@ -154,7 +154,7 @@ b5.loadgame = function() {
 
 
 	dev = {
-		fastcoding: 1,
+		fastcoding: 0,
 		loadscene: 'notice2', //8
 		data: {
 		}
@@ -421,6 +421,7 @@ object;
 	}
 	
 b5.Game.parseResources = function(json, scene) {
+	if(json === void 0)	return;
 	var resources = typeof json === "string" ? JSON.parse(json) : json,
 	loadId = 0;
 	for(var i in resources) 

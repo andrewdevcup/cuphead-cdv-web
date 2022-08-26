@@ -22,6 +22,10 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			func && func();
 		});
 	};
+	
+	thisPlayer.data.triggerShot = function() {
+		this.animTriggerShot = true;
+	}
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {
 		//This is a loop function
@@ -71,7 +75,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			
 			//Stand animation (default)
 			if (!flags.running && !flags.ducking && !flags.locking && !flags.dashing)
-				flags.shooting ? vars.triggerShot ? playAnimAfter('shooting_straight', 'shooting_straight_boil'): atlas.playAnim('shooting_straight_boil', true): atlas.playAnim("idle_stand", true);
+				flags.shooting ? vars.animTriggerShot ? playAnimAfter('shooting_straight', 'shooting_straight_boil'): atlas.playAnim('shooting_straight_boil', true): atlas.playAnim("idle_stand", true);
      
      //Dashing animation
 			if (flags.dashing) {
@@ -89,7 +93,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 					thisPlayer.updateAnimations = true;
 					flipchange = true;
 				}): playAnimAfter(duckchange ? flags.shooting ? 'duck_tr_shoot' : "duck_tr" : flags.shooting?'shooting_duck_boil': !flipchange && !shootchange ?'duck_tr':'duck', flags.shooting ? 'shooting_duck_boil': "duck");
-				vars.triggerShot && flags.shooting && playAnimAfter('shooting_duck','shooting_duck_boil');
+				vars.animTriggerShot && flags.shooting && playAnimAfter('shooting_duck','shooting_duck_boil');
 			flipchange = false;
 			} else if (!flags.ducking && duckchange && !flags.inAir && !flags.shooting) {
 				playAnimAfter("duck_tr_bck" + (flags.locking?'': '_idle'), "idle_stand", ()=> {
@@ -109,7 +113,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				} else if (flags.locking && !flags.ducking && !duckchange) {
 					//Locking animations
 					flags.shooting ?
-					vars.triggerShot ?
+					vars.animTriggerShot ?
 					//TriggerShot
 					atlas.playAnimWithEnd(
 						!axis_y ? "shooting_straight":
@@ -131,7 +135,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 
 				} else if (axis_y < 0 && !axis_x) {
 					//Aim up
-					!vars.triggerShot ? atlas.playAnim(flags.shooting ? "shooting_up_boil" : "aim_up", true)
+					!vars.animTriggerShot ? atlas.playAnim(flags.shooting ? "shooting_up_boil" : "aim_up", true)
 					  : flags.shooting ? playAnimAfter('shooting_up', 'shooting_up_boil') : atlas.playAnim('aim_up',true);
 				}
 
@@ -140,7 +144,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			else atlas.playAnim("jump", true);
       
       //Reset triggerShot
-			vars.triggerShot = false;
+			vars.animTriggerShot = false;
 			
 		}
 		

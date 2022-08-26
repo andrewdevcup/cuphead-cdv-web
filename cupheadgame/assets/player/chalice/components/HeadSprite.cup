@@ -31,7 +31,9 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		//It will be called consecutively when loadingScreenOut
 		
 		headSprite.visible =
-		headSprite.active = false;//flags.inAir && !flags.dashing && !flags.damageHit && !flags.inDoubleJump && !flags.shootingEX && flags.shooting;
+		headSprite.active = flags.inAir && !flags.dashing && 
+		!flags.damageHit && !flags.inDoubleJump && !flags.shootingEX
+		&& flags.shooting && !flags.parried;
 
 		if(headSprite.visible) {
 			vars = thisPlayer.data;

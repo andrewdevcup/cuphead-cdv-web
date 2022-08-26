@@ -15,6 +15,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	shooting = false,
 	shootchange = false,
 	prevAimFrame = 0,
+	prevFallFrame = 0,
 	playAnimAfter = function(anim1, anim2, func,repeat) {
 		repeat === undefined && (repeat = true);
 		atlas.frames_repeat = false;
@@ -24,11 +25,16 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		});
 	};
 	
+	thisPlayer.data.triggerShot = function() {
+		this.animTriggerShot = true;
+		this.headTriggerShot = true;
+	}
+	
 	var AtlasPlayAnim = function(a,r) {
 		atlas.playAnim(a,r);
 	}
 
-	return function(thisPlayer, flags, input, world, scene, game, data) {
+	return (thisPlayer.updateAnims = function(thisPlayer, flags, input, world, scene, game, data) {
 		//This is a loop function
 		//It will be called consecutively when loadingScreenOut
 		
@@ -75,8 +81,8 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			}
 			
 			//Stand animation (default)
-			if (!flags.running && !flags.ducking && !flags.locking && !flags.dashing)
-				flags.shooting ? vars.triggerShot ? playAnimAfter('shooting_straight', 'shooting_straight_boil'): AtlasPlayAnim('shooting_straight_boil', true)
+			if (!flags.running && !flags.ducking && !flags.locking && !flags.dashing && !flags.inAir)
+				flags.shooting ? vars.animTriggerShot ? playAnimAfter('shooting_straight', 'shooting_straight_boil'): AtlasPlayAnim('shooting_straight_boil', true)
 				: !axis_y && (
 					prevAimFrame=atlas.current_frame, 
 					AtlasPlayAnim("idle_stand", true),
@@ -99,7 +105,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 					thisPlayer.updateAnimations = true;
 					flipchange = true;
 				}): playAnimAfter(duckchange ? (flags.shooting ? 'duck_tr_shoot' : "duck_tr") : flags.shooting?'shooting_duck_boil': !flipchange && !shootchange && !flags.rolling ?'duck_tr':'duck', flags.shooting ? 'shooting_duck_boil': "duck");
-				vars.triggerShot && flags.shooting && playAnimAfter('shooting_duck','shooting_duck_boil');
+				vars.animTriggerShot && flags.shooting && playAnimAfter('shooting_duck','shooting_duck_boil');
 			flipchange = false;
 			} else if (!flags.ducking && duckchange && !flags.inAir && !flags.shooting) {
 				playAnimAfter("duck_tr_bck" + (flags.locking?'': '_idle'), "idle_stand", ()=> {
@@ -119,7 +125,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				} else if (flags.locking && !flags.ducking && !duckchange) {
 					//Locking animations
 					flags.shooting ?
-					vars.triggerShot ?
+					vars.animTriggerShot ?
 					//TriggerShot
 					atlas.playAnimWithEnd(
 						!axis_y ? "shooting_straight":
@@ -145,7 +151,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 
 				} else if (axis_y < 0 && !axis_x) {
 					//Aim up
-					!vars.triggerShot ? (
+					!vars.animTriggerShot ? (
 						prevAimFrame = atlas.current_frame,
 						AtlasPlayAnim(flags.shooting ? "shooting_up_boil" : "aim_up", true),
 						!flags.shooting && (atlas.current_frame = prevAimFrame)
@@ -154,12 +160,19 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				}
 
 			} else if (flags.inDoubleJump) AtlasPlayAnim("jump", true);
-			else !flags.jumpActioned ? AtlasPlayAnim('fall') : playAnimAfter("jump_ground", 'fall');
-      
+			else if(!flags.parried) {
+				atlas.onAnimEnd = null;
+				prevFallFrame = atlas.current_frame;
+				!flags.jumpActioned ? (
+				  AtlasPlayAnim( flags.shooting ? 'fall_body':'fall')
+				  )
+				  : flags.shooting? AtlasPlayAnim('fall_body')
+				  : AtlasPlayAnim('jump_fall');//playAnimAfter(thisPlayer.body.m_linearVelocity.y < 0 ?"jump_ground":'fall', 'fall');
+				 atlas.current_frame = prevFallFrame;
+			}
       //Reset triggerShot
-			vars.triggerShot = false;
+			vars.animTriggerShot = false;
 			
 		}
-		
-	};
+	}, thisPlayer.updateAnims);
 };

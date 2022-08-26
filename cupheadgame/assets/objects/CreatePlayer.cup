@@ -48,7 +48,8 @@ b5.export = function(world, scene, data, game) {
 
 		//	asPlayer2 && (data[player].flags.heartPoints = 1); Made easier because of desync, enjoy
 		//Load resources
-		var res = data[player].resources;
+		var res = data[player].resources,
+		extRes = data[player].extra_resources;
 
 		//Bitmaps
 		for (var a = 0, bitmaps = []; a < res.bitmaps.length; a++) {
@@ -79,6 +80,10 @@ b5.export = function(world, scene, data, game) {
 				scene.addResource(sound, 'sound');
 			}
 		}
+		
+		//Load extra resources
+		game.parseResources(extRes, scene);
+		
 	  scene.tryLoadNextResource();
 
 		var phyb = data[player].body.physicsBody;

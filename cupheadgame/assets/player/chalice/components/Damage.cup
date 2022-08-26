@@ -26,6 +26,21 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		scene.findResource('PlayerDeathSfx1', 'sound'),
 		scene.findResource('PlayerDeathSfx2', 'sound')
 	],
+	spawnVanishParticle = function(target) {
+		//Custom deathbody particle for chalice
+		var p = new b5.Actor;
+		p.atlas = scene.findResource('ChaliceDeathBodyAtlas','brush');
+		p.center_atlas = true;
+		p._scale = 1;
+		p.setPosition(target.x,target.y);
+		p.layer = target.layer + 1;
+		p.frame_speed = 24;
+		p.frames_repeat = false;
+		p.onAnimEnd = p.destroy;
+		target.parent.addActor(p);
+		p.tags = ['particle','playerParticle'];
+		return p;
+	},
 	dead = function() {
 		deathSfx[b5.Maths.randomRange(0,1)].play();
 		flags.controllable = false;
@@ -36,10 +51,10 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		thisPlayer.data.times_died++;
  		thisPlayer.setTimeout(function() {
  			thisPlayer.visible = false;
- 			var dbp = data.spawnPlayerParticle('playerDeathBody', thisPlayer);
+ 			var dbp = spawnVanishParticle(thisPlayer);/*data.spawnPlayerParticle('playerDeathBody', thisPlayer);
  			dbp.playAnimWithEnd('cuphead_vanish', _this => {
  				_this.destroy();
- 			});
+ 			});*/
  			data.spawnPlayerParticle('playerExplodeFX',thisPlayer);
 			thisPlayer.spawnGhost(-7 - (thisPlayer.data.times_died*1.3));
 			

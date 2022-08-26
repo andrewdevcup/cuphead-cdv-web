@@ -52,7 +52,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			if (shooting != flags.shooting) {
 				shooting = flags.shooting;
 
-				!flags.inAir && (thisPlayer.updateAnimations = true);
+				!flags.inDoubleJump && (thisPlayer.updateAnimations = true);
 				if (!shooting) {
 					thisPlayer.weapons[flags.weaponIndex].data.onShootingStopped();
 				}

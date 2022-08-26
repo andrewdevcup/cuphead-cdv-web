@@ -455,7 +455,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			if (shootTime < wpnData.delay) shootTime += app.dt;
 			else if (!flags.dashing && !flags.damageHit) {
 				shootTime = 0;
-				thisPlayer.data.triggerShot = true;
+				thisPlayer.data.triggerShot();//= true;
 				!flags.inAir && (thisPlayer.updateAnimations = true);
 				var pos = [
 					thisPlayer.data.shootOffset[0],

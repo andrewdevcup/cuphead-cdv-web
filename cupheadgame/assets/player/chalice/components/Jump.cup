@@ -29,6 +29,38 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		thisPlayer.setTimeout(f => {
 			!h && i.A ? (hold2 = A_hold = true, unhold(i,1)) : A_hold = false;
 		},A_holdTime);
+	};
+	
+	thisPlayer.addDblJumpParticles = function(axis_x) {
+		var scale = 1.15,
+		s = new b5.Actor();
+		s.atlas = scene.findResource('ChaliceFXAtlas','brush');
+		s.playAnimWithEnd('dbl_jump_fx_back', f => f.destroy());
+		thisPlayer.parent.addActor(s);
+		s.setPosition(thisPlayer.x,thisPlayer.y);
+		s.layer = thisPlayer.layer -1;
+		s.setScale(
+			thisPlayer.Sprite.scale_x * scale,
+			thisPlayer.Sprite.scale_y * scale
+		);
+		
+		var g = new b5.Actor();
+		g.atlas = scene.findResource('ChaliceFXAtlas','brush');
+		g.playAnimWithEnd('dbl_jump_fx_front', f => f.destroy());
+		thisPlayer.parent.addActor(g);
+		g.setPosition(thisPlayer.x,thisPlayer.y);
+		g.layer = thisPlayer.layer + 1;
+		g.oy = 30;
+		g.setScale(
+			thisPlayer.Sprite.scale_x * 0.85 * scale,
+			thisPlayer.Sprite.scale_y * 0.85 * scale
+		);
+		
+		axis_x > 0 ? s.rotation = g.rotation = 30 * b5.Maths.DtoRad
+		: axis_x < 0 && (s.rotation = g.rotation = -30 * b5.Maths.DtoRad);
+		
+		s.dirty();
+		g.dirty();
 	}
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {
@@ -63,6 +95,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			if (jumping && flags.jumpState == 0) {
 				flags.jumpState = 1; //Leave ground
 				flags.ducking = false;
+				!flags.shooting && thisPlayer.Sprite.playAnim('jump_ground');
 			} else if (!jumping) {
 				flags.jumpState = 0; //In ground
 				startHeight = 32768;
@@ -76,15 +109,19 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				A_hold = false;
 				hold2 = false;
 				flags.jumpActioned = false;
+				
 				//Spawn particle
 				data.spawnPlayerParticle('landDust', thisPlayer);
 				//Play sfx
 				landsfx[b5.Maths.randomRange(0, 1)].play();
+				
+				//Update animations in this frame to sync with headSprite
+				thisPlayer.updateAnimations = true;
+				thisPlayer.updateAnims(thisPlayer, flags, input, world, scene, game, data);
 
 			}
-
-
 			thisPlayer.updateAnimations = true;
+	
 		}
 
 		//Input A state change
@@ -106,7 +143,8 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				jumpsfx[b5.Maths.randomRange(0, 2)].play();
 				//Jump!
 				thisPlayer.body.m_linearVelocity.y = !flags.dashing ? -thisPlayer.data.jumpSpeed*thisPlayer.data.doubleJumpSpeedMultiplier : 0;
-			
+			  //Add particles
+			  thisPlayer.addDblJumpParticles(input.axis_x);
 				thisPlayer.updateAnimations = true;
 				
 			}
