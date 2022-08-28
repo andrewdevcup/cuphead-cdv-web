@@ -52,6 +52,7 @@ b5.Game.Multiplayer = {
 	tpTask: "",
 	data: {
 		teleportTimer: 0,
+		teleportInterval: 0.4,
 		status: 0,
 		inputsP1Hold: Object.clone(b5.Game.Input.player1),
 		inputsP2Hold: Object.clone(b5.Game.Input.player2),
@@ -350,7 +351,7 @@ startMPTask: function() {
 			}
 			
 			//Count teleport timer
-			m.data.teleportTimer < 1.5 ? m.data.teleportTimer += app.dt: (
+			m.data.teleportTimer < m.data.teleportInterval ? m.data.teleportTimer += app.dt: (
 				//Teleport sync position
 				(b5.Game.Flags.inLevel || b5.Game.Flags.inWorldmap) && m.guest.send("4Ξ"),
 				m.data.teleportTimer = 0

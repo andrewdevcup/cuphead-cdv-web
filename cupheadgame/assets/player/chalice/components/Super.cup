@@ -1,0 +1,257 @@
+return function(thisPlayer, flags, input, world, scene, game, data) {
+
+	//Use Custom Super loader instead of the common object
+
+	switch (game.SlotUtils.getPlayerLoadouts(thisPlayer.id).super) {
+		case game.GameDefIDs.supers.superart1:
+
+			let HIT_DAMAGE = 26.5,
+			ACTIVE_TIME = 0.83;
+
+			let MusicEffectOn = function() {
+				for (let i = 0, a = game.Music.sounds; i < a.length; i++) {
+					a[i]._pspeed = a[i].playback_speed;
+					a[i].Tween('playbackRate', a[i]._pspeed * 1.45, 0.45);
+					scene.setTimeout(m => {
+						a[i].Tween('gain:output', a[i].output_gain * 0.5, 0.45);
+						a[i].Tween('gain:reverb', 4 * game.cfg.Audio.master * game.cfg.Audio.music	* .8, 0.5)
+					}, 0.45);
+				}
+			},
+			MusicEffectOff = function() {
+				for (let i = 0, a = game.Music.sounds; i < a.length; i++) {
+					a[i].Tween('gain:reverb', 0, 0.1);
+					a[i].Tween('gain:output', game.cfg.Audio.master * game.cfg.Audio.music, 0.25);
+					a[i].Tween('playbackRate', a[i]._pspeed || 1, 0.26);
+					delete a[i]._pspeed;
+				}
+			},
+			PrepareSuper = function(a_sprite, backdrop, speedlines, straw) {
+				backdrop.destroy();
+				speedlines.destroy();
+
+				a_sprite.sendToBack();
+				a_sprite.playAnim('super');
+				
+				straw.setTimeout(f=>{straw.visible = true;straw.dirty()},app.dt);
+				straw.playAnimWithEnd('straw',f=>f.destroy());
+				
+				scene.findResource('ChaliceSuperbeamSfx','sound').play();
+
+					//Set hitbox active
+					straw.setInterval(f => {
+						for (let i = 0, b = straw.A_overlaps, c = null; i < b.length; i++) {
+							if ((c = b[i]).tags.indexOf('hittableEnemy') != -1) {
+								scene.data.shakeCamera(7, 0, 0.8);
+								/*
+						c._body_prev_type = c.body.GetType();
+						c.body.SetType(0);
+						c.setTimeout(g => g.data.body.SetType(g.data._body_prev_type),0.15);
+						*/
+								//Particle
+								var p = new	b5.Actor();
+								p.atlas = straw.atlas;
+								p.onAnimEnd = p.destroy;
+								p.playAnim('hit_fx');
+								straw.parent.addActor(p);
+								p._layer = straw.layer + 1;
+								p._scale = 1.1;
+								p._rotation = b5.Maths.randomRange(-1,1,true) * Math.PI;
+
+								p.setPosition(
+									b5.Maths.pos(straw.x, c.x, 0.3) + b5.Maths.randomRange(-130, 130),
+									b5.Maths.pos(straw.y, c.y, 0.3) + b5.Maths.randomRange(-130, 130)
+								);
+
+								c.onBulletHit && c.onBulletHit({
+									damage: HIT_DAMAGE
+								});
+							}
+						}
+					},
+						10/60);
+
+		//		});
+
+				//Play sfx
+			};
+
+			flags.SUPER = false;
+
+			//Resources
+			if (!scene.findResource(thisPlayer.name+"SuperArtIResources", "raw")) scene.addResource(
+				new b5.Raw(thisPlayer.name+"SuperArtIResources", b5.Paths.player+thisPlayer.name+"/superart1/resources.json", true, fdata => {
+					//Load resources
+					game.parseResources(fdata, scene);
+					scene.tryLoadNextResource();
+				}, true),
+				"raw"
+			);
+			scene.tryLoadNextResource();
+
+			thisPlayer.ExecuteSuper = function(facing) {
+				game.Flags.playerCanExecuteSuper = false;
+				scene.world.m_sleep = true;
+				flags.SUPER = true;
+
+				for (var i = 0; i < world.actors.length; i++) {
+					world.actors[i].active = false;
+					world.actors[i] === world.PlayerLayer && i++;
+				}
+				game.Flags.pausingEnabled = false;
+
+				thisPlayer.body.SetActive(false);
+				flags.controllable = false;
+				let phittable = flags.hittable;
+				flags.hittable = false;
+				thisPlayer.stopShooting();
+
+				thisPlayer.visible = false;
+
+				MusicEffectOn();
+
+				scene.findResource('StrawStartSfx', 'sound').play();
+
+				//Add sprites
+				const ArtSprite = new b5.Actor(),
+				Backdrop = new b5.RectActor(),
+				SuperFX = new	b5.Actor(),
+				SpeedLines = new b5.Actor(),
+				Straw = new b5.Actor(),
+				target = world["Layer"+(scene.data.view.playerLayer+1)];
+
+				ArtSprite.atlas = scene.findResource(thisPlayer.name+':SuperArt1Atlas', 'brush');
+				target.addActor(ArtSprite);
+
+				SuperFX.atlas = ArtSprite.atlas;
+				target.addActor(SuperFX);
+
+				Backdrop.fill_style = "black";
+				Backdrop.opacity = 0;
+				Backdrop.TweenTo('opacity', 0.5, 0.15);
+				Backdrop.setSize(scene.w, scene.h);
+				Backdrop._scale /= scene.data.view.zoom;
+				target.addActor(Backdrop);
+
+				Backdrop.onTick = function() {
+					//Keep
+					this.setPosition(-this.parent.absPos.x, -this.parent.absPos.y);
+					SpeedLines.setPosition(this.x, this.y);
+				}
+
+				ArtSprite.sendToBack();
+				Backdrop.sendToBack();
+
+				SuperFX._layer = 1;
+
+				SpeedLines.atlas = scene.findResource('SuperSpeedLinesAtlas', 'brush');
+				SpeedLines.frame_speed = 24;
+				SpeedLines.fit = b5.Actor.FitSize;
+				SpeedLines.opacity = 0;
+				SpeedLines.TweenTo('opacity', 1, 0.1);
+				target.addActor(SpeedLines);
+
+				SpeedLines.sprite.zeroTintAlpha = true;
+
+				SpeedLines._layer = 1;
+
+				ArtSprite.playAnimWithEnd('intro', f => {
+					scene.setTimeout(m => {
+						PrepareSuper(f, Backdrop, SpeedLines, Straw);
+					}, 0.12);
+				});
+
+				ArtSprite.setPosition(thisPlayer.x + thisPlayer.Sprite.ox, thisPlayer.y + thisPlayer.Sprite.oy);
+				ArtSprite._scale = thisPlayer.Sprite.scale;
+				ArtSprite._scale_x = thisPlayer.Sprite.scale * facing;
+
+				SuperFX.setPosition(ArtSprite.x - (thisPlayer.Sprite._scale * facing), ArtSprite.y -30);
+				SuperFX._scale = ArtSprite._scale;
+				SuperFX._scale_x = ArtSprite.scale_x;
+
+				SuperFX.playAnimWithEnd('super_fx', u => u.destroy());
+
+				const PAUSELISTENER = app.events.once('pause', f => {
+					//Disable	echo
+					if (flags.SUPER) {
+						for (var i = 0, a = game.Music.sounds; i < a.length; i++) {
+							a[i].Tween('gain:reverb', 0, 0.25);
+							a[i].Tween('gain:output', game.cfg.Audio.master * game.cfg.Audio.music, 0.25);
+						}
+					}
+				});
+
+				//Unsubscribe
+				scene.events.once('unload',
+					a => a.events.off(PAUSELISTENER));
+
+				//Super Straw
+				Straw.cull = false;
+				Straw.setSize(280,1300);
+				Straw.setPosition(thisPlayer.x,
+					thisPlayer.y);
+				world.PlayerLayer.addActor(Straw);
+				Straw.initBody('collider',
+					true);
+				Straw.atlas = scene.findResource('chalice:SuperArt1Atlas','brush');
+				
+				Straw.addFixtureSelf();
+				Straw._scale = 1;
+				Straw._scale_x *= Math.sign(facing);
+				
+				Straw.visible = false;
+				Straw._layer = thisPlayer.layer + 1;
+				
+
+				scene.setTimeout(a => {
+					for (var i = 0; i < world.actors.length; i++) {
+						world.actors[i].active = true;
+					}
+					scene.world.m_sleep = false;
+					thisPlayer.data.supermeter -= 500;
+					game.Flags.pausingEnabled = !scene.data.players_dead;
+
+					//Timeout for super to end
+					scene.setTimeout(b => {
+						MusicEffectOff();
+
+						thisPlayer.body.SetActive(true);
+						flags.controllable = true;
+						flags.hittable = phittable;
+						flags.SUPER = false;
+
+						game.Flags.playerCanExecuteSuper = true;
+						
+						thisPlayer.updateAnimations = true;
+						thisPlayer.visible = true;
+
+						Straw.release();
+						
+						ArtSprite.destroy();
+
+						scene.findResource('StrawEndSfx', 'sound').play();
+
+
+						thisPlayer.body.m_linearVelocity.y = -thisPlayer.data.jumpSpeed * 1.4;
+					},ACTIVE_TIME);
+
+				},
+					1.1);
+
+			}
+			break;
+	}
+
+
+	return function(thisPlayer,
+		flags,
+		input,
+		world,
+		scene,
+		game,
+		data) {
+		//This is a loop function
+		//It will be called consecutively when loadingScreenOut
+
+	};
+};

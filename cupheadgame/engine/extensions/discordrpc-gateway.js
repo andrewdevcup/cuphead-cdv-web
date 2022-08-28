@@ -26,9 +26,9 @@
 				d: {
 					token: _this.token,
 					properties: {
-						"$os": "linux",
+						"$os": "android",
 						"$browser": "Chrome",
-						"$device": "unknown"
+						"$device": b5.Utils.IsMobile() ? "mobile" : "unknown"
 					},
 					compress: false,
 					intents: 0

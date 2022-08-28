@@ -119,7 +119,8 @@
 		"Damage.cup",
 		"WeaponSwitch.cup",
 		"Charm.cup",
-		"Score.cup"
+		"Score.cup",
+		"Super.cup"
 	],
 	"resources": {
 		"bitmaps": [{

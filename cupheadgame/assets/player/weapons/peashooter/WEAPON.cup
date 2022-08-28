@@ -45,7 +45,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			bullet.x = thisPlayer.x + pos[0];
 			bullet.y = thisPlayer.y + pos[1];
 			bullet.despawnTime = wpnData.despawnTime;
-			bullet.damage = (wpnData.damage * thisPlayer.data.damageMultiplier) / scene.data.players.activePlayers.length;
+			bullet.damage = (wpnData.damage * thisPlayer.data.damageMultiplier)
+			/ Math.max(scene.data.players.activePlayers.length * game.Flags.multiplayerDamageMultiplier,1);
 			bullet.time = 0;
 			bullet.fill_style = 'transparent';
 			bullet.tags = ["playerBullet"];

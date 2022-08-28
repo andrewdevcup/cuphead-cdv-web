@@ -202,7 +202,7 @@ return function(thisPlayer, flags, world, scene, game, superData) {
 				world.actors[i].active = true;
 			}
 			scene.world.m_sleep = false;
-			thisPlayer.data.supermeter = 0;
+			thisPlayer.data.supermeter -= 500;
 			game.Flags.pausingEnabled = !scene.data.players_dead;
 			
 			//Timeout for super to end

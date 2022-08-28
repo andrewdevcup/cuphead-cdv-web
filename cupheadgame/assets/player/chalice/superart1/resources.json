@@ -1,0 +1,38 @@
+{
+	"read": "This JSON aswell as Super.cup are exclusive for Ms. Chalice",
+	"bitmap": [{
+		"automatize": {
+			"name": "ChaliceSuperIBitmap%i",
+			"start": 0,
+			"end": 4,
+			"pad": 1,
+			"src": "player/chalice/superart1/SpriteAtlasTexture_SUPERI_Chalice-#.png"
+		}
+	}],
+	"brush": [{
+		"name": "chalice:SuperArt1Atlas",
+		"bitmaps": {
+			"start": 0,
+			"end": 4,
+			"name-prefix": "ChaliceSuperIBitmap%i"
+		},
+		"frames": "player/chalice/superart1/SpriteAtlasTexture_SUPERI_Chalice.csv",
+		"anims": "player/chalice/superart1/superIChalice.anims.json"
+	}],
+	"sound": [{
+		"name": "StrawStartSfx",
+		"src": "player/chalice/superart1/sfx_DLC_Player_Chalice_Superbeam_Start.ogg",
+		"reuse": true,
+		"category": "sfx"
+	},{
+		"name": "ChaliceSuperbeamSfx",
+		"src": "player/chalice/superart1/sfx_DLC_Player_Chalice_Superbeam.ogg",
+		"reuse": true,
+		"category": "sfx"
+	},{
+		"name": "StrawEndSfx",
+		"src": "player/chalice/superart1/sfx_DLC_Player_Chalice_Superbeam_End.ogg",
+		"reuse": true,
+		"category": "sfx"
+	}]
+}

@@ -77,7 +77,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
       		break;
       	case 45:
       	case 135:
-      		ca = "shooting_diag_up";
+      		ca = "shooting_diag_down";
       		break;
       	default:
       	  ca = "shooting_straight";

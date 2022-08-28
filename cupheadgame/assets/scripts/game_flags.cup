@@ -12,6 +12,7 @@
 		inNpcTooltip: false,
 		inputEnabled: true,
 		inPlayerJoinedScreen: false,
-		playerCanExecuteSuper: true
+		playerCanExecuteSuper: true,
+		multiplayerDamageMultiplier: 0.75
 	};
 })();
