@@ -138,7 +138,7 @@ b5.loadgame = function() {
 	app.disable_dock_screen = true;
 	app.global_font_scale = .55;
 	app.physics_step = 2;
-	app.min_speed = 1/20;
+	app.min_speed = 1/12;
 	app.hide_cursor = true;
 	app.texture_resolution = 1;
 	//Fill canvas to screen
@@ -157,6 +157,7 @@ b5.loadgame = function() {
 		fastcoding: 0,
 		loadscene: 'notice2', //8
 		data: {
+			playerOneAsChalice: true
 		}
 	};
 	
@@ -635,7 +636,7 @@ app.splash.destroy();
 b5.Game.loadingScreen.hourglass._av = true;
 b5.Game.loadingScreen.hourglass.opacity=1;
 b5.Game.LoadScene(dev.loadscene, false, false, {
-hide_anim: 'fade', hide_speed: 0.2,hourglass:true
+hide_anim: 'fade', hide_speed: 0.2,hourglass:false
 },dev.data);
 
 setTimeout(setInterval(b => b5.Game.Input.updateInput(), 1),1000);
@@ -821,9 +822,9 @@ b5.Game.PauseMenu.show(b5.Game.Flags.inWorldmap ? "worldmap": b5.Game.Flags.inLe
 app.now > l+1000 ? (fpt = fptc+1,
   fptc = 0, 
   l = app.now,
-  app.getMemoryUsage()//, app.updateInfoText()
+  app.getMemoryUsage(), app.updateInfoText()
 ): fptc++;
-app.updateInfoText()
+//app.updateInfoText()
 
 
 }

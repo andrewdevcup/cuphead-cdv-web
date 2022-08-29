@@ -120,7 +120,8 @@
 		"WeaponSwitch.cup",
 		"Charm.cup",
 		"Score.cup",
-		"Super.cup"
+		"Super.cup",
+		"Intro.cup"
 	],
 	"resources": {
 		"bitmaps": [{
@@ -172,6 +173,9 @@
 		}, {
 			"name": "ChaliceFXBitmap0",
 			"src": "player/chalice/SpriteAtlasTexture_ChaliceFX-0.png"
+		}, {
+			"name": "PortalIntroBitmap0",
+			"src": "player/chalice/SpriteAtlasTexture_CookieIntroPortal-0.png"
 		}],
 		"brush": [{
 			"name": "ChaliceDeathBodyAtlas",
@@ -182,6 +186,10 @@
 			"bitmaps": ["ChaliceFXBitmap0"],
 			"frames": "player/chalice/SpriteAtlasTexture_ChaliceFX.csv",
 			"anims": "player/chalice/chaliceFX.anims.json"
+		}, {
+			"name": "PortalIntroAtlas",
+			"bitmaps": ["PortalIntroBitmap0"],
+			"frames": "player/chalice/SpriteAtlasTexture_CookieIntroPortal.csv"
 		}]
 	}
 }

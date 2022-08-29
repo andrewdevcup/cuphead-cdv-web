@@ -34,10 +34,10 @@ b5.export = function(world, scene, data, game) {
   
   data.playerLastSpawnPosX = 0;
   
-	myexports.createPlayer = function(player, playerInput, asPlayer2, levelStarted, loadAsChalice) {
+	myexports.createPlayer = function(player, playerInput, asPlayer2, levelStarted, chaliceFlag) {
 		
 		var rPlayer = player;
-		if(loadAsChalice) player = "chalice";
+		if(chaliceFlag == 1 || chaliceFlag == 4) player = "chalice";
 		
 		var playerPath = b5.Paths.player + player + '/',
 		playerid = !asPlayer2 ? "playerOne": "playerTwo";
@@ -45,6 +45,8 @@ b5.export = function(world, scene, data, game) {
 		data[player] = JSON.parse(
 			b5.File.readSync(playerPath + 'player.json')
 		);
+		
+		data[player].flags.introFlag = chaliceFlag;
 
 		//	asPlayer2 && (data[player].flags.heartPoints = 1); Made easier because of desync, enjoy
 		//Load resources
@@ -278,25 +280,45 @@ b5.export = function(world, scene, data, game) {
 		scene.events.dispatch('playerremoved',p);
 	};
 	
-	//If both players have the cookie	equiped
-	var p1chalice = game.SlotUtils.getPlayerLoadouts('playerOne').charm == "temp",
-	p2chalice = game.SlotUtils.getPlayerLoadouts('playerTwo').charm == "temp";
+	/*
+	*
+	* ChaliceFlag:
+	* 0 - no Chalice
+	* 1 - load as Chalice
+	* 2 - No cookie
+	* 3 - Intro Scared (no chalice)
+	* 4 - Intro scared (chalice)
+	*/
+	var p1chaliceFlag = game.SlotUtils.getPlayerLoadouts('playerOne').charm == "temp" ? 1 : 0,
+	p2chaliceFlag = game.SlotUtils.getPlayerLoadouts('playerTwo').charm == "temp" ? 1 : 0;
 	
-	if( p1chalice && p2chalice && b5.Game.Multiplayer.player2Joined) {
+	//If both players have the cookie	equiped
+	if( p1chaliceFlag && p2chaliceFlag && b5.Game.Multiplayer.player2Joined) {
 		data.loadData.RNDINT >= 128 ?
-		  p1chalice = false
+		  p1chaliceFlag = 2
 		  :
-		  p2chalice = false;
+		  p2chaliceFlag = 2;
+	}
+	
+	//If it's final boss
+	if(data.levelIsFinalBoss) {
+		p1chaliceFlag = (p1chaliceFlag == 1 ? 4 : 3);
+		p2chaliceFlag = (p2chaliceFlag == 1 ? 4 : 3);
+	}
+	
+	//Level locked for chalice
+	if(data.noChalice) {
+		p1chaliceFlag = p2chaliceFlag = 0;
 	}
 
 	myexports.createPlayer(
 		data.players.player1, false, false, false, 
-		p1chalice	//|| data.loadData.playerOneAsChalice
+		p1chaliceFlag	//|| data.loadData.playerOneAsChalice
 	);
 	//Add player 2 if joined
 	game.Multiplayer.player2Joined && myexports.createPlayer(
 		data.players.player2, true, true, false,
-		p2chalice// || data.loadData.playerTwoAsChalice
+		p2chaliceFlag // || data.loadData.playerTwoAsChalice
 	);
 
 	data.initializePlayers = function() {
@@ -387,6 +409,10 @@ b5.export = function(world, scene, data, game) {
   
 
 	data.playersIntroAnimation = function() {
+		for (var i = 0, a = world.findActorsByTagName('player', true); i < a.length; i++) {
+			a[i].playIntroAnimation(a[i].flags.introFlag);
+		}
+		/*
 		app.setTimeout(function() {
 			for (var i = 0, a = world.findActorsByTagName('player', true); i < a.length; i++) {
 				var anim = b5.Maths.randomRange(0, 1) ? 'a': 'b',
@@ -395,7 +421,7 @@ b5.export = function(world, scene, data, game) {
 					x.parent.updateAnimations = true;
 				});
 			}
-		},0.5);
+		},0.5);*/
 	};
 
 	data.createPlayer = myexports.createPlayer;

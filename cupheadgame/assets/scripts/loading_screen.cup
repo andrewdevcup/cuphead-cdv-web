@@ -54,29 +54,41 @@
 	hourglass.h = 200;
 //	hourglass._scale = 1.15;
 	hourglass.opacity = 0;
-	hourglass.round_pixels = false;
 	scene_GUI.addActor(hourglass); // Add to scene
 	hourglass.name = "hourglass";
 	hourglass._layer = 7;
 	hourglass._av = false;
-	hourglass.center_atlas = true;
 
 	loadScreen.hourglass = hourglass;
+	
+	b5.Game.parseResources({
+		bitmap:[{
+			name: "texture2d",
+			src: "SpriteAtlasTexture_LoaderHourglass.png"
+		}],
+		brush:[{
+			name: "texture2d_hourglass",
+			bitmaps: ["texture2d"],
+			frames: "SpriteAtlasTexture_LoaderHourglass.csv",
+			anims: "hourglass.anims.json"
+		}]
+	}, scene_GUI);
 
-	var hourglass_atlas_bitmap = new b5.Bitmap("texture2d", b5.Paths.assets + "SpriteAtlasTexture_LoaderHourglass.png", false);
-  hourglass_atlas_bitmap.enable_cache = false;
-  
-	hourglass.atlas = new b5.ImageAtlas("texture2d_hourglass", [hourglass_atlas_bitmap]);
-
-	scene_GUI.addResource(hourglass_atlas_bitmap, "bitmap");
-
-	hourglass.atlas.parseFrames(b5.File.readSync(b5.Paths.assets + 'SpriteAtlasTexture_LoaderHourglass.csv'));
-	hourglass.frame_speed = 23;
-
+	hourglass.atlas = scene_GUI.findResource("texture2d_hourglass","brush");
+	
 	hourglass.show = function() {
 		this._av = true;
 		this.opacity = 0;
 		this.TweenTo('opacity', 1, 0.6, 0, true);
+		
+		this._oy = 0;
+		if(!loadScreen.nightmare) this.current_anim != "hourglass"	&& this.playAnim('hourglass',true);
+		else {
+			this.current_anim != "nightmare" && this.playAnim('nightmare', true);
+			this._oy = -85;
+		}
+		
+		loadScreen.nightmare = false;
 	}
 	hourglass.hide = function(onHide) {
 		var onHourglassHide = function() {

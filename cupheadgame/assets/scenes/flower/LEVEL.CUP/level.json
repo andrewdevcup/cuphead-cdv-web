@@ -297,7 +297,16 @@
 					"start": 0,
 					"end": 12,
 					"pad": 1,
-					"src": "scenes/flower/phase1/SpriteAtlasTexture_Flower-#.png"
+					"src": "scenes/flower/form1/SpriteAtlasTexture_Flower-#.png"
+				}
+			},
+			{
+				"automatize": {
+					"name": "FlowerBitmapPH2-%i",
+					"start": 0,
+					"end": 5,
+					"pad": 1,
+					"src": "scenes/flower/form2/SpriteAtlasTexture_Flower2-#.png"
 				}
 			}
 		],
@@ -325,8 +334,17 @@
 					"start": 0,
 					"end": 12
 				},
-				"frames": "scenes/flower/phase1/SpriteAtlasTexture_Flower.csv",
-				"anims": "scenes/flower/phase1/flower1.anims.json"
+				"frames": "scenes/flower/form1/SpriteAtlasTexture_Flower.csv",
+				"anims": "scenes/flower/form1/flower1.anims.json"
+			},
+			{
+				"name": "FlowerAtlasPH2",
+				"bitmaps": {
+					"name-prefix": "FlowerBitmapPH2-%i",
+					"start": 0,
+					"end": 5
+				},
+				"frames": "scenes/flower/form2/SpriteAtlasTexture_Flower2.csv"
 			}
 		],
 		"sound": [

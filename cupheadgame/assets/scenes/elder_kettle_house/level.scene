@@ -6,6 +6,8 @@ b5.LoadScene = function(world, scene, data, game) {
   //Import actors and initialize physics world
   
   game.importObject('CreateLevel').init();
+  
+  data.noChalice = true;
   game.importObject('CreatePlayer');
   
   //Update presence in discord

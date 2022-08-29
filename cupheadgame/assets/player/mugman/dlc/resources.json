@@ -1,0 +1,12 @@
+{
+	"bitmap": [{
+		"name": "MugmanIntroDLCBitmap0",
+		"src": "player/mugman/dlc/SpriteAtlasTexture_MugmanIntroDLC-0.png"
+	}],
+	"brush": [{
+		"name": "mugman:IntroDLCAtlas",
+		"bitmaps": ["MugmanIntroDLCBitmap0"],
+		"frames": "player/mugman/dlc/SpriteAtlasTexture_MugmanIntroDLC.csv",
+		"anims": "player/mugman/dlc/mugmanIntroDLC.anims.json"
+	}]
+}

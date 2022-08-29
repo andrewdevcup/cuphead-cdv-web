@@ -42,6 +42,9 @@ myexports.loadResources = function() {
 		switch (text) {
 			case 'GetReady':
 				game.Flags.pausingEnabled = false;
+				
+				var guihidden = game.GUI.hidden;
+				game.GUI.hide();
 
 				for (var i = 0, p = world.findActorsByTagName('player', true); i < p.length; i++)
 					data[p[i].name].flags.controllable = false;
@@ -79,6 +82,7 @@ myexports.loadResources = function() {
 						][b5.Maths.randomRange(0, 4)].play();
 						
 						scene.events.dispatch('fightstarted');
+						if(!guihidden) game.GUI.show();
 
 						for (var i = 0, p = world.findActorsByTagName('player', true); i < p.length; i++)
 							data[p[i].name].flags.controllable = true;

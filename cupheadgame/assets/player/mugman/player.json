@@ -113,7 +113,8 @@
 		"DamageComponent.cup",
 		"WeaponSwitch.cup",
 		"CharmComponent.cup",
-		"ScoreComponent.cup"
+		"ScoreComponent.cup",
+		"Intro.cup"
 	],
 	"resources": {
 		"bitmaps": [

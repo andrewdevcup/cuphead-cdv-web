@@ -1,0 +1,12 @@
+{
+	"bitmap": [{
+		"name": "CupheadIntroDLCBitmap0",
+		"src": "player/cuphead/dlc/SpriteAtlasTexture_CupheadIntroDLC-0.png"
+	}],
+	"brush": [{
+		"name": "cuphead:IntroDLCAtlas",
+		"bitmaps": ["CupheadIntroDLCBitmap0"],
+		"frames": "player/cuphead/dlc/SpriteAtlasTexture_CupheadIntroDLC.csv",
+		"anims": "player/cuphead/dlc/cupheadIntroDLC.anims.json"
+	}]
+}
