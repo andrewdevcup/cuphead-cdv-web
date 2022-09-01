@@ -1,0 +1,45 @@
+{
+	"speed": 50,
+	"diag_speed": 55,
+	"up_angle": -25,
+	"damage": 11.6,
+	"supermeter_score": 11.6,
+	"delay": 0.35,
+	"scale": 0.8,
+	"despawnTime": 5,
+	"max_bounce": 4,
+	"ex": {
+		"speed": 55,
+		"damage": 28,
+		"scale": 0.85,
+		"despawnTime": 5,
+		"consumption": 100
+	},
+	"body": {
+		"shape": "TypeBox",
+		"size": [40,40],
+		"fixedRotation": true,
+		"sub_layer": 0,
+		"bodyType": "dynamic",
+		"restitution": 0.9,
+		"gravity_scale": 0.7,
+		"hitbox": {
+			"type": "Arc",
+			"size": 15
+		},
+		"ex": {
+			"shape": "TypeBox",
+			"size": [100,100],
+			"fixedRotation": true,
+			"bodyType": "dynamic",
+			"sub_layer": 3,
+			"gravity_scale": 0.7,
+	  	"hitbox": {
+  			"type": "Arc",
+			  "size": 50
+	  	}
+		}
+	},
+	"resources": {
+	}
+}

@@ -99,7 +99,7 @@ b5.export = function(world, scene, data, game) {
 		for(var i=0; i<player.equipedWeapons.length;i++) {
 			var wn = player.equipedWeapons[i],
 			wni = new	b5.Actor();
-			wni.atlas = scene.findResource(wn+':WEAPON_EQUIP_ICON','brush');
+			wni.atlas = scene.findResource(wn+':EQUIP_ICON','brush');
 			wni.frame_speed = 12;
 			wni.ignore_atlas_size = true;
 			wni.setSize(85,85);
@@ -129,7 +129,7 @@ b5.export = function(world, scene, data, game) {
 					this.showing = true;
 					this.visible = true;
 					//Update icon
-					this.atlas = scene.findResource(player.equipedWeapons[this.lwi]+':WEAPON_EQUIP_ICON','brush');
+					this.atlas = scene.findResource(player.equipedWeapons[this.lwi]+':EQUIP_ICON','brush');
 					
 					this.clearTimeout(this.backTimeout);
 					this.TweenToWithEnd('_y',this.y_o+(this.y_to*53),0.2,b5.Ease.quadout,true,0,_this=>{

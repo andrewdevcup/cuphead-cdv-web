@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "psugar:CHARM_EQUIP_ICON",
+			"name": "psugar:EQUIP_ICON",
 			"bitmaps": ["SugarEquipIcon"],
 			"frames": "player/charms/psugar/SpriteAtlasTexture_Sugar.csv"
 		}

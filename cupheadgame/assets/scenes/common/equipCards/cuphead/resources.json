@@ -1,0 +1,12 @@
+{
+	"bitmap": [{
+		"name": "cuphead:EquipCardFront",
+		"src": "scenes/common/equipCards/cuphead/ch_equip_front_no_text.png"
+	}, {
+		"name": "cuphead:EquipCardBack",
+		"src": "scenes/common/equipCards/cuphead/ch_equip_back.png"
+	}, {
+		"name": "cuphead:EquipCardP2Cover",
+		"src": "scenes/common/equipCards/cuphead/ch_equip_front_(second_player_cover).png"
+	}]
+}

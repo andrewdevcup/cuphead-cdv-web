@@ -62,7 +62,7 @@
 			"layer": 1,
 			"sub_layer": 2,
 			"tags": ["ignoreBullets"],
-			"detectionTags": ["floor","ignoreBullets"],
+			"detectionTags": ["wall","ignoreBullets"],
 			"body": {
 				"friction": 1,
 				"fixedRotation": true,
@@ -116,7 +116,7 @@
 			"layer": 1,
 			"sub_layer": 2,
 			"tags": ["ignoreBullets"],
-			"detectionTags": ["floor","ignoreBullets"],
+			"detectionTags": ["wall","ignoreBullets"],
 			"body": {
 				"friction": 1,
 				"fixedRotation": true,
@@ -171,7 +171,7 @@
 			"layer": 1,
 			"sub_layer": 2,
 			"tags": ["ignoreBullets"],
-			"detectionTags": ["floor","ignoreBullets"],
+			"detectionTags": ["wall","ignoreBullets"],
 			"body": {
 				"friction": 1,
 				"fixedRotation": true,
@@ -189,7 +189,7 @@
 			"layer": 1,
 			"sub_layer": 2,
 			"tags": ["ignoreBullets"],
-			"detectionTags": ["floor","ignoreBullets"],
+			"detectionTags": ["wall","ignoreBullets"],
 			"body": {
 				"friction": 1,
 				"fixedRotation": true,
@@ -207,7 +207,7 @@
 			"layer": 1,
 			"sub_layer": 2,
 			"tags": ["ignoreBullets"],
-			"detectionTags": ["floor","ignoreBullets"],
+			"detectionTags": ["wall","ignoreBullets"],
 			"body": {
 				"friction": 1,
 				"fixedRotation": true,
@@ -225,7 +225,7 @@
 			"layer": 1,
 			"sub_layer": 2,
 			"tags": ["ignoreBullets"],
-			"detectionTags": ["floor","ignoreBullets"],
+			"detectionTags": ["wall","ignoreBullets"],
 			"body": {
 				"friction": 1,
 				"fixedRotation": true,

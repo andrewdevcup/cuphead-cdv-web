@@ -29,6 +29,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 	game.importObject('CreateCommonLevelResources');
 	myexports.fightTextsObject = game.importObject('CreateFightTexts');
 	game.importObject('CreateDeathCard');
+	game.importObject('CreateEquipCard'); //1.3.2
 	var initNpcs = game.importObject('CreateNPC').initNpcs;
 	//Level data directory
 	sceneData.levelDataPath = sceneData.resourcePath + 'LEVEL.CUP/';
@@ -177,6 +178,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 			friction: o.body.friction || 1,
 			is_bullet: false
 		});
+		
 		//Set physics position
 		a.setPosition(o.pos[0], o.pos[1]);
 
@@ -206,6 +208,10 @@ b5.export = function(world, scene, sceneData, game, importData) {
 			c.opacity=.8;
 			
 	    c.playersOver = {};
+	    
+	    c.isFloor = c.tags.indexOf('floor') != -1;
+	    c.isPlatform = c.tag == "platform";
+	    c.isWall = c.tags.indexOf('wall') != -1;
 			
 			//Initialize body
 		  c.initBody('collider', o.body.fixedRotation, false);
@@ -227,16 +233,26 @@ b5.export = function(world, scene, sceneData, game, importData) {
 			
 			a.collider = c;
 			c.platform = a;
+			
+			a.category = o.body.category || 
+	    	(
+	    		c.isFloor	? game.FLOOR_I : 
+	    	  c.isPlatform ? game.PLATFORM_I : game.WALL_I
+	    	);
+			
+			//Set physics layer
+	  	a.setPhysicsLayers(a.category, o.body.canCollideWith && game.BoxLayers(o.body.canCollideWith));
 		}
 
 		//Platform behavior
 		if (a.collider.tag == "platform") {
+			//Set platform tag
+			
 			a.onTick = function() {
 				var ols = this.parent.findActorsByTagName('player', true),
 				playersOver = this.collider.playersOver;
 				
 				var pfs = this.findActorsByTagName('platform',true);
-				
 				
 				//Disable collisions when	player is under
 				for (var b = 0; b < ols.length; b++) if (ols[b].body) {

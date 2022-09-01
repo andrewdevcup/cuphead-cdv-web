@@ -157,7 +157,6 @@ b5.loadgame = function() {
 		fastcoding: 0,
 		loadscene: 'notice2', //8
 		data: {
-			playerOneAsChalice: true
 		}
 	};
 	
@@ -187,7 +186,7 @@ b5.loadgame = function() {
 		config: appResDir + 'config.ini'
 	};
 	b5.Paths.scripts = b5.Paths.assets + 'scripts/',
-	b5.Paths.scenes = b5.Paths.scripts + 'scenes/',
+	b5.Paths.scenes = b5.Paths.assets + 'scenes/',
 	b5.Paths.sceneRes = b5.Paths.assets +'scenes/',
 	b5.Paths.anims = b5.Paths.assets + 'anims/',
 	b5.Paths.fonts = b5.Paths.assets + 'fonts/',
@@ -231,6 +230,10 @@ b5.loadgame = function() {
 			}*/
 	  	
 			b5.Game.cfg.Settings = { version: RELEASE_VER, codename: RELEASE_CODENAME };
+			
+			//Create new section
+			if(!b5.Game.cfg.Game) b5.Game.cfg.Game = { dlc_title: true }
+			if(b5.Game.cfg.Game.dlc_title === void 0) b5.Game.cfg.Game.dlc_title = true;
 			
 			if (section == "video" || !section) {
 				//Video config

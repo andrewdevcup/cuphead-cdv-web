@@ -4,7 +4,7 @@
 		"src": "player/weapons/chaser/SpriteAtlasTexture_ChaserEquipIcon-0.png"
 	}],
 	"brush": [{
-		"name": "chaser:WEAPON_EQUIP_ICON",
+		"name": "chaser:EQUIP_ICON",
 		"bitmaps": ["ChaserEquipIconBitmap0"],
 		"frames": "player/weapons/chaser/SpriteAtlasTexture_ChaserEquipIcon.csv"
 	}]

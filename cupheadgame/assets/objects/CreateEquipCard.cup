@@ -1,0 +1,137 @@
+b5.export = function(world, scene, data, game) {
+	var myexports = {
+	};
+	
+	//Load weapons, charms and supers resources 
+	let weaponList = JSON.parse(b5.File.readSync(b5.Paths.player+'weapons.json')),
+	charmList = JSON.parse(b5.File.readSync(b5.Paths.player+'charms.json')),
+	superList = JSON.parse(b5.File.readSync(b5.Paths.player+'supers.json'));
+	
+	//Load weapon icons
+	for(var i = 0; i < weaponList.length; i++)
+	  game.parseResources(JSON.parse(
+	  	b5.File.readSync(
+	  		b5.Paths.player+ 'weapons/' + weaponList[i] + '/resources-worldmap.json'
+	  	))
+	  ,scene);
+	  
+	//Load charm icons
+	for(var i = 0; i < charmList.length; i++)
+	  game.parseResources(JSON.parse(
+	  	b5.File.readSync(
+	  		b5.Paths.player+ 'charms/' + charmList[i] + '/resources-worldmap.json'
+	  	))
+	  ,scene);
+	  
+  //Load super icons
+	for(var i = 0; i < superList.length; i++)
+	  game.parseResources(JSON.parse(
+	  	b5.File.readSync(
+	  		b5.Paths.player+ 'supers/' + superList[i] + '/resources-worldmap.json'
+	  	))
+	  ,scene);
+	
+	
+	const characters = [ "cuphead", "mugman" ];
+	
+	//Card objects (for p1 and p2)
+	
+	for(var i = 0, plyrCard; i < characters.length; i++) {
+		//Resources
+		game.parseResources(
+			JSON.parse(b5.File.readSync(b5.Paths.scenes+'common/equipCards/'+characters[i]+'/resources.json'))
+		,scene);
+		
+		//Card
+		
+		plyrCard = new b5.Actor();
+		plyrCard.setSize(595,668);
+		
+		plyrCard.id = characters[i];
+		plyrCard.tag = "EquipCardUI";
+		plyrCard.name = characters[i] + "-EquipCard";
+		plyrCard.bitmap = scene.findResource(plyrCard.id+":EquipCardFront","bitmap");
+		plyrCard.layer = 5;
+		
+		// ADD TO SCENE GUI
+	//	scene_GUI.addActor(plyrCard);
+		
+		plyrCard.front_sel = 0;
+		plyrCard.back_sel = {
+			x: 0,
+			y: 0
+		}
+		
+		//Icons
+		var isPlyOne = 
+		  (game.SaveSlots.currentSaveSlot.isPlayer1Mugman && characters[i] == "mugman")
+		  ||
+		  (!game.SaveSlots.currentSaveSlot.isPlayer1Mugman && characters[i] != "mugman"),
+		loadout = game.SlotUtils.getPlayerLoadouts(isPlyOne ? 'playerOne':'playerTwo');
+		
+		//Create icons
+		
+		var iconFrontBox = new b5.Actor(),
+		selX = -201,
+		selSpace = 100;
+		
+		plyrCard.addActor(iconFrontBox);
+		
+		iconFrontBox.setPosition(2,165);
+		
+		for(var a = 0, sx = selX, sy = 0, ssp = selSpace, icon; a < 5; a++) {
+			var ico = new	b5.Actor();
+			ico.frame_speed = 12;
+			
+			iconFrontBox.addActor(ico);
+			ico.setPosition(sx,sy);
+			sx += ssp;
+			
+			//Equip icons	front
+			switch(a) {
+				case 0:	//primaryWeapon
+			  	ico.tag = game.GameDefIDs.weapons[loadout.primaryWeapon];
+					ico.atlas = scene.findResource(ico.tag + ':EQUIP_ICON','brush');
+					break;
+				case 1:
+					ico.tag = game.GameDefIDs.weapons[loadout.secondaryWeapon];
+					ico.atlas = scene.findResource(ico.tag + ':EQUIP_ICON','brush');
+					break;
+				case 2: 
+					ico.tag = game.GameDefIDs.supers[loadout.super];
+					ico.atlas = scene.findResource(ico.tag + ':EQUIP_ICON','brush');
+					break;
+				case 3:
+					ico.tag = game.GameDefIDs.charms[loadout.charm];
+					ico.atlas = scene.findResource(ico.tag + ':EQUIP_ICON','brush');
+					break;
+				case 4: //List icon
+				  ico.tag = "list";
+				  ico.atlas = scene.findResource('EquipCardCommonAtlas','brush');
+				  ico.frame_speed = 0;
+				  ico.current_frame = b5.Maths.randomRange(36,39);
+			}
+		}
+		
+		//Selector
+		var pIconSel = new b5.Actor();
+		pIconSel.atlas = scene.findResource('EquipCardCommonAtlas','brush');
+		pIconSel.setPosition(selX,0);
+		pIconSel.playAnim('icon_selector',true);
+		pIconSel._oy = 2;
+		pIconSel._scale = 1.05;
+		
+		iconFrontBox.addActor(pIconSel);
+		
+		break;
+	}
+	
+	app.events.once('sceneunload', function() {
+		var eqs = scene_GUI.findActorsByTagName('EquipCardUI', true);
+		for(var i = 0; i < eqs.length; i++)
+			eqs[i].destroy();
+	});
+	
+	
+	return myexports;
+};

@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "heart:CHARM_EQUIP_ICON",
+			"name": "heart:EQUIP_ICON",
 			"bitmaps": ["HeartEquipIcon"],
 			"frames": "player/charms/heart/SpriteAtlasTexture_Heart.csv"
 		}

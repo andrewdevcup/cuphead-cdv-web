@@ -4,7 +4,7 @@
 		"src": "player/weapons/spread/SpriteAtlasTexture_Spread_EquipIcon-0.png"
 	}],
 	"brush": [{
-		"name": "spread:WEAPON_EQUIP_ICON",
+		"name": "spread:EQUIP_ICON",
 		"bitmaps": ["SpreadEquipIconBitmap"],
 		"frames": "player/weapons/spread/SpriteAtlasTexture_Spread_EquipIcon.csv"
 	}]

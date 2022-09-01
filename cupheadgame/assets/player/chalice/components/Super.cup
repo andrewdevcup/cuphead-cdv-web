@@ -5,7 +5,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	switch (game.SlotUtils.getPlayerLoadouts(thisPlayer.id).super) {
 		case game.GameDefIDs.supers.superart1:
 
-			let HIT_DAMAGE = 26.5,
+			let HIT_DAMAGE = 28.5,
 			ACTIVE_TIME = 0.83;
 
 			let MusicEffectOn = function() {

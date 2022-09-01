@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "whetstone:CHARM_EQUIP_ICON",
+			"name": "whetstone:EQUIP_ICON",
 			"bitmaps": ["WhetstoneEquipIcon"],
 			"frames": "player/charms/whetstone/SpriteAtlasTexture_Whetstone.csv"
 		}

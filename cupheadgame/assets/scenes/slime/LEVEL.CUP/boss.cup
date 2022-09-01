@@ -178,12 +178,16 @@ return {
 					
 					world.PlayerLayer.addActor(sHitbox);
 					sHitbox.initBody('dynamic',true);
-					sHitbox.addFixtureSelf();
+					
+					//Filter collision
+					sHitbox.addFixtureSelf(null, null, null, null,
+					game.BOSS, //Collision category
+					game.FLOOR + game.WALL + game.PLATFORM //Can collide with
+					);
 					
 					sHitbox.body.m_gravityScale.y = slime.data.gravity_scale;
 					
 					//Base hitbox (for damage and events)
-	
 					
 					world.PlayerLayer.addActor(punchsns);
 					punchsns.initBody('dynamic');
@@ -197,6 +201,7 @@ return {
 					
 					punchsns.weldBodyTo(sHitbox);
 					
+					/*
 					//Disable collisions
 					for(var i = 0, a = data.getActivePlayers(); i < a.length; i++) {
 						sHitbox.disableCollision(a[i]);
@@ -205,7 +210,7 @@ return {
 					slime.pAddEvt = scene.events.on('playeradded', player => {
 						const p = world.findActor(player, true);
 						p && slime.disableCollision(p);
-					});
+					});*/
 					
 					scene.events.on('allplayersdead', a => {
 						if(data.levelData.currentPhase != "Tombstone") {
@@ -936,11 +941,15 @@ return {
 					tomb.setSize(20,400);
 					
 					tomb._layer = data.SlimeBoss.hitbox.layer+1;
+					tomb.fill_style = 'transparent';
 					
 					world.PlayerLayer.addActor(tomb);
 					tomb.initBody('dynamic',true);
-					tomb.addFixtureSelf(0.2,0,0);
-					tomb.fill_style = 'transparent';
+					
+					tomb.addFixtureSelf(0, 0, 0, false,
+					game.BOSS, //Collision category
+					game.FLOOR + game.WALL + game.PLATFORM //Can collide with
+					);
 					
 					tomb.data = currentPhase.data.tombstone;
 					
@@ -951,7 +960,7 @@ return {
 					tombHit.layer = tomb.layer +1;
 					world.PlayerLayer.addActor(tombHit);
 					tombHit.initBody('collider',true);
-					tombHit.addFixtureSelf(0,0,0);
+					tombHit.addFixtureSelf(0);
 					
 					tomb.onBodyUpdate = function() {
 						//Virtual	weld
@@ -997,6 +1006,7 @@ return {
 					md._scale = md.bscale = 0.81;
 					tomb.addActor(md);
 					
+					/*
 					//Disable collisions
 					for(var i = 0, a = data.getActivePlayers(); i < a.length; i++) {
 						tomb.disableCollision(a[i]);
@@ -1007,7 +1017,7 @@ return {
 					tomb.pAddEvt = scene.events.on('playeradded', player => {
 						const p = world.findActor(player, true);
 						p && slime.disableCollision(p);
-					});
+					});*/
 					
 					tomb.inAir = true;
 					tomb.wallCollide = false;

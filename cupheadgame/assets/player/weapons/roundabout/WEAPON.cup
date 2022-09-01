@@ -155,7 +155,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 						}
 						return;
 					}
-					if (ols[i].tags.search(["floor", "wall"]) != -1 && ols[i].tags.indexOf('ignoreBullets') == -1) {
+					if ((l.isWall || l.isFloor) && ols[i].tags.indexOf('ignoreBullets') == -1) {
 						//Scenery was hit
 						this.destroyBullet();
 						sfxBulletDeath.play();

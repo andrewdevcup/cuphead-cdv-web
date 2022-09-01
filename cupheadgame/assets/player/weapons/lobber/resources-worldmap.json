@@ -3,7 +3,7 @@
 	],
 	"brush": [
 		{
-	  	"name": "exploder:EQUIP_ICON",
+	  	"name": "lobber:EQUIP_ICON",
 	  	"bitmaps": []
   	}
   ]

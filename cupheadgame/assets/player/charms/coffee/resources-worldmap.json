@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "coffee:CHARM_EQUIP_ICON",
+			"name": "coffee:EQUIP_ICON",
 			"bitmaps": ["CoffeeEquipIcon"],
 			"frames": "player/charms/coffee/SpriteAtlasTexture_Coffee.csv"
 		}

@@ -13,6 +13,7 @@
 		inputEnabled: true,
 		inPlayerJoinedScreen: false,
 		playerCanExecuteSuper: true,
-		multiplayerDamageMultiplier: 0.75
+		multiplayerDamageMultiplier: 0.75,
+		forceChalice: false
 	};
 })();

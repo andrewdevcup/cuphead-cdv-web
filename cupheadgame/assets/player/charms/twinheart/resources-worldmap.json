@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "twinheart:CHARM_EQUIP_ICON",
+			"name": "twinheart:EQUIP_ICON",
 			"bitmaps": ["TwinHeartEquipIcon"],
 			"frames": "player/charms/twinheart/SpriteAtlasTexture_TwinHeart.csv"
 		}

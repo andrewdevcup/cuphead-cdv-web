@@ -3,7 +3,7 @@
 	],
 	"brush": [
 		{
-	  	"name": "charge:WEAPON_EQUIP_ICON",
+	  	"name": "charge:EQUIP_ICON",
 	  	"bitmaps": []
   	}
   ]

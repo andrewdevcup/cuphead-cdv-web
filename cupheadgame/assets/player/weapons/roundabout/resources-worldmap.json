@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "roundabout:WEAPON_EQUIP_ICON",
+			"name": "roundabout:EQUIP_ICON",
 			"bitmaps": ["RoundaboutEquipIconBitmap0"],
 			"frames": "player/weapons/roundabout/SpriteAtlasTexture_RoundaboutEquipIcon.csv"
 		}

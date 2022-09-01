@@ -29,6 +29,7 @@ b5.export = function(world, scene, sceneData, game, importData) {
 
 	game.importObject('CreateCommonResources');
 	game.importObject('CreateCommonWorldmapResources');
+	game.importObject('CreateEquipCard');
 	
 	var initNpcs = game.importObject('CreateNPC').initNpcs;
 	//Level data directory

@@ -125,15 +125,46 @@ b5.LoadScene = function(world, scene, data, game) {
 	titlebg._layer = 0;
 	
 	//Title animatic
-	var titleanim = new b5.Actor();
-	titleanim.atlas = scene.findResource('TitleAtlas', 'brush');
-	titleanim.setPosition(36,54);
-  titleanim.round_pixels = false;
-  titleanim.center_atlas = false;
-  titleanim.name = "TitleScreenAnim";
-	world.addActor(titleanim);
-	titleanim._layer = 1;
-	titleanim.playAnim("defaultA", true);
+	
+	var chips = new b5.Actor();
+	chips.atlas = scene.findResource('TitleAtlas', 'brush');
+	chips.setPosition(0,305);
+	world.addActor(chips);
+	chips._layer = 2;
+	chips.current_frame = game.cfg.Game.dlc_title ? 42 : 43;
+	
+	var chalice = new b5.Actor();
+	chalice.atlas = scene.findResource('TitleAtlas', 'brush');
+	world.addActor(chalice);
+	chalice._layer = 1;
+	chalice.playAnim('chalice',true);
+	
+	var cuphead = new b5.Actor();
+	cuphead.atlas = scene.findResource('TitleAtlas', 'brush');
+	world.addActor(cuphead);
+	cuphead._layer = 1;
+	cuphead.playAnim('cuphead',true);
+	
+  var mugman = new b5.Actor();
+	mugman.atlas = scene.findResource('TitleAtlas', 'brush');
+	world.addActor(mugman);
+	mugman._layer = 1;
+	mugman.playAnim('mugman',true);
+	
+	if(game.cfg.Game.dlc_title) {
+		cuphead.setPosition(-325,10);
+		mugman.setPosition(310,10);
+		chalice.setPosition(-30,50);
+	}
+	else {
+		chalice._av = false;
+		
+		cuphead.setPosition(-232, 14);
+		mugman.setPosition(205,20);
+		
+		cuphead._scale = mugman._scale = 0.98;
+	}
+	
 
 	//Start Label
 	var labelstart = new b5.LabelActor();
@@ -214,7 +245,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 				
 				//Play instrumental when it's over
 				mus_ddv.onComplete = function() {
-					app.setTimeout(function() {
+					!game.cfg.Game.dlc_title && app.setTimeout(function() {
 						var mus_ddd = scene.findResource('MUS_DontDealWithDevil', 'sound');
 						mus_ddd && mus_ddd.play();
 					},1.5);
@@ -272,12 +303,12 @@ b5.addSceneResources = function(scene, data, game) {
   
   //Title atlas
   var title_atlas = new b5.ImageAtlas('TitleAtlas', []);
-  title_atlas.parseFrames(b5.File.readSync(data.resourcePath + 'cuphead_title_screen.csv'));
-  title_atlas.parseAnims(b5.File.readSync(data.resourcePath + 'cuphead_title_screen.atlas.json'));
+  title_atlas.parseFrames(b5.File.readSync(data.resourcePath + 'SpriteAtlasTexture_TitlescreenDLC.csv'));
+  title_atlas.parseAnims(b5.File.readSync(data.resourcePath + 'titlescreenDLC.anims.json'));
 
   //Load title bitmaps
-  for(var i = 0; i < 5; i++) {
-  	var bitmap = new b5.Bitmap('TitleBitmap'+i, data.resourcePath + 'cuphead_title_screen_' + i.zfill(4) + '.png', false);
+  for(var i = 0; i < 3; i++) {
+  	var bitmap = new b5.Bitmap('TitleBitmap'+i, data.resourcePath + 'SpriteAtlasTexture_TitlescreenDLC-' + i + '.png', false);
   	scene.addResource(bitmap, 'bitmap');
   	//Add to atlas 
   	title_atlas.bitmaps.push(bitmap);
@@ -300,10 +331,11 @@ b5.addSceneResources = function(scene, data, game) {
   //Secret ;)
   var chance = b5.Maths.randomChance(1/2013);
   
-  //Dont Deal With Devil (vocal)
-  var mus_ddv = new b5.Sound('MUS_DontDealVocal', data.resourcePath + (!chance ? 'MUS_Intro_DontDealWithDevil_Vocal.ogg' : 'bgm_title_screen.ogg'), false, false, true);
+  //Dont Deal With Devil (vocal) and dlc
+  var mus_ddv = new b5.Sound('MUS_DontDealVocal', data.resourcePath + (!chance ? (game.cfg.Game.dlc_title ? 'mus_dlc_title.ogg' : 'MUS_Intro_DontDealWithDevil_Vocal.ogg') : 'bgm_title_screen.ogg'), false, false, true);
   mus_ddv.output_gain = game.Music.volume;
   mus_ddv.onDestroy = game.Music.remove;
+  mus_ddv.loop = game.cfg.Game.dlc_title;
   scene.addResource(mus_ddv, 'sound', true);
   game.Music.add(mus_ddv);
   

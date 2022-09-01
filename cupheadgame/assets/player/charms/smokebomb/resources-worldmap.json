@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "smokebomb:CHARM_EQUIP_ICON",
+			"name": "smokebomb:EQUIP_ICON",
 			"bitmaps": ["SmokeBombEquipIcon"],
 			"frames": "player/charms/smokebomb/SpriteAtlasTexture_SmokeDash.csv"
 		}

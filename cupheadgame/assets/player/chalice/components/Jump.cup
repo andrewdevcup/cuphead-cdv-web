@@ -73,7 +73,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		flags.inPlatform = false);
 		
 		for (var i = 0; i < overlaps.length; i++) if (Math.round(thisPlayer.body.m_linearVelocity.y) >= 0) {
-			if (overlaps[i].tags.indexOf('floor') != -1 && thisPlayer.y < overlaps[i].y - (overlaps[i].h/2)) {
+			if ((overlaps[i].isFloor || overlaps[i].isWall/*tags.indexOf('floor') != -1*/) && thisPlayer.y < overlaps[i].y - (overlaps[i].h/2)) {
 				flags.inAir = false; break;
 			} else if (overlaps[i].tags.indexOf('platform')>-1 && overlaps[i].playersOver[thisPlayer.name] && !flags.inPlatform && !flags.droppingPlatform) {
 				flags.inAir = false; flags.inPlatform = true; break
@@ -95,7 +95,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			if (jumping && flags.jumpState == 0) {
 				flags.jumpState = 1; //Leave ground
 				flags.ducking = false;
-				!flags.shooting && thisPlayer.Sprite.playAnim('jump_ground');
+				!flags.shooting && !flags.dashing && thisPlayer.Sprite.playAnim('jump_ground');
 			} else if (!jumping) {
 				flags.jumpState = 0; //In ground
 				startHeight = 32768;
@@ -138,6 +138,9 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 			//	flags.parryActive = true;
 			  flags.inDoubleJump = true;
 				flags.jumpState = 3; //double jump
+				
+				//Reset dash
+				thisPlayer.resetDashes();
 				
 				//Play sfx
 				jumpsfx[b5.Maths.randomRange(0, 2)].play();

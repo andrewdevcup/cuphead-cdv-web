@@ -147,7 +147,9 @@ b5.export = function(world, scene, data, game) {
 		//	height:ply.h,
 			restitution: 0,
 			density: phyb.density,
-			friction: phyb.friction
+			friction: phyb.friction,
+			collision_category: game.PLAYER, 
+			collision_mask: game.FLOOR + game.WALL + game.PLATFORM //Can collide with categories:
 		});
 
 
@@ -307,7 +309,7 @@ b5.export = function(world, scene, data, game) {
 	}
 	
 	//Level locked for chalice
-	if(data.noChalice) {
+	if(data.noChalice && !game.Flags.forceChalice) {
 		p1chaliceFlag = p2chaliceFlag = 0;
 	}
 
@@ -336,26 +338,24 @@ b5.export = function(world, scene, data, game) {
 			};
 			
 		}
-		//Reset joints
-		for (var i = 0; i < players.length; i++) {
-			players[i].releaseJoints();
-		}
 
 		var platforms = world.findActorsByTagName('platform', true);
 
-		for (var a = 0; a < platforms.length; a++) platforms[a].releaseJoints();
+	//	for (var a = 0; a < platforms.length; a++) platforms[a].releaseJoints();
 
 		for (var i = 0; i < players.length; i++) {
-			for (var a = 0; a < players.length; a++)
-				//Create joints with no collision so the players don't collide with each other
+		/*	for (var a = 0; a < players.length; a++)
+			//OLD: Create joints with no collision so the players don't collide with each other
+			//Update: use physics layers instead
 			players[a] != players[i] && players[i].disableCollision(players[a]);
-
+			*/
+			
 			//Do the same with platforms so players cannot collide when they're jumping below them
 			for (var a = 0; a < platforms.length; a++)
-			players[i].y > platforms[a].y && platforms[a].playersOver[players[i].name] !== false && (
-				platforms[a].platform.disableCollision(players[i]),
-				platforms[a].playersOver[players[i].name] = false
-			);
+		  	players[i].y > platforms[a].y && platforms[a].playersOver[players[i].name] !== false && (
+		  		platforms[a].platform.disableCollision(players[i]),
+		  		platforms[a].playersOver[players[i].name] = false
+  			);
 		}
 	};
 

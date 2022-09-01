@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "superart1:SUPER_EQUIP_ICON",
+			"name": "superart1:EQUIP_ICON",
 			"bitmaps": ["SuperArtIEquipIcon"],
 			"frames": "player/supers/superart1/SpriteAtlasTexture_BeamEquipIcon.csv"
 		}

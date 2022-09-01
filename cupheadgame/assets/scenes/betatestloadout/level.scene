@@ -47,7 +47,7 @@ b5.LoadScene = function(world, scene, data, game) {
     weaponIcon.updateWeaponIcon = function() {
     	var n = 'wIcon'+this.index+'Index',
     	weapon = data.levelData.weaponList[data.levelData[n]];
-      this.atlas = scene.findResource(weapon+':WEAPON_EQUIP_ICON','brush');
+      this.atlas = scene.findResource(weapon+':EQUIP_ICON','brush');
     
       this.rotation = -1;
       this.TweenTo('_rotation',0,0.3,b5.Ease.quadout,true);
@@ -86,7 +86,7 @@ b5.LoadScene = function(world, scene, data, game) {
     
       var charm = data.levelData.charmList[data.levelData[n]];
       
-      this.atlas = scene.findResource(charm+':CHARM_EQUIP_ICON','brush');
+      this.atlas = scene.findResource(charm+':EQUIP_ICON','brush');
       
     };
     
@@ -119,7 +119,7 @@ b5.LoadScene = function(world, scene, data, game) {
     
       var super_ = data.levelData.superList[data.levelData[n]];
       
-      this.atlas = scene.findResource(super_+':SUPER_EQUIP_ICON','brush');
+      this.atlas = scene.findResource(super_+':EQUIP_ICON','brush');
       
     };
     

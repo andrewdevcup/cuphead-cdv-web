@@ -305,6 +305,11 @@ return {
 		var ft = r.getFixtureSelf();
 		ft.width = 55;
 		ft.friction = 0;
+		
+		//Filter collision to prevent colliding with players (physics)
+		ft.collision_category = game.ENEMY;
+		ft.collision_mask = game.FLOOR + game.WALL;
+		
 		r.addFixture(ft);
 		r.body.m_invMass = 1e-6;
 		
@@ -381,22 +386,12 @@ return {
 		}
 		
 		r.spawnHitbox.onPlayerHit = e => r.spawnHitbox.release(true);
-		
-		r.playeraddedevt = scene.events.on('playeradded', function(player) {
-			r.disableCollision(world.findActor(player,true));
-		});
-		r.playerremovedevt = scene.events.on('playerremoved', function(player) {
-			r.enableCollision(world.findActor(player,true));
-		});
-		
+
 		r.playersdeadevt = scene.events.once('allplayersdead', function() {
 			r.tasks.clear();
 			r.body.SetActive(false);
 		});
-		
-		for(var i = 0, p = scene.data.getActivePlayers(); i < p.length;i++)
-			r.disableCollision(p[i]);
-			
+
 		var loopsfx = scene.findResource('RaddishLoopSfx','sound'),
 		bonksfx = scene.findResource('RaddishIntroBonkSfx','sound'),
 		startsfx = scene.findResource('RaddishStartSfx','sound'),

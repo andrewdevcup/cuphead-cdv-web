@@ -7,7 +7,7 @@
 	],
 	"brush": [
 		{
-			"name": "cookie:CHARM_EQUIP_ICON",
+			"name": "cookie:EQUIP_ICON",
 			"bitmaps": ["CookieEquipIcon"],
 			"frames": "player/charms/cookie/SpriteAtlasTexture_Cookie.csv"
 		}

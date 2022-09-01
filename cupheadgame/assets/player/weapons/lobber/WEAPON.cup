@@ -36,6 +36,9 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			bullet.angle = angle;
 			bullet.layer = thisPlayer.layer-1;
 			bullet.supermeter_score = wpnData.supermeter_score;
+			
+			bullet.inFloor = false;
+			bullet.bounces = 0;
 
 			viewLayer.addActor(bullet);
 
@@ -52,33 +55,30 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				friction: body.friction || 0,
 				restitution: body.restitution || 0,
 				density: body.density || 1,
-				is_sensor: true
+				collision_category: game.BULLET,
+				collision_mask: game.FLOOR
 			});
 			
-			bullet.axis = {
-				x: Math.cos(angle),
-				y: Math.sin(angle)
-			}
+			let up_angle = angle != 0 && Math.abs(angle) != Math.PI ? 0 : (thisPlayer.data.facing) * b5.Maths.DtoRad * wpnData.up_angle;
 			
-			bullet.baseSpeedX = bullet.body.m_linearVelocity.x = bullet.axis.x*wpnData.speed;
-		  bullet.baseSpeedY = bullet.body.m_linearVelocity.y = bullet.axis.y*wpnData.speed;
-
+			bullet.body.m_linearVelocity.x = Math.cos(angle + up_angle) * (up_angle != 0 ? wpnData.speed : wpnData.diag_speed);
+		  bullet.body.m_linearVelocity.y = Math.sin(angle + up_angle)* (up_angle != 0 ? wpnData.speed : wpnData.diag_speed)
+		  
+		  bullet.body.m_gravityScale.y = body.gravity_scale;
+		  
 			bullet.onTick = function() {
 				this.time += app.dt;
 				if (this.time > this.despawnTime) {
 					this.destroyBullet(true);
 					return;
 				}
-		
-				var lv = this.body.m_linearVelocity;
 				
-				lv.x = this.baseSpeedX + (Math.sin(this.time*8) *5);
-				lv.y = this.baseSpeedY + (Math.cos(this.time*8) *5);
-
+				this.inFloor = false;
+				
 				//Check overlaps
 				var ols = this.A_overlaps;
 				for (var i = 0; i < ols.length; i++)
-					if (ols[i]) {
+				if (ols[i]) {
 					var l = ols[i];
 					if (ols[i].tags.indexOf("hittableEnemy") != -1) {
 						//Enemy was hit
@@ -97,13 +97,19 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 						}
 						return;
 					}
-					if (ols[i].tags.search(["wall", "floor"]) != -1 && ols[i].tags.indexOf('ignoreBullets') == -1) {
-						//Scenery was hit
-						this.destroyBullet();
-						sfxBulletDeath.play();
-						return;
+					
+					if( l.isFloor ) {
+						this.inFloor = true;
+						break;
 					}
 				}
+				
+				if(this.inFloor) {
+					this.inFloor = false;
+					this.bounces++;
+		  	 	this.bounces >= wpnData.max_bounce && this.destroyBullet();
+				}
+				
 			}
 
 			//	scene.data.playerBullets.push(bullet);
@@ -175,12 +181,18 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				is_sensor: true
 		});
 
-		exb.body.m_linearVelocity.x = Math.cos(angle)*wpnData.ex.speed;
-		exb.body.m_linearVelocity.y = Math.sin(angle)*wpnData.ex.speed
-		exb.inwall = false;
+	//	exb.body.m_linearVelocity.x = Math.cos(angle)*wpnData.ex.speed;
+	//	exb.body.m_linearVelocity.y = Math.sin(angle)*wpnData.ex.speed;
+	
+		let up_angle = angle != 0 && Math.abs(angle) != Math.PI ? 0 : (thisPlayer.data.facing) * b5.Maths.DtoRad * wpnData.up_angle;
+			
+		exb.body.m_linearVelocity.x = Math.cos(angle + up_angle) * wpnData.ex.speed;
+		exb.body.m_linearVelocity.y = Math.sin(angle + up_angle)* wpnData.ex.speed;
+		  
+	  exb.body.m_gravityScale.y = body.ex.gravity_scale;
+		
 		exb.destroyBullet = function() {
 			this.release(true);
-			
 		}
 		exb.onTick = function() {
 			this.time += app.dt;
@@ -193,6 +205,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			var ols = this.A_overlaps; 
 			for (var i = 0; i < ols.length; i++)
 				if (ols[i]) {
+					var l = ols[i];
 				if (ols[i].tags.indexOf("hittableEnemy") != -1) {
 					//Enemy was hit
 					ols[i].onBulletHit && ols[i].onBulletHit(this);
@@ -203,27 +216,11 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					this.destroyBullet();
 					return;
 				}
-				if (ols[i].isWall && ols[i].tags.indexOf('ignoreBullets') == -1 && !this.inwall) {
-					//Reflect and make enemy
-					this.radius *= 7;
-					this.inwall = true;
-					this.body.SetActive(false);
-					
-					//Reflect
-					this.setTimeout(m => {
-						var _this = m.data;
-						_this.radius /= 7;
-						
-						_this.body.SetActive(true);
-						
-						_this.body.m_linearVelocity.x *= -1;
-						_this.body.m_linearVelocity.y *= -1;
-						
-						_this.tags.push('enemy');
-						_this.draw();
-					},0.1);
+				if ((l.isWall || l.isFloor) && ols[i].tags.indexOf('ignoreBullets') == -1 && !this.body.m_linearVelocity.y > 0) {
+					this.destroyBullet();
 					return;
 				}
+				
 			}
 
 		}

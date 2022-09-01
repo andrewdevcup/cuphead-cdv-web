@@ -1,7 +1,7 @@
 return function(thisPlayer, flags, world, scene, game, superData) {
 	//Setup actions
 	
-	let HIT_DAMAGE = 14;
+	let HIT_DAMAGE = 16;
 	
 	let MusicEffectOn = function() {
 		for(let i = 0, a = game.Music.sounds; i < a.length; i++) {
