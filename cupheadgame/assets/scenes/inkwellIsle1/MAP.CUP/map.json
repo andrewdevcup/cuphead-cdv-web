@@ -328,18 +328,6 @@
 		"atlas": "NightAtlas",
 		"base_frame_speed": 12,
 		"anim_loop": true
-	},
-	{
-		"name": "LuigiStar",
-		"type": "",
-		"size": [150,150],
-		"pos": [3040,1230],
-		"visible": true,
-		"appendTo": "MAP",
-		"sub_layer": 0,
-		"scale": 0.65,
-		"cull": false,
-		"bitmap": "LuigiStarBitmap"
 	}
 	],
 	"resources": {
@@ -395,10 +383,6 @@
 			{
 				"name": "NightBitmap",
 				"src": "fanservice/Night-0.png"
-			},
-			{
-				"name": "LuigiStarBitmap",
-				"src": "scenes/inkwellIsle1/npcs/luigistar.png"
 			}
 		],
 		"brush": [

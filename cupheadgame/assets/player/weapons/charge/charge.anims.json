@@ -1,0 +1,28 @@
+{
+	"shoot_uncharged": {
+		"indices":[0,1,2,3,4,5],"speed":24
+	},"hit_small": {
+		"indices":[0,1,2,3,4,5],"speed":24
+	},"hit_charged": {
+		"indices":[6,7,8,9,10,11,12,13,14,15,16,17,18],"speed":24
+	},"shoot_charged": {
+		"indices":[19,20,21,22,23,24,25,26,27],"speed":24
+	},"charge_intro": {
+		"indices":[28,29,30],"speed":24
+	},"charge_loop": {
+		"indices":[31,32,33,34,35,36,37,38,39,40,41,42],"speed":24
+	},"spark_charged": {
+		"indices":[54,55,56,57,58,59],"speed":24
+	},"spark_charging": {
+		"indices":[43,44,45,46,47,48],"speed":24
+	},"charging_fx_a": {
+		"indices":[49,50,51,52,53],"speed":24
+	},"spark_charging_fx_full": {
+		"indices":[60,61,62,63,64],"speed":24
+	},"charge_small_loop": {
+		"indices":[65,66,67,68,69,70,71,72],"speed":12
+	},"spark": {
+		"indices":[73,74,75,76],"speed":24
+	},"ex_explosion": {
+		"indices":[77,78,79,80,81,82,83,84,85,86,87,88,89,90,91],"speed":24
+	}}

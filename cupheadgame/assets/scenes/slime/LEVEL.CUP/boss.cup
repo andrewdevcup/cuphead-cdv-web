@@ -180,7 +180,7 @@ return {
 					sHitbox.initBody('dynamic',true);
 					
 					//Filter collision
-					sHitbox.addFixtureSelf(null, null, null, null,
+					sHitbox.addFixtureSelf(null, null, null, false,
 					game.BOSS, //Collision category
 					game.FLOOR + game.WALL + game.PLATFORM //Can collide with
 					);

@@ -308,7 +308,7 @@ return {
 		
 		//Filter collision to prevent colliding with players (physics)
 		ft.collision_category = game.ENEMY;
-		ft.collision_mask = game.FLOOR + game.WALL;
+		ft.collision_mask = game.FLOOR + game.WALL + game.BULLET;
 		
 		r.addFixture(ft);
 		r.body.m_invMass = 1e-6;

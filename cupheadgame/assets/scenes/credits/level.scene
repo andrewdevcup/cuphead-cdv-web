@@ -270,10 +270,6 @@ b5.addSceneResources = function(scene, data, game) {
   		name: "Doni",
   		src: "scenes/credits/doni.png"
   	},
-	{
-  		name: "Azukar",
-  		src: "scenes/credits/azukar.png"
-  	},
   	{
   		name: "Deluxe",
   		src: "scenes/credits/deluxe.jpg"

@@ -6,8 +6,9 @@
 	"supermeter_score": 11.6,
 	"delay": 0.35,
 	"scale": 0.8,
-	"despawnTime": 5,
+	"despawnTime": 4,
 	"max_bounce": 4,
+	"high_speed_y": 40,
 	"ex": {
 		"speed": 55,
 		"damage": 28,
@@ -21,19 +22,19 @@
 		"fixedRotation": true,
 		"sub_layer": 0,
 		"bodyType": "dynamic",
-		"restitution": 0.9,
+		"restitution": 0.8,
 		"gravity_scale": 0.7,
 		"hitbox": {
 			"type": "Arc",
 			"size": 15
 		},
 		"ex": {
-			"shape": "TypeBox",
-			"size": [100,100],
+			"shape": "TypeCircle",
+			"size": [120,100],
 			"fixedRotation": true,
 			"bodyType": "dynamic",
 			"sub_layer": 3,
-			"gravity_scale": 0.7,
+			"gravity_scale": 0.6,
 	  	"hitbox": {
   			"type": "Arc",
 			  "size": 50
@@ -41,5 +42,36 @@
 		}
 	},
 	"resources": {
+		"bitmap": [{
+			"name": "LobberBitmap0",
+			"src": "player/weapons/lobber/SpriteAtlasTexture_Lobber-0.png"
+		}],
+		"brush": [{
+			"name": "LobberAtlas",
+			"bitmaps": ["LobberBitmap0"],
+			"frames": "player/weapons/lobber/SpriteAtlasTexture_Lobber.csv",
+			"anims": "player/weapons/lobber/lobber.anims.json"
+		}],
+		"sound": [{
+			"automatize": {
+				"name": "LobberShootSfx%i",
+				"start": 1,
+				"end": 5,
+				"pad": 3,
+				"src": "player/weapons/lobber/sfx_player_weapon_bouncer_###.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		},{
+			"automatize": {
+				"name": "ShmupBombExplodeSfx%i",
+				"start": 1,
+				"end": 3,
+				"pad": 2,
+				"src": "player/common_plane/sfx_player_plane_shmup_bomb_explode_##.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		}]
 	}
 }

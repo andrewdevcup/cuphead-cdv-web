@@ -1,13 +1,13 @@
 {
 	"speedSmall": 50,
-	"speedFull": 65,
+	"speedFull": 62,
 	"damageSmall": 6,
 	"damageFull": 46,
 	"supermeter_score": 6,
 	"supermeter_scoreFull": 46,
 	"delay": 0.14,
 	"fullChargeTime": 1.25,
-	"scale": 0.8,
+	"scale": 0.98,
 	"despawnTime": 3,
 	"ex": {
 		"speed": 0,
@@ -18,17 +18,19 @@
 	},
 	"body": {
 		"shape": "TypeBox",
-		"size": [40,25],
-		"fixedRotation": true,
+		"size": [40,40],
+		"size_charged": [110,110],
+		"fixedRotation": false,
 		"sub_layer": 0,
 		"bodyType": "collider",
 		"hitbox": {
 			"type": "Arc",
-			"size": 15
+			"size": 15,
+			"size_charged": 30
 		},
 		"ex": {
-			"shape": "TypeBox",
-			"size": [100,100],
+			"shape": "TypeCircle",
+			"size": [230,100],
 			"fixedRotation": true,
 			"bodyType": "collider",
 			"sub_layer": 3,
@@ -38,5 +40,75 @@
 			}
 		}
 	},
-	"resources": {}
+	"resources": {
+		"bitmap": [{
+			"automatize": {
+				"name": "ChargeBitmap%i",
+				"start": 0,
+				"end": 2,
+				"pad": 1,
+				"src": "player/weapons/charge/SpriteAtlasTexture_Charge-#.png"
+			}
+		}],
+		"brush": [{
+			"name": "ChargeAtlas",
+			"bitmaps": {
+				"start": 0,
+				"end": 2,
+				"name-prefix": "ChargeBitmap%i"
+			},
+			"frames": "player/weapons/charge/SpriteAtlasTexture_Charge.csv",
+			"anims": "player/weapons/charge/charge.anims.json"
+		}],
+		"sound": [{
+			"automatize": {
+				"name": "ChargeFireSmallSfx%i",
+				"start": 1,
+				"end": 5,
+				"pad": 3,
+				"src": "player/weapons/charge/sfx_player_weapon_charge_fire_small_###.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		}, 
+		{
+			"automatize": {
+				"name": "ChargeFullShotSfx%i",
+				"start": 1,
+				"end": 3,
+				"pad": 2,
+				"src": "player/weapons/charge/sfx_player_weapon_charge_full_fireball_##.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		},
+		{
+			"automatize": {
+				"name": "ChargeFullImpactSfx%i",
+				"start": 1,
+				"end": 3,
+				"pad": 2,
+				"src": "player/weapons/charge/sfx_player_weapon_charge_full_impact_##.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		},
+		{
+			"automatize": {
+				"name": "ChargeStartSfx%i",
+				"start": 1,
+				"end": 5,
+				"pad": 3,
+				"src": "player/weapons/charge/sfx_player_weapon_charge_start_###.ogg",
+				"reuse": true,
+				"category": "sfx"
+			}
+		},
+		{
+			"name": "ChargeReadySfx",
+			"src": "player/weapons/charge/sfx_player_weapon_charge_ready.ogg",
+			"reuse": true,
+			"category": "sfx"
+		}]
+	}
 }

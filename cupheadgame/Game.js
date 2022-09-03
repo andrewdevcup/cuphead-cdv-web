@@ -156,8 +156,7 @@ b5.loadgame = function() {
 	dev = {
 		fastcoding: 0,
 		loadscene: 'notice2', //8
-		data: {
-		}
+		data: {}
 	};
 	
 	// Beta tester methods
@@ -636,8 +635,6 @@ if (scene_GUI.areResourcesLoaded()) {
 
 app.start();
 app.splash.destroy();
-b5.Game.loadingScreen.hourglass._av = true;
-b5.Game.loadingScreen.hourglass.opacity=1;
 b5.Game.LoadScene(dev.loadscene, false, false, {
 hide_anim: 'fade', hide_speed: 0.2,hourglass:false
 },dev.data);
@@ -825,9 +822,9 @@ b5.Game.PauseMenu.show(b5.Game.Flags.inWorldmap ? "worldmap": b5.Game.Flags.inLe
 app.now > l+1000 ? (fpt = fptc+1,
   fptc = 0, 
   l = app.now,
-  app.getMemoryUsage(), app.updateInfoText()
+  app.getMemoryUsage() //, app.updateInfoText()
 ): fptc++;
-//app.updateInfoText()
+app.updateInfoText()
 
 
 }

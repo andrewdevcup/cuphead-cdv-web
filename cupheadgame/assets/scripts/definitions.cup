@@ -49,3 +49,11 @@ b5.Game.GameDefIDs = {
 		"superart3": 1467617939
 	}
 };
+b5.Game.GetItemName = function(id) {
+	for(var i in this.GameDefIDs)
+	  if(id in this.GameDefIDs[i]) return	this.GameDefIDs[i][id];
+}
+b5.Game.GetItemId = function(name) {
+	for(var i in this.GameDefIDs)
+	  if(name in this.GameDefIDs[i]) return	this.GameDefIDs[i][name];
+}
