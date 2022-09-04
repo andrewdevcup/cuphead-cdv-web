@@ -17,8 +17,8 @@
 		"consumption": 100
 	},
 	"body": {
-		"shape": "TypeBox",
-		"size": [40,40],
+		"shape": "TypeCircle",
+		"size": [30,40],
 		"fixedRotation": true,
 		"sub_layer": 0,
 		"bodyType": "dynamic",

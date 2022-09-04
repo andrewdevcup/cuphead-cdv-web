@@ -23,7 +23,7 @@
 			optionPart = new b5.LabelActor();
 			
 			container.name = name;
-			container._scale = 0.95;
+			container._scale = 0.9;
 			textPart.name = name +"-Text";
 		  optionPart.name = name+"-Options";
 		  textPart.fill_style = optionPart.fill_style = textColor;
@@ -135,8 +135,8 @@
 			}
 		}
 	}
-	optcard.yesno = function(bool) {
-		return b5.Game.Texts.texts['general_'+(bool?'on':'off')]
+	optcard.yesno = function(bool, txtyes, txtno) {
+		return txtyes && txtno ? (bool?txtyes:txtno) : b5.Game.Texts.texts['general_'+(bool?'on':'off')]
 	}
 	
 	//WARNING / DIALOG CARD
@@ -154,9 +154,9 @@
 	mainlabel.x = mainlabel.y = 0;
 	maincard.addActor(mainlabel);
 	mainlabel.fill_style = textColor;
-	mainlabel._scale = 1;
-	mainlabel.line_height = 39;
-	mainlabel.y2 = -85;
+	mainlabel._scale = 0.9;
+	mainlabel.line_height = 41;
+	mainlabel.y2 = -77;
 	mainlabel.text = holdertext;
 
 	mainlabel.onAVChanged = function(av) {
@@ -265,7 +265,7 @@
 	aud_labelsec.fill_style = textColor;
 	aud_labelsec.line_height = 41;
 	aud_labelsec.y2 = -165;
-	aud_labelsec._scale = .95;
+	aud_labelsec._scale = .9;
 	aud_labelsec.text = holdertext;
 	aud_labelsec._av = false;
 	
@@ -275,9 +275,10 @@
 		ix = pauseMenu.data.opt_snd_index-1,
 		ox = txt.sett_sound_label_x;
 		
-		this.text =txt.sett_sound_master + ": " + optcard.slider(acfg.master)+"\n"+
+		this.text = txt.sett_sound_master + ": " + optcard.slider(acfg.master)+"\n"+
 								txt.sett_sound_sfx + ": " + optcard.slider(acfg.sfx)+"\n"+
 								txt.sett_sound_mus + ": " + optcard.slider(acfg.music)+"\n"+
+								txt.sett_sound_reverb + ': ' + optcard.yesno(acfg.reverb)+'\n'+
 								"\n"+
 								txt.general_back;
 	  
@@ -286,13 +287,15 @@
 		this.setFormatLine(0, 0, 0, [,,ox,,,,,,,'right']);
 		this.setFormatLine(1, 0, 0, [,,ox,,,,,,,'right']);
 		this.setFormatLine(2, 0, 0, [,,ox,,,,,,,'right']);
+		this.setFormatLine(3, 0, 0, [,,ox - 585,,,,,,,'left']);
 		
-		this.setFormatLine(4, 0, 0, [ix == 3 ? textSelColor : textColor]);
+		this.setFormatLine(5, 0, 0, [ix == 4 ? textSelColor : textColor]);
 		
 		//Color
 		this.applyFormatLine(0, (txt.sett_sound_master+"").length+2, 0, [ix == 0 ? textSelColor : textColor]);
 		this.applyFormatLine(1, (txt.sett_sound_sfx+"").length+2, 0, [ix == 1 ? textSelColor : textColor]);
 		this.applyFormatLine(2, (txt.sett_sound_mus+"").length+2, 0, [ix == 2 ? textSelColor : textColor]);
+		this.applyFormatLine(3, (txt.sett_sound_reverb+"").length+2, 0, [ix == 3 ? textSelColor : textColor]);
 	}
 
 
@@ -318,8 +321,8 @@
 		if (!this.axis_y_pressed && axis_y) {
 			this.axis_y_pressed = true;
 			data.opt_snd_index += axis_y;
-			data.opt_snd_index == 0 && (data.opt_snd_index = 4); //Set to last
-			data.opt_snd_index == 5 && (data.opt_snd_index = 1); //Set to first
+			data.opt_snd_index == 0 && (data.opt_snd_index = 5); //Set to last
+			data.opt_snd_index == 6 && (data.opt_snd_index = 1); //Set to first
 			pauseMenu.playSfx(); //Play sfx on index change
 
 		} else if (!axis_y) {
@@ -348,6 +351,8 @@
 					acfg.music += axis_x * 0.1;
 					acfg.music = b5.Maths.cap(acfg.music, 0, 1);
 				break;
+				case 4: //REVERB
+				acfg.reverb = !acfg.reverb;
 			}
 			b5.Game.applyConfig("audio");
 		} else if (!axis_x) {
@@ -363,7 +368,7 @@
 			this.btnA_pressed = true;
 			pauseMenu.playSfx();
 			//Do actions
-			if (data.opt_snd_index == 4) {
+			if (data.opt_snd_index == 5) {
 				//Back
 				optcard._av = false;
 				this._av = false;
@@ -408,13 +413,14 @@
 								txt.sett_visual_postfx +": \n"+
 								txt.sett_visual_overscan + ": \n"+
 								txt.sett_visual_texquality +": \n"+
+								txt.sett_visual_titlemode + ": \n"+ 
 								"\n"+
 								txt.general_back;
 		
 		this.textPart.clearFormat();
-		for(var i=0;i<7;i++) this.textPart.setFormatLine(i, 0, 0, [, , ox])
+		for(var i=0;i<9;i++) this.textPart.setFormatLine(i, 0, 0, [, , ox])
 		
-	  this.textPart.setFormatLine(8, 0, 0, [ix == 7 ? textSelColor:textColor,,,,,,,,,'center']);
+	  this.textPart.setFormatLine(9, 0, 0, [ix == 8 ? textSelColor:textColor,,,,,,,,,'center']);
 	  
 	  this.optionPart.text = (Math.round(vcfg.resolution * (AR[0]/AR[1])) + 'x' + vcfg.resolution) +"\n"+
 	  											 vcfg.aspectRatio +'\n'+
@@ -422,10 +428,11 @@
 	  											 optcard.yesno(vcfg.screenfx_enabled)+"\n"+
 	  											 optcard.yesno(vcfg.colorFX)+"\n"+
 	  											 optcard.slider(vcfg.overscan)+"\n"+
-	  											 optcard.slider(vcfg.textureQuality);
+	  											 optcard.slider(vcfg.textureQuality)+"\n"+
+	  											 optcard.yesno(b5.Game.cfg.Game.dlc_title, txt.sett_visual_titledlc, txt.sett_visual_titlenodlc)
 	  											 
 	  this.optionPart.clearFormat();
-	  for(var i=0;i<7;i++) this.optionPart.setFormatLine(i, 0, 0, [,,ox]);
+	  for(var i=0;i<9;i++) this.optionPart.setFormatLine(i, 0, 0, [,,ox]);
 	  
 	  this.optionPart.applyFormatLine(ix, 0, 0, [textSelColor]);
 	}
@@ -452,8 +459,8 @@
 		if (!this.axis_y_pressed && axis_y) {
 			this.axis_y_pressed = true;
 			data.opt_vis_index += axis_y;
-			data.opt_vis_index == 0 && (data.opt_vis_index = 8); //Set to last
-			data.opt_vis_index == 9 && (data.opt_vis_index = 1); //Set to first
+			data.opt_vis_index == 0 && (data.opt_vis_index = 9); //Set to last
+			data.opt_vis_index == 10 && (data.opt_vis_index = 1); //Set to first
 			pauseMenu.playSfx(); //Play sfx on index change
 
 		} else if (!axis_y) {
@@ -501,6 +508,9 @@
 			    vcfg.textureQuality += axis_x*0.1;
 			    vcfg.textureQuality = b5.Maths.cap(vcfg.textureQuality,0.1,1);
 			  break;
+			  case 8: //TITLE MODE
+			    b5.Game.cfg.Game.dlc_title = !b5.Game.cfg.Game.dlc_title;
+			  break;
 			}
 			b5.Game.applyConfig("video");
 		} else if (!axis_x) {
@@ -517,7 +527,7 @@
 			this.btnA_pressed = true;
 			pauseMenu.playSfx();
 			//Do actions
-			if (data.opt_vis_index == 8) {
+			if (data.opt_vis_index == 9) {
 				//Back
 				optcard._av = false;
 				this._av = false;
@@ -561,7 +571,7 @@
 	langlabelopt.x = langlabelopt.y = 0;
 	maincard.addActor(langlabelopt);
 	langlabelopt.name = "LanguageLabelOptions";
-	langlabelopt._scale = 1;
+	langlabelopt._scale = 0.9;
 	langlabelopt.line_height = 82;
 	langlabelopt.y2 = -30;
 	langlabelopt.fill_style = textColor
@@ -677,8 +687,9 @@
 	levellabel.x = levellabel.y = 0;
 	maincard.addActor(levellabel);
 	levellabel.fill_style = textColor;
-	levellabel.line_height = 40;
-	levellabel.y2 = -85;
+	levellabel.line_height = 41;
+	levellabel.y2 = -77;
+	levellabel._scale = 0.9;
 	levellabel._av = false;
 	levellabel.name = "LevelLabel";
 	levellabel.round_pixels = false;
@@ -786,8 +797,9 @@
 	worldmaplabel.x = worldmaplabel.y = 0;
 	maincard.addActor(worldmaplabel);
 	worldmaplabel.fill_style = textColor;
-	worldmaplabel.line_height = 40;
-	worldmaplabel.y2 = -85;
+	worldmaplabel.line_height = 41;
+	worldmaplabel.y2 = -77;
+	worldmaplabel._scale = 0.9;
 	worldmaplabel._av = false;
 	worldmaplabel.name = "LevelLabel";
 	worldmaplabel.text = holdertext;
@@ -888,8 +900,8 @@
 	ctrlslabel.x = ctrlslabel.y = 0;
 	maincard.addActor(ctrlslabel);
 	ctrlslabel.fill_style = textColor;
-	ctrlslabel._scale = 1;
-	ctrlslabel.line_height = 39;
+	ctrlslabel._scale = 0.9;
+	ctrlslabel.line_height = 41;
 	ctrlslabel.y2 = -55;
 	ctrlslabel._av = false;
 	ctrlslabel.name = "ControlsLabel";

@@ -505,7 +505,7 @@ return {
 					Math.round1000(r.body.m_linearVelocity.x)
 				]]);
 			}
-		},1);
+		},0.4);
 		
 		return r;
 	}

@@ -4,6 +4,7 @@ b5.LoadScene = function(world, scene, data, game) {
 	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
 	game.importObject('CreateLevel').init();
 	game.importObject('CreateCommonPlatformingResources');
+	data.noChalice = true;
 	game.importObject('CreatePlayer');
 	
 	//Update presence in discord

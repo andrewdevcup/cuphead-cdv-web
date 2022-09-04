@@ -269,13 +269,12 @@ b5.addSceneResources = function(scene, data, game) {
   	{
   		name: "Doni",
   		src: "scenes/credits/doni.png"
-  	},
-  	{
-  		name: "Deluxe",
-  		src: "scenes/credits/deluxe.jpg"
   	},{
   		name: "Drew",
   		src: "scenes/credits/drew.png"
+  	},{
+  		name: "Azukar",
+  		src: "scenes/credits/azukar.png"
   	}],
   	brush: [{
   		name: "CupheadPosterFont",

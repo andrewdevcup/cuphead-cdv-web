@@ -328,6 +328,30 @@
 		"atlas": "NightAtlas",
 		"base_frame_speed": 12,
 		"anim_loop": true
+	},
+	{
+		"name": "LuigiStar12",
+		"type": "",
+		"size": [150,150],
+		"pos": [2960, 1220],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 0,
+		"scale": 0.68,
+		"cull": false,
+		"bitmap": "LuigiStarBitmap"
+	},
+	{
+		"name": "MarddleDoo12",
+		"type": "",
+		"size": [150,150],
+		"pos": [3060, 1220],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 0,
+		"scale": 0.7,
+		"cull": false,
+		"bitmap": "MarddleDooBitmap"
 	}
 	],
 	"resources": {
@@ -383,6 +407,14 @@
 			{
 				"name": "NightBitmap",
 				"src": "fanservice/Night-0.png"
+			},
+			{
+				"name": "LuigiStarBitmap",
+				"src": "fanservice/LuigiStar12.png"
+			},
+			{
+				"name": "MarddleDooBitmap",
+				"src": "fanservice/MarddleDoo12.png"
 			}
 		],
 		"brush": [

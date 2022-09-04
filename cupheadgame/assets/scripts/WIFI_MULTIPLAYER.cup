@@ -208,13 +208,16 @@ sendToGuest: function(type, msg) {
 			var sl = b5.Game.SceneLoader,
 			ls = JSON.stringify(sl.loading_screen),
 			ldd = Object.clone(msg),
-			lvd = "";
+			lvd = "",
+			svd = JSON.stringify(Object.clone(b5.Game.SaveSlots.currentSaveSlot));
 			
 			ldd.levelData = msg.levelData;
 			
 			lvd = JSON.stringify(ldd);
 			
-			data += "3Ξ"+ sl.sceneId+"π"+ (sl.stopMusic?1: 0) + "π" + (sl.fadeOutMusic?1: 0) + "π" + ls + "π" + lvd + "π" + (sl.reload?1: 0) + "π" + (sl.bundle?1: 0);
+			data += "3Ξ"+ sl.sceneId +"π"+ (sl.stopMusic?1: 0) + "π" + 
+			        (sl.fadeOutMusic?1: 0) + "π" + ls + "π" + lvd + "π" + 
+			        (sl.reload?1: 0) + "π" + (sl.bundle?1: 0) + "π" + svd;
 			this.host.send(data);
 			break;
 		case "PAUSE":
@@ -372,7 +375,12 @@ guestGeneralMessage: function(e) {
 	switch (+r[0]) {
 		case 3: //Load scene
 			var d = r[1].split('π');
-			b5.Game.LoadScene(isNaN(+d[0])?d[0]:+d[0], +d[1], +d[2], JSON.parse(d[3]), JSON.parse(d[4]), +d[5], +d[6])
+			b5.Game.LoadScene(isNaN(+d[0])?d[0]:+d[0], +d[1], +d[2], JSON.parse(d[3]), JSON.parse(d[4]), +d[5], +d[6]);
+			
+			//Parse save data back for sync
+			var data = JSON.parse(d[7]);
+			for(var i in data) b5.Game.SaveSlots.currentSaveSlot[i] = data[i];
+			
 			break;
 		case 8: // host loaded
 			m.hostReady = true; 

@@ -31,8 +31,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 		Spawn: function(pos, angle) {
 			/*Spawning normal bullet(s)*/
 
-			//Actor with kinematic body
-			var bullet = new b5.Actor();
+			var bullet = new b5.Actor(),
+			bulletsns = new b5.Actor();
 		//	bullet.radius = wpnData.body.hitbox.size;
 			bullet.atlas = thisAtlas;
 			bullet.x = thisPlayer.x + pos[0];
@@ -47,29 +47,49 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			bullet.supermeter_score = wpnData.supermeter_score;
 			
 			bullet.inFloor = false;
+			bullet.pStFloor = false;
 			bullet.bounces = 0;
 			
 			bullet.playAnimWithEnd('lobber_start',b=>b.playAnim('lobber_loop',true));
 
 			viewLayer.addActor(bullet);
+			
+			bulletsns.setPosition(bullet.x,bullet.y);
+			bullet.parent.addActor(bulletsns);
 
 			bullet.destroyBullet = function(timeout) {
 				if(!timeout) thisWeapon.SpawnParticle("bulletDeath", [this.x,this.y]);
-	       this.release(true);
+				this.sensor.release(true);
+	      this.release(true);
 			}
 
 			bullet.initBody(body.bodyType, body.fixedRotation, true);
-
-			bullet.addFixture({
+			bulletsns.initBody('collider', true);
+			
+			var fxt = {
 				type: b5.Shape[body.shape],
-				width: body.size[0],
+				width: body.size[0] + 5,
 				height: body.size[1],
 				friction: body.friction || 0,
 				restitution: body.restitution || 0,
 				density: body.density || 1,
-				collision_category: game.BULLET,
-				collision_mask: game.FLOOR
-			});
+				is_sensor: true
+			}
+			
+			bulletsns.addFixture(fxt);
+			bulletsns.body.m_invMass = 1e-6;
+			
+			fxt.is_sensor = false;
+			fxt.collision_category = game.BULLET,
+			fxt.collision_mask = game.FLOOR;
+			fxt.width -= 5;
+				
+			bullet.addFixture(fxt);
+			bullet.onPositionSet = function() {
+				this.sensor.setPosition(this.x,this.y);
+			}
+			
+			bullet.sensor = bulletsns;
 			
 			let up_angle = angle != 0 && Math.abs(angle) != Math.PI ? 0 : (thisPlayer.data.facing) * b5.Maths.DtoRad * wpnData.up_angle;
 			
@@ -88,7 +108,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				this.inFloor = false;
 				
 				//Check overlaps
-				var ols = this.A_overlaps;
+				var ols = this.sensor.A_overlaps;
 				for (var i = 0; i < ols.length; i++)
 				if (ols[i]) {
 					var l = ols[i];
@@ -116,15 +136,12 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					}
 				}
 				
-				if(this.inFloor) {
-		/*			this.playAnimWithEnd(
-						this.body.m_linearVelocity.y >= wpnData.high_speed_y ? 'bounce_high' : 'bounce_low',
-						f => f.playAnim('lobber_loop',true)
-					);*/
-					
-					this.inFloor = false;
-					this.bounces++;
-		  	 	this.bounces >= wpnData.max_bounce && this.destroyBullet();
+				if(this.inFloor != this.pStFloor ) {
+					this.pStFloor = this.inFloor;
+					if(this.inFloor) {
+						this.bounces++;
+						this.bounces >= wpnData.max_bounce && this.destroyBullet();
+					}
 				}
 				
 			}
@@ -162,6 +179,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					var p = new b5.Actor;
 			  	p.atlas = thisAtlas;
 					p.setPosition(pos[0], pos[1]);
+					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
 					p.layer = thisPlayer.layer + 1; //(thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
 					thisPlayer.parent.addActor(p);
 					p._scale = wpnData.scale;

@@ -9,7 +9,7 @@
 *
 */
 RELEASE_CODENAME = "Pre-Beta";
-RELEASE_VER = 3;
+RELEASE_VER = 2.5;
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -301,6 +301,10 @@ b5.loadgame = function() {
 					b5.Game.Sfx.volume = acfg.master * acfg.sfx,
 					b5.Game.Sfx.setVolumeMultiplierAll(1*b5.Game.Sfx.volume)
 				);
+				
+				if(acfg.reverb === void 0) acfg.reverb = false;
+				
+				b5.Sound.reverbEnabled = acfg.reverb;
 			}
 
 			if (section == "language" || !section) {
@@ -822,9 +826,9 @@ b5.Game.PauseMenu.show(b5.Game.Flags.inWorldmap ? "worldmap": b5.Game.Flags.inLe
 app.now > l+1000 ? (fpt = fptc+1,
   fptc = 0, 
   l = app.now,
-  app.getMemoryUsage() //, app.updateInfoText()
+  app.getMemoryUsage(), app.updateInfoText()
 ): fptc++;
-app.updateInfoText()
+//app.updateInfoText()
 
 
 }
