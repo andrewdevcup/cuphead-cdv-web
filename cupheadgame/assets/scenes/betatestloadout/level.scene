@@ -186,7 +186,7 @@ b5.LoadScene = function(world, scene, data, game) {
   //Icon for super
   var ssw = world.findActor('ParrySuperSwitch',true);
   ssw.body.m_angularDamping = 3;
-  ssw.id = 302;
+  ssw.id = 303;
   ssw.onParry = function(player) {
   	this.body.m_angularVelocity = player.x > this.x ? 7 : -7;
   	   

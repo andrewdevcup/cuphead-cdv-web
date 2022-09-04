@@ -198,11 +198,9 @@ b5.LoadScene = function(world, scene, data, game) {
   	else {
   		Davatar.visible = Dname.visible = true;
     
-	   Davatar.bitmap = scene.addResource(
-  	  	new	b5.Bitmap('davatar', game.DiscordSession.data.avatarUrl),
-    	  'bitmap');
+	   Davatar.bitmap = new b5.Bitmap('davatar', game.DiscordSession.data.avatarUrl);
       
-  	  Dname.text = game.DiscordSession.data.username + "\n" + (game.DiscordSession.data.discriminator||"");
+  	  Dname.text = game.DiscordSession.data.username// + "\n" + (game.DiscordSession.data.discriminator||"");
 
   	}
   }

@@ -82,6 +82,113 @@
 	bg.name = "PauseMenuBG";
 	bg.fit = b5.Actor.FitSize;
 	pauseMenu.addActor(bg);
+	
+	/**/
+	//Discord user avatar and name
+  let Davatar = new b5.Actor(),
+  Dname = new b5.LabelActor();
+  
+  Davatar.setSize(110,110);
+  Davatar.setPosition(480,-230);
+  Dname.setPosition(480,-145);
+  Dname._scale = 0.55;
+  Dname.line_height = 45;
+  Davatar.name = "DiscordAvatar"
+  Dname.name = "DiscordName";
+  Dname.font = scene_GUI.findResource('CupheadMemphisFont','brush');
+  
+  pauseMenu.addActor(Davatar);
+  pauseMenu.addActor(Dname);
+  
+  //For player 2
+  let Davatar2 = new b5.Actor(),
+  Dname2 = new b5.LabelActor();
+  
+  Davatar2.setSize(110,110);
+  Davatar2.setPosition(480,-50);
+  Dname2.setPosition(480,35);
+  Dname2._scale = 0.55;
+  Dname2.line_height = 45;
+  Davatar2.name = "DiscordAvatar2"
+  Dname2.name = "DiscordName2";
+  Dname2.font = scene_GUI.findResource('CupheadMemphisFont','brush');
+  
+  pauseMenu.addActor(Davatar2);
+  pauseMenu.addActor(Dname2);
+  
+  Davatar2.visible = Dname2.visible = !false;
+  Davatar.visible = Dname.visible = !false;
+  
+  b5.Game.parseResources({
+  	bitmap: [{
+  		name: "playerOne:DiscordAvatarBitmap",
+  		src: ""
+  	}, {
+  		name: "playerTwo:DiscordAvatarBitmap",
+  		src: ""
+  	}]
+  }, scene_GUI);
+  
+  Davatar.bitmap = scene_GUI.findResource('playerOne:DiscordAvatarBitmap','bitmap');
+  Davatar2.bitmap = scene_GUI.findResource('playerTwo:DiscordAvatarBitmap','bitmap');
+  
+  Dname.text = Dname2.text = "Sample text";
+ 
+  pauseMenu.setDiscordAvatarsAndNames = function(p1Avt, p1N, p2Avt, p2N) {
+  	if(p1Avt && p1N) {
+  		Davatar.visible = Dname.visible = true;
+  		Davatar.bitmap.reload(p1Avt);
+  		Dname.text = p1N;
+  	}
+  	else Davatar.visible = Dname.visible = false;
+  	
+  	if(p2Avt && p2N) {
+  		Davatar2.visible = Dname2.visible = true;
+  		Davatar2.bitmap.reload(p2Avt);
+  		Dname2.text = p2N;
+  	}
+  	else Davatar2.visible = Dname2.visible = false;
+  }
+  
+  pauseMenu.updateAvatarDisplays = function() {
+    //Update discord avatars and names
+			let guest = b5.Game.Multiplayer.isGuest,
+			logged = b5.Game.DiscordLogged,
+			session = b5.Game.DiscordSession.data,
+			p1Avt, p1N, p2Avt, p2N;
+			
+			if(!guest) {
+				//Query host discord avatar and name (if logged)
+				b5.Game.Multiplayer.sendToGuest('QUERY_DISCORD_UDATA');
+			}
+			else b5.Game.Multiplayer.sendToHost('QUERY_DISCORD_UDATA');
+			
+			if(!guest) {
+				if(logged) {
+					p1Avt = session.avatarUrl;
+					p1Name = session.username;
+					
+					p2Avt = b5.Game.Multiplayer.guestAvatarUrl;
+					p2Name = b5.Game.Multiplayer.guestUsername;
+				}
+			}
+			else {
+				if(logged) {
+					p2Avt = session.avatarUrl;
+					p2Name = session.username;
+					
+					p1Avt = b5.Game.Multiplayer.guestAvatarUrl;
+					p1Name = b5.Game.Multiplayer.guestUsername;
+				}
+			}
+			
+			this.setDiscordAvatarsAndNames(
+				p1Avt, p1Name, p2Avt, p2Name
+			);
+  }
+  
+  
+  /**/
 
 	//Pause card
 	var pcardbtm = new b5.Bitmap('pauseCardBitmap', b5.Paths.assets + 'pause_menu.png', false);
@@ -1225,6 +1332,8 @@
 					"actionButton": "shoot"
 				}
 			]);
+			
+			this.updateAvatarDisplays();
 			
 			app.events.dispatch('pause');
 			

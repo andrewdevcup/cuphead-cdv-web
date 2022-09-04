@@ -340,7 +340,7 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 			this.value = 0;
 		};
 		btnPause.onTick = function() {
-			this.visible = b5.Game.Flags.pausingEnabled && !b5.Game.Multiplayer.isGuest;
+			this.visible = b5.Game.Flags.pausingEnabled;
 		}
 		gui.addActor(btnPause);
 

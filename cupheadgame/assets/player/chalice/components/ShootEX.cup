@@ -90,19 +90,19 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	}
 	
 	//Guest events
-	scene.events.on('playerex', evtdata => {
+	scene.events.on('playersuper', evtdata => {
 		if(thisPlayer.name == evtdata[0]) {
 			if(evtdata[4] == "send") {
 				var target = game.Multiplayer.target();
-				game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playerex',[evtdata[0],evtdata[1],target]]);
+				game.Multiplayer["sendTo" + target]('DISPATCH_EVENT',['playersuper',[evtdata[0],evtdata[1],target]]);
 			}
 			else if(evtdata[4] == game.Multiplayer.session) {
-				!flags.SUPER && thisPlayer.startEX(evtdata[1]);
+				!flags.SUPER && thisPlayer.startSuper(evtdata[1]);
 			}
 		}
 	});
 	
-	scene.events.on('playersuper', evtdata => {
+	scene.events.on('playerex', evtdata => {
 		if(thisPlayer.name == evtdata[0]) {
 			if(evtdata[4] == "send") {
 				var target = game.Multiplayer.target();

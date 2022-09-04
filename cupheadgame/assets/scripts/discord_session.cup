@@ -5,7 +5,7 @@
 		data: JSON.parse(localStorage.getItem('discordSession')),
 		activity: {
 			application_id: "971820323806806036",
-			name: 'Cuphead CDV',
+			name: 'Cuphead CDV ' + b5.Utils.GetPlatform().toLowerCase().capitalize(),
 			details: ' ',
 			state: " ",
 			largeImageKey: "971826208826327062",

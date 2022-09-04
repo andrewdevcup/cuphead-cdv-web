@@ -28,6 +28,13 @@ b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenPropertie
 	
 	if (this.SceneLoader.available) {
 		
+		//Set load data
+	 	//With a random number to decide which player will be chalice (if selected both)
+   	if(!b5.Game.Multiplayer.isGuest) {
+    	if(!loadData) loadData = { RNDINT: b5.Maths.randomRange(0,255) }
+ 	  	else loadData.RNDINT = b5.Maths.randomRange(0,255);
+    }
+		
 		app.events.dispatch('loadscene');
 		
 		app.clearInterval(this.SceneLoader.mpSyncTask);
@@ -141,11 +148,6 @@ b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenPropertie
 
 			delete b5.addSceneResources;
 			delete b5.LoadScene;
-			
-	  	//Set load data
-	  	//With a random number to decide which player will be chalice (if selected both)
-	  	if(!loadData) loadData = { RNDINT: b5.Maths.randomRange(0,255) }
-	  	else loadData.RNDINT = b5.Maths.randomRange(0,255);
 	  	
   		var tempLoadData = sceneMain.data.loadData;
 	  	//Clear temporary scene variables

@@ -29,9 +29,6 @@ b5.export = function(world, scene, data, game) {
 
 	var isP1Mugman = game.SaveSlots.currentSaveSlot.isPlayer1Mugman;
 
-	data.players.player1 = data.players.characters[isP1Mugman ? 1: 0];
-	data.players.player2 = data.players.characters[isP1Mugman ? 0: 1];
-  
   data.playerLastSpawnPosX = 0;
   
 	myexports.createPlayer = function(player, playerInput, asPlayer2, levelStarted, chaliceFlag) {
@@ -41,6 +38,9 @@ b5.export = function(world, scene, data, game) {
 		
 		var playerPath = b5.Paths.player + player + '/',
 		playerid = !asPlayer2 ? "playerOne": "playerTwo";
+		
+		if(!asPlayer2) data.players.player1 = player;
+		else data.players.player2 = player;
 
 		data[player] = JSON.parse(
 			b5.File.readSync(playerPath + 'player.json')
@@ -48,7 +48,6 @@ b5.export = function(world, scene, data, game) {
 		
 		data[player].flags.introFlag = chaliceFlag;
 
-		//	asPlayer2 && (data[player].flags.heartPoints = 1); Made easier because of desync, enjoy
 		//Load resources
 		var res = data[player].resources,
 		extRes = data[player].extra_resources;
@@ -245,7 +244,7 @@ b5.export = function(world, scene, data, game) {
 		var cmps = data[player].components;
 		
 		//If player added after levelStarted, start with one hp
-		if(levelStarted) data[player].flags.heartPoints = 1;
+	//	if(levelStarted) data[player].flags.heartPoints = 1;
 		
 		for (var i = 0; i < cmps.length; i++) {
 			var cmp = cmps[i].replace(".cup", '');
@@ -314,12 +313,12 @@ b5.export = function(world, scene, data, game) {
 	}
 
 	myexports.createPlayer(
-		data.players.player1, false, false, false, 
+		data.players.characters[isP1Mugman ? 1 : 0 ], false, false, false, 
 		p1chaliceFlag	//|| data.loadData.playerOneAsChalice
 	);
 	//Add player 2 if joined
 	game.Multiplayer.player2Joined && myexports.createPlayer(
-		data.players.player2, true, true, false,
+		data.players.characters[isP1Mugman ? 0 : 1 ], true, true, false,
 		p2chaliceFlag // || data.loadData.playerTwoAsChalice
 	);
 

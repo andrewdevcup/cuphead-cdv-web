@@ -50,6 +50,8 @@ b5.Game.Multiplayer = {
 	host: new Peer('host', iceServers, turnServers, 4),
 	inputsTask: "",
 	tpTask: "",
+	guestAvatarUrl: "",
+	guestUsername: "",
 	data: {
 		teleportTimer: 0,
 		teleportInterval: 0.4,
@@ -80,14 +82,16 @@ b5.Game.Multiplayer = {
 			"SCENE_LOADED",
 			"HIDE_LS",
 			"PLAY_EVENT",
-			"DISPATCH_EVENT"
+			"DISPATCH_EVENT",
+			"QUERY_DISCORD_UDATA",
+			"SEND_DISCORD_UDATA"
 	],
 	events: new b5.EventsManager(),
 	onGuestConnected: function(conn) {
 		var flags = b5.Game.Flags;
 		this.isHosting = true;
 	},
-	onGuestMessage: function(msg) {
+	onGuestMessage: function(msg) { //Guest message recieved
 		//Decode
 		var inst = msg.split("Ξ"),
 		flags = this.FLAGS;
@@ -190,6 +194,14 @@ b5.Game.Multiplayer = {
 		  
 		  sceneMain.events.dispatch(inst[1],data);
 		  break;
+		case 'QUERY_DISCORD_UDATA':
+			this.host.send('13Ξ'+(b5.Game.DiscordLogged ? b5.Game.DiscordSession.data.avatarUrl:'') +
+			  "Ξ" + (b5.Game.DiscordLogged ? b5.Game.DiscordSession.data.username:'') );
+			break;
+		case 'SEND_DISCORD_UDATA':
+			this.guestAvatarUrl = inst[1];
+			this.guestUsername = inst[2];
+			break;
 	}
 
 },
@@ -239,6 +251,9 @@ sendToGuest: function(type, msg) {
 			!msg[1] && (msg[1] = []);
 			this.host.send('11Ξ'+msg[0]+'Ξ'+msg[1].join('π'));
 			break;
+		case 'QUERY_DISCORD_UDATA':
+			this.host.send('12Ξ');
+			break;
 	}
 },
 sendToHost: function(type, msg) {
@@ -248,6 +263,9 @@ sendToHost: function(type, msg) {
 			!msg[1] && (msg[1] = []);
 			this.guest.send('11Ξ'+msg[0]+'Ξ'+msg[1].join('π'));
 			break;
+		case 'QUERY_DISCORD_UDATA':
+	  	this.guest.send('12Ξ');
+	    break;
 	}
 },
 Initialize: function(world, data) {
@@ -283,8 +301,8 @@ Initialize: function(world, data) {
 				a1 = world.findActor(data.players.player1, true),
 				a2 = world.findActor(data.players.player2, true);
 				
-				if(a1 && a1.body && a1.body.m_fixtureList) a1.setPosition(d.p1[0], d.p1[1]);
-				if(a2 && a2.body && a2.body.m_fixtureList) a2.setPosition(d.p2[0], d.p2[1]);
+				if(a1 && a1.body && a1.body.m_fixtureList && d.p1) a1.setPosition(d.p1[0], d.p1[1]);
+				if(a2 && a2.body && a2.body.m_fixtureList && d.p2) a2.setPosition(d.p2[0], d.p2[1]);
 			}
 			//Start multiplayer sync
 			mp.startMPTask();
@@ -369,7 +387,7 @@ startMPTask: function() {
 	}
 },
 guestGeneralMessageEvt: null,
-guestGeneralMessage: function(e) {
+guestGeneralMessage: function(e) { //Guest recieved message from host
 	var r = e.split("Ξ"),
 	m = b5.Game.Multiplayer;
 	switch (+r[0]) {
@@ -418,6 +436,15 @@ guestGeneralMessage: function(e) {
 		  
 		  sceneMain.events.dispatch(r[1],data);
 		  break;
+		case 12: // QUERY_DISCORD_UDATA
+		  m.guest.send('13Ξ'+(b5.Game.DiscordLogged ? b5.Game.DiscordSession.data.avatarUrl:'') +
+			  "Ξ" + (b5.Game.DiscordLogged ? b5.Game.DiscordSession.data.username:''));
+		  break;
+		case 13:
+			m.guestAvatarUrl = r[1];
+			m.guestUsername = r[2];
+			break;
+			
 	}
 },
 guestInputMessage: null,
@@ -491,6 +518,9 @@ onGuestDisconnected: function() {
 	mult.isHosting = false;
 	mult.stopMPTask();
 	mult.wifiReady = false;
+	mult.guestAvatarUrl = "";
+	mult.guestUsername = "";
+	b5.Game.PauseMenu.updateAvatarDisplays();
 },
 onHostError: function(reason) {},
 addPlayer2: function() {
@@ -502,6 +532,8 @@ addPlayer2: function() {
 	b5.Game.ShowPlayerJoinedScreen();
 	this.player2Joined = true;
 	sceneMain.data.initializePlayers();
+	
+	b5.Game.PauseMenu.updateAvatarDisplays();
 },
 removePlayer2: function() {
 	if (this.player2Joined) {
@@ -522,6 +554,12 @@ removePlayer2: function() {
 	
 	this.isGuest = false;
 	this.isHost = false;
+	this.isPlayer2 = false,
+	this.player2Joined = false,
+	this.wifiReady = false;
+	this.guestAvatarUrl = "";
+	this.guestUsername = "";
+	b5.Game.PauseMenu.updateAvatarDisplays();
 	
 	//Clear room in database
 	try{b5.MPDB.ref(this.data.HOST_CODE).remove()}catch(e){}
@@ -601,7 +639,7 @@ setGuest: function(success, failure, timeout) {
 
 		this.guest.onMessage = function(m) {
 			var id = +m.data.substr(0,m.data.indexOf('Ξ'));
-			id != 2 && console.log('Recieved: ' + (m.data? b5.Game.Multiplayer.FLAGS[id] :"nomsg"));
+			app.debug && id != 2 && console.log('Recieved: ' + (m.data? b5.Game.Multiplayer.FLAGS[id] :"nomsg"));
 			b5.Game.Multiplayer.events.dispatch('guest:onmessage', m.data);
 		}
 		
@@ -699,7 +737,7 @@ setHost: function(success, failure) {
 	}
 	this.host.onMessage = function(r) {
 		var id = +r.data.substr(0,r.data.indexOf('Ξ'));
-		id != 2 && console.log('Recieved: ' + (r.data? b5.Game.Multiplayer.FLAGS[id] :"nomsg"));
+		app.debug && id != 2 && console.log('Recieved: ' + (r.data? b5.Game.Multiplayer.FLAGS[id] :"nomsg"));
 
 		b5.Game.Multiplayer.onGuestMessage(r.data);
 		b5.Game.Multiplayer.events.dispatch('host:onmessage', r.data);

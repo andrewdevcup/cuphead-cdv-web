@@ -1,9 +1,0 @@
-bitmap_index,sx,sy,sw,sh,ox,oy,notes
-0,0,0,1400,201,0,0, flower_bg_clouds_a
-0,0,201,1525,350,0,0, flower_bg_clouds_b
-0,0,551,1466,312,0,0, flower_bg_fg
-0,1466,551,431,820,0,0, flower_bg_fg-bush
-0,0,863,1390,525,0,0, flower_bg_hills
-0,0,1388,1107,136,0,0, flower_bg_sea
-0,0,1524,1414,481,0,0, flower_bg_sky
-0,1414,1456,79,73,0,0, flower_bg_sun
