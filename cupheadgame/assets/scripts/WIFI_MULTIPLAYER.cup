@@ -598,68 +598,79 @@ setGuest: function(success, failure, timeout) {
 	
   this.session = "Guest";
 
-	var prh = prompt('INPUT HOST CODE','');//b5.Game.Texts.texts.get_code_from_host);
+	var pnt = promptAsync('INPUT HOST CODE','');//b5.Game.Texts.texts.get_code_from_host);
+	sceneMain.active = false;
 	
-	if (prh == null || prh == "") {
-		fail = true;
+	pnt.catch(prh => {
+		sceneMain.active = true;
+	 	fail = true;
 		failure && failure();
 		this.guest.close();
-	}
-	else {
-		
-		//Connect to database
-		mlt.DB_ENTRY = b5.MPDB.ref(prh);
-		
-		//Get codes
-		mlt.DB_ENTRY.on('value', onGetHostCode);
-
-		this.guest.onError = function(err) {
-			b5.Game.Multiplayer.events.dispatch('guest:error', err);
-			!fail && failure && (fail=true,failure());
+	});
+	
+	pnt.then( prh => {
+		sceneMain.active = true;
+		if (prh == null || prh == "") {
+			fail = true;
+			failure && failure();
+			this.guest.close();
 		}
-		this.guest.onOpen = function() {
-			console.log('[guest] Connected to host');
-
-			var mul = b5.Game.Multiplayer;
-			mul.events.dispatch('guest:open');
+		else {
 			
-			b5.Game.addCheev(b5.Game.Texts.texts.roomFound, b5.Game.Texts.texts.wifiConnecting);
+			//Connect to database
+			mlt.DB_ENTRY = b5.MPDB.ref(prh);
 			
-			//General events
-			mul.events.off(mul.guestGeneralMessageEvt);
-			mul.guestGeneralMessageEvt = mul.events.on('guest:onmessage', mul.guestGeneralMessage);
-		}
-		this.guest.onClose = function() {
-			console.log('[guest] Closed');
+			//Get codes
+			mlt.DB_ENTRY.on('value', onGetHostCode);
+	
+			this.guest.onError = function(err) {
+				b5.Game.Multiplayer.events.dispatch('guest:error', err);
+				!fail && failure && (fail=true,failure());
+			}
+			this.guest.onOpen = function() {
+				console.log('[guest] Connected to host');
+	
+				var mul = b5.Game.Multiplayer;
+				mul.events.dispatch('guest:open');
+				
+				b5.Game.addCheev(b5.Game.Texts.texts.roomFound, b5.Game.Texts.texts.wifiConnecting);
+				
+				//General events
+				mul.events.off(mul.guestGeneralMessageEvt);
+				mul.guestGeneralMessageEvt = mul.events.on('guest:onmessage', mul.guestGeneralMessage);
+			}
+			this.guest.onClose = function() {
+				console.log('[guest] Closed');
+				
+				b5.Game.Multiplayer.isGuest && b5.Game.addCheev(b5.Game.Texts.texts.wifiDisconnected);
+				
+				b5.Game.Multiplayer.events.dispatch('guest:close');
+			}
+	
+			this.guest.onMessage = function(m) {
+				var id = +m.data.substr(0,m.data.indexOf('Ξ'));
+				app.debug && id != 2 && console.log('Recieved: ' + (m.data? b5.Game.Multiplayer.FLAGS[id] :"nomsg"));
+				b5.Game.Multiplayer.events.dispatch('guest:onmessage', m.data);
+			}
 			
-			b5.Game.Multiplayer.isGuest && b5.Game.addCheev(b5.Game.Texts.texts.wifiDisconnected);
+			//Connection states
+			this.guest.onConnectionState = st => {
+				var hsp = b5.Game.Multiplayer.data.host_statep;
+				hsp[0] = st;
+				b5.Game.addCheev('[guest] ' + hsp[0], 'ice: '+hsp[1]);
+				
+				if(st == "failed" && b5.Game.Multiplayer.player2Joined) b5.Game.Multiplayer.guest.close();
+			}
+			this.guest.onIceConnectionState = st => {
+				var hsp = b5.Game.Multiplayer.data.host_statep;
+				hsp[1] = st;
+				b5.Game.addCheev('[guest] ' + hsp[0], 'ice: '+hsp[1]);
+			}
+	
+		//	this.guest.connect(code2, onConnect);
 			
-			b5.Game.Multiplayer.events.dispatch('guest:close');
-		}
-
-		this.guest.onMessage = function(m) {
-			var id = +m.data.substr(0,m.data.indexOf('Ξ'));
-			app.debug && id != 2 && console.log('Recieved: ' + (m.data? b5.Game.Multiplayer.FLAGS[id] :"nomsg"));
-			b5.Game.Multiplayer.events.dispatch('guest:onmessage', m.data);
-		}
-		
-		//Connection states
-		this.guest.onConnectionState = st => {
-			var hsp = b5.Game.Multiplayer.data.host_statep;
-			hsp[0] = st;
-			b5.Game.addCheev('[guest] ' + hsp[0], 'ice: '+hsp[1]);
-			
-			if(st == "failed" && b5.Game.Multiplayer.player2Joined) b5.Game.Multiplayer.guest.close();
-		}
-		this.guest.onIceConnectionState = st => {
-			var hsp = b5.Game.Multiplayer.data.host_statep;
-			hsp[1] = st;
-			b5.Game.addCheev('[guest] ' + hsp[0], 'ice: '+hsp[1]);
-		}
-
-	//	this.guest.connect(code2, onConnect);
-		
-		}
+			}
+	});
  
 },
 HostStarted: false,
@@ -795,4 +806,3 @@ b5.Game.Multiplayer.events.on('guest:close',r => {
 	b5.Game.SceneLoader.reset();
 	b5.Game.Multiplayer.removePlayer2();
 });
-

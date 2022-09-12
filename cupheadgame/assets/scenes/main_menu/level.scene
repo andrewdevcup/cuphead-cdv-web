@@ -58,7 +58,7 @@ b5.LoadScene = function(world, scene, data, game) {
 		
 		//Current map 
 		var slotsub = new b5.LabelActor;
-		slotsub.font = scene.findResource('CupheadVogueBoldFont','brush');
+		slotsub.font = scene_GUI.findResource('CupheadVogueBoldFont','brush');
 		slotsub.fill_style = "#1e1e1e";
 		slotsub._scale = 0.8;
 		slot.addActor(slotsub);
@@ -306,7 +306,7 @@ b5.LoadScene = function(world, scene, data, game) {
 
 	//Select player label
 	var pselectlab = new b5.LabelActor;
-	pselectlab.font = scene.findResource('CupheadVogueBoldFont', 'brush');
+	pselectlab.font = scene_GUI.findResource('CupheadVogueBoldFont', 'brush');
 	pselectbg.addActor(pselectlab);
 	pselectlab.setPosition(-135, -10);
 	pselectlab._scale = .75;
@@ -413,10 +413,11 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 						break;
 					case 3: //Discord
 						if(!game.DiscordLogged) {
-							var tk = prompt(game.Texts.texts.discord_token);
+							var ps = promptAsync(game.Texts.texts.discord_token);
+							sceneMain.active = false;
 							
-							if(tk) {
-								game.DiscordSession.start(tk, true).then(f => {
+							ps.then(tk => {
+					  		if(tk) game.DiscordSession.start(tk, true).then(f => {
 									game.DiscordLogged = true;
 								
 									var dav = world.findActor('DiscordAvatar',true),
@@ -429,10 +430,12 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
   						  	 'bitmap');
       
   								 dna.text = game.DiscordSession.data.username;// + "\n" + game.DiscordSession.data.discriminator;
-  							 
 								});
-								
-							}
+								sceneMain.active = true;
+							});
+							ps.catch(tk => {
+								sceneMain.active = true;
+							});
 						}
 						else {
 							//Logout
@@ -684,6 +687,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 						});
 						
 					}, function() {
+						sceneMain.active = true;
 						b5.Game.Multiplayer.isGuest = false;
 						data.slot_page = "LocalSaves";
 					});
@@ -822,14 +826,6 @@ var slot_select_atlas = new b5.ImageAtlas('SactxSlotSelectAtlas', [slot_select_b
 slot_select_atlas.parseFrames(b5.File.readSync(data.resourcePath + 'sactx_BC7_Slot_Select-optimized.csv'));
 slot_select_atlas.parseAnims(b5.File.readSync(data.resourcePath + 'anims/player_select-outline.atlas.json'));
 scene.addResource(slot_select_atlas, 'brush');
-
-//Load Bold font
-var voguefont_bold = new b5.ImageAtlas('CupheadVogueBoldFont', [
-	scene.addResource( new b5.Bitmap('CupheadVogueBold', b5.Paths.fonts + 'CupheadVogue-Bold-merged-0.png'), 'bitmap')
-]);
-voguefont_bold.parseFrames(b5.File.readSync(b5.Paths.fonts + 'CupheadVogue-Bold-merged.bft'));
-
-scene.addResource(voguefont_bold, 'brush');
 
 //Read save data
 var slot0data = new b5.Raw('SaveSlot0Data', b5.Paths.saves + game.contents.sav[0], true, sd => {

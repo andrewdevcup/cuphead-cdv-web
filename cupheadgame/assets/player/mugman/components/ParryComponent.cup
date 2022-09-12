@@ -68,7 +68,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
     	flags.parrying = true;
     	flags.jumpState = 1; //Recover parry
     	thisPlayer.body.SetActive(true);
-    	game.Flags.pausingEnabled = true;
+    	game.Flags.pausingEnabled = !data.players_dead;
     	scene.world.m_sleep = false;
     	//Continue parryActive until anim ends
     	atlas.playAnimWithEnd('jump_parry', function() {

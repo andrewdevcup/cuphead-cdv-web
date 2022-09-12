@@ -1,6 +1,6 @@
-b5.PixiDisplay = function(canvas) {
+b5.PixiDisplay = function(canvas, use_image_bitmaps) {
 	PIXI.settings.PRECISION_VERTEX = "mediump";
-  PIXI.settings.CREATE_IMAGE_BITMAP = true;
+  PIXI.settings.CREATE_IMAGE_BITMAP = use_image_bitmaps;
 	PIXI.settings.SORTABLE_CHILDREN = true;
 	
 	this.canvas = canvas;
@@ -413,3 +413,55 @@ b5.Actor3D.prototype.destroy = function() {
   this.sprite.destroy(),
   this.container.destroy()
 };
+
+(function() {
+		_createImageBitmap = createImageBitmap;
+		var _process = {
+			tasks: [],
+			pending: [],
+			threads: navigator.hardwareConcurrency,
+			addTask: function(t) {
+				if(this.tasks.length < this.threads) this.tasks.push(t);
+				else this.pending.push(t);
+				this.processTasks();
+				return t;
+			},
+			processTasks: function() {
+				for(var i = 0, tl = this.tasks, pl = this.pending, ts = this.threads, _this = this, t; i < tl.length; i++) {
+					if(t = tl[i], !t.processing) {
+						t.processing = true;
+						_createImageBitmap(t.data, t.x, t.y, t.w, t.h, t.options)
+						.then(f => {
+							t.success(f);
+							tl.splice(t,1);
+							pl.length > 0 && tl.length < ts && tl.push(pl[0]);
+							pl.shift();
+							_this.processTasks();
+						})
+						.catch(f => {
+							t.fail(f);
+							tl.splice(t,1);
+							pl.length > 0 && tl.length < ts && tl.push(pl[0]);
+							pl.shift();
+							_this.processTasks();
+						});
+					}
+				}
+			}
+		}
+		createImageBitmap = function(d,x,y,w,h,o) {
+			var task = _process.addTask({
+				data: d,
+				x: x,
+				y: y,
+				w: w,
+				h: h,
+				options: o
+			});
+			
+			return new Promise( (res, rej) => {
+				task.success = res;
+				task.fail = rej;
+			});
+		}
+	})();

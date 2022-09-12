@@ -28,7 +28,8 @@ b5.Game.GameDefIDs = {
 		"1487051212": "psugar",
 		"1500641115": "twinheart",
 		"1500621999": "whetstone",
-		"temp": "cookie",
+		"1522153206": "cookie",
+		"temp": "drew",
 		"empty": 2147483647,
 		"smokebomb": 1461001046,
 		"heart": 1460832742,
@@ -36,7 +37,8 @@ b5.Game.GameDefIDs = {
 		"psugar": 1487051212,
 		"twinheart": 1500641115,
 		"whetstone": 1500621999,
-		"cookie": "temp"
+		"cookie": 1522153206,
+		"drew": "temp"
 	},
 	supers: {
 		"2147483647": "empty",

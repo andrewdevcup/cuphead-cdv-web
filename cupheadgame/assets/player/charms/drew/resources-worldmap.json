@@ -1,0 +1,15 @@
+{
+	"bitmap": [
+		{
+			"name": "drewEquipIcon",
+			"src": "player/charms/drew/data.0"
+		}
+	],
+	"brush": [
+		{
+			"name": "drew:EQUIP_ICON",
+			"bitmaps": ["drewEquipIcon"],
+			"frames": "player/charms/drew/data.1"
+		}
+	]
+}

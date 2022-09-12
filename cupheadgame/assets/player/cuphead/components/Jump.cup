@@ -28,7 +28,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	var unhold = function(i,h) {
 		thisPlayer.setTimeout(f => {
 			!h && i.A ? (hold2 = A_hold = true, unhold(i,1)) : A_hold = false;
-		},A_holdTime);
+		},A_holdTime + (h ? .2 : 0));
 	}
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {

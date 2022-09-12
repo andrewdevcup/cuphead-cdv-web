@@ -41,7 +41,7 @@ b5.LoadScene = function(world, scene, data, game) {
 
 	//Tutorial main label
 	var tutolabel = world.findActor('TutorialLabel', true);
-	tutolabel.font = scene.findResource('CupheadVogueBoldFont', 'brush');
+	tutolabel.font = scene_GUI.findResource('CupheadVogueBoldFont', 'brush');
 
 	var tutorialObjects = scene.findResource('TutorialObjectsAtlas', 'brush');
 	//Duck
@@ -513,14 +513,6 @@ b5.addSceneResources = function(scene, data, game) {
 	scene.addResource(tutoAtlas,
 		'brush');
 
-	//Fonts
-	var vogueFont = new b5.ImageAtlas('CupheadVogueBoldFont',
-		[
-			scene.addResource(new b5.Bitmap('CupheadVogueBold', b5.Paths.fonts + 'CupheadVogue-Bold-merged-0.png'), 'bitmap')
-		]);
-	vogueFont.parseFrames(b5.File.readSync(b5.Paths.fonts + 'CupheadVogue-Bold-merged.bft'));
-	scene.addResource(vogueFont,
-		'brush');
 
 	//Music
 	var mus_tuto = new b5.Sound('MUS_Tutorial',

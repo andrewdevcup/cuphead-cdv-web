@@ -28,6 +28,9 @@ b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenPropertie
 	
 	if (this.SceneLoader.available) {
 		
+		if(this.SlotUtils.getPlayerLoadouts('playerOne').charm == 'temp')
+		  this.loadingScreen.nightmare = true;
+		
 		//Set load data
 	 	//With a random number to decide which player will be chalice (if selected both)
    	if(!b5.Game.Multiplayer.isGuest) {

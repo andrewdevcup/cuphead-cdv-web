@@ -9,7 +9,7 @@
 *
 */
 RELEASE_CODENAME = "Pre-Beta";
-RELEASE_VER = 2.5;
+RELEASE_VER = "2.5.5";
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -106,6 +106,7 @@ b5.dbgtxt = new b5.LabelActor();
 b5.dbgtxt._scale = 0.5;
 b5.dbgtxt.dock_y = b5.Actor.Dock_Top;
 b5.dbgtxt.oy = -60;
+b5.dbgtxt.y2 = 40;
 }
 
 b5.loadgame = function() {
@@ -126,12 +127,10 @@ b5.loadgame = function() {
 				break;
 		}
 	};
-	
-	PIXI.settings.CREATE_IMAGE_BITMAP = true
+
 	//Create the app
-	app = new b5.App(document.getElementById("gamecanvas"), true, {
-	alpha: false, desynchronized: true
-	});
+	app = new b5.App(document.getElementById("gamecanvas"),
+	true, true);
 	app.debug = !true;
 	app.prevent_default = true;
 	app.adapt_resolution = false;
@@ -247,7 +246,7 @@ b5.loadgame = function() {
 				//app.clear_canvas = app.global_scale < 0.9;
 				app.onResizeBase();
 				//Vsync
-				app.vsync = vcfg.vsync;
+				app.vsync = true; //vcfg.vsync;
 				app.fps_limit = 250;
 				//Noise
 				b5.Game.screenfx && (vcfg.screenfx_enabled ? b5.Game.screenfx.activate() : b5.Game.screenfx.deactivate());
@@ -266,13 +265,6 @@ b5.loadgame = function() {
 				//Display
 				!dev.fastcoding && b5.Utils.SetOrientation('landscape');
 				
-				/*
-				//Brightness and saturation
-				app.setFilters({
-					brightness: 1 + (Math.round10(vcfg.brightness) *0.6),
-					saturate: 1
-				});*/
-				
 				//Texture resolution
 				if(vcfg.textureQuality == void 0) vcfg.textureQuality = 0.6;
 				app.texture_resolution = vcfg.textureQuality;
@@ -286,6 +278,15 @@ b5.loadgame = function() {
 			  
 			  //Additions
 			  if(vcfg.fastTextureDecoding === void 0) vcfg.fastTextureDecoding = false;
+			  if(vcfg.cupheadFilters === void	0) vcfg.cupheadFilters = true;
+			  if(vcfg.brightness === void 0) vcfg.brightness = 0.2;
+			  
+			  //Filters
+			  var bright = b5.Maths.pos(-0.05, 0.3, vcfg.brightness);
+			  if(vcfg.cupheadFilters) app.setFilters({
+			  	contrast: 1.3 - bright,
+			  	brightness: 0.85 + bright
+			  });
 			  
 			  app.fast_texture_decoding = vcfg.fastTextureDecoding;
 			  
@@ -398,10 +399,11 @@ object;
 };
 
   b5.Game.d_getDifficulty = function(d) {
+  	var a = (this.Multiplayer.isGuest || this.Multiplayer.isHosting) && this.Multiplayer.player2joined ? ' | Online' : '';
   	switch(d) {
-  		case 0: return 'Simple';
-  		case 2: return 'Extreme';
-  		default: return 'Regular';
+  		case 0: return 'Simple' + a;
+  		case 2: return 'Extreme' + a;
+  		default: return 'Regular' + a;
   	}
   }
 	b5.Game.d_printPlayersAndHP = function() {
@@ -409,7 +411,7 @@ object;
 			for(var i = 0, n = "", a = sceneMain.data.players.activePlayers; i < a.length; i++) {
 				var p = sceneMain.findActor(a[i],true);
 				
-				n += a[i].capitalize() + " " + (p.flags.heartPoints > 0 ? p.flags.heartPoints + "HP" : "DEAD") + (i+1 < a.length ? " | ":"");
+				n += a[i].capitalize() + /*+ (p.flags.heartPoints > 0 ? p.flags.heartPoints + "HP" : "DEAD") +*/ (i+1 < a.length ? " | ":"");
 			}
 			return n;
 		}
@@ -787,7 +789,7 @@ app.adaptive_physics = true;
 app.memoryUsage = ""
 
 app.getMemoryUsage = function() {
-	if(cordova.platformId == "browser") return;
+	if(cordova.platformId == "browser" || cordova.platformId == "electron") return;
 	chrome.system.memory.getInfo(function(e){
   	app.memoryUsage = Math.round10(Math.round1000((e.capacity-e.availableCapacity)/e.capacity)*100)+'%'
   })
@@ -819,14 +821,15 @@ sceneMain.time_step = app.dt;
 
 
 //Update pause
-var btnPause = b5.Game.Input.player1.Start || b5.Game.Input.player2.Start;
+var btnPause = (b5.Game.Input.player1.Start || b5.Game.Input.player2.Start) && !b5.Game.Flags.inSomeMenu;
 if (btnPause && b5.Game.Flags.pausingEnabled && !b5.Game.PauseMenu.visible && !b5.Game.Multiplayer.isGuest)
 b5.Game.PauseMenu.show(b5.Game.Flags.inWorldmap ? "worldmap": b5.Game.Flags.inLevel ? "level": null);
   
 app.now > l+1000 ? (fpt = fptc+1,
   fptc = 0, 
   l = app.now,
-  app.getMemoryUsage(), app.updateInfoText()
+  cordova.platformId != 'electron' && app.getMemoryUsage(), 
+  app.updateInfoText()
 ): fptc++;
 //app.updateInfoText()
 

@@ -118,8 +118,8 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
      	if(flags.heartPoints <= 0) dead();
      	
      	//Check if dead
-     	for(var i = 0, p = data.players.activePlayers, l = 0; i < p.length; i++) 
-     		data[p[i]].flags.heartPoints <= 0 && l++;
+     	for(var i = 0, p = data.players.activePlayers, g = world.findActorsByTagName('player',true), l = 0; i < p.length; i++) 
+     	  g[i].flags.heartPoints <= 0 && l++;
      	if(l >= p.length) data.allPlayersDead();
     }
      

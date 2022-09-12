@@ -174,7 +174,7 @@ promptAsync = function(subtitle, text, options) {
      
      mbgs.backgroundColor = 'rgb(49 49 49)';
      mbgs.width = (nw * 0.9) + 'px';
-     mbgs.height = (nh * .74) + 'px';
+     mbgs.height = (nh * .54) + 'px';
      mbgs.borderRadius = '5%';
      mbgs.display = 'flex';
      mbgs.justifyContent = 'start';
@@ -186,8 +186,8 @@ promptAsync = function(subtitle, text, options) {
      stxts = stxt.style;
      stxt.textContent = subtitle;
      stxts.color = "#bbbbbb";
-     stxts.zoom = 1.6;
-     stxts.font = b5.dbgtxt.style.font;
+     stxts.zoom = 1.3;
+     stxts.font = '';
      stxts.paddingTop = "3%";
      stxts.paddingLeft = "2%";
      stxts.paddingRight = "2%";
@@ -201,15 +201,15 @@ promptAsync = function(subtitle, text, options) {
      tas.backgroundColor = "transparent";
      tas.marginTop = "3%";
      tas.width = '95%';
-     tas.height = '55%';
+     tas.height = '35%';
      tas.color = "white";
      mbg.appendChild(ta);
      
      var btnCancel = document.createElement('text'),
      btncs = btnCancel.style;
      
-     btncs.font = b5.dbgtxt.style.font;
-     btncs.zoom = 2.5;
+     btncs.font = '';
+     btncs.zoom = 2.2;
      btncs.marginLeft = "-25%";
      btncs.marginTop = "1%";
      btncs.color = "#589693";
@@ -228,8 +228,8 @@ promptAsync = function(subtitle, text, options) {
      var btnAccept = document.createElement('text'),
      btnas = btnAccept.style;
      
-     btnas.font = b5.dbgtxt.style.font;
-     btnas.zoom = 2.5;
+     btnas.font = '';
+     btnas.zoom = 2.2;
      btnas.color = "#589693";
      btnas.marginLeft = "25%";
      btnAccept.textContent = " . . . . " + (options.accept || "Accept");
@@ -257,7 +257,7 @@ promptAsync = function(subtitle, text, options) {
      
   return new Promise((res,rej) => {
   	btnCancel.onclick = k => {
-  		bg.hide(),res(null);
+  		bg.hide(),rej(null);
   		btnCancel.onclick = null;
   	};
   	btnAccept.onclick = k => {

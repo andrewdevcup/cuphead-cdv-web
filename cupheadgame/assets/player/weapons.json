@@ -1,9 +1,9 @@
 [
 	"peashooter",
 	"spread",
-	"roundabout",
 	"chaser",
-	"charge",
 	"lobber",
+	"charge",
+	"roundabout",
 	"exploder"
 ]

@@ -46,6 +46,7 @@
 	"sett_visual_resolution": "RESOLUTION",
 	"sett_visual_postfx": "COLOR FX",
 	"sett_visual_vsync": "VSYNC",
+	"sett_visual_brightness": "BRIGHTNESS",
 	"sett_visual_overscan": "OVERSCAN",
 	"sett_visual_texquality": "QUALITY",
 	"sett_visual_screenfx": "NOISE",

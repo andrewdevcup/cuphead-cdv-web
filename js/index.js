@@ -21,37 +21,6 @@
  alert(e+','+t+','+o+','+a+','+n)
  }
  
- promptAsync = function(subtitle, text) {
-	 if(document.getElementById('PromptBG')) return;
-	 
-	 var bg = document.createElement('div'),
-	 bgs = bg.style;
-	
-	 bg.id = 'PromptBG';
-	
-	 bgs.width = self.innerWidth + 'px';
-	 bgs.height = self.innerHeight + 'px';
-	 bgs.position = 'absolute';
-	 bgs.display = 'flex';
-	 bgs.justifyContent = 'center';
-	 bgs.alignItems = 'center';
-	 bgs.zIndex = 90;
-	 
-	 var mbg = document.createElement('div'),
-	 mbgs = mbg.style;
-	 
-	 mbgs.backgroundColor = 'rgb(49 49 49)';
-	 mbgs.width = '75%';
-	 mbgs.height = '65%';
-	 mbgs.borderRadius = '5%';
-	 bg.appendChild(mbg);
-	 
-	 mbg.animate([{transform:'scale(0)',easing:'cubic-bezier(.36,1.59,.86,.95)'},{transform:'scale(1)'}],300);
-	
-	 document.body.appendChild(bg);
-	
- }
- 
  /* Queue system */
  ResourceQueue = function() {},
  ResourceQueue.in_queue = [],
@@ -115,6 +84,12 @@ function onDeviceReady() {
 		switch(cordova.platformId) {
 			case 'android': 
 				internalDir = window.DebugBuild ? '/sdcard/CupheadGame/' : cordova.file.applicationDirectory+'cupheadgame/'
+			break;
+			case 'ios':
+				internalDir = cordova.file.applicationDirectory + 'www/cupheadgame/';
+			break;
+			case 'electron':
+				internalDir = location.href.replace("index.html","") + 'cupheadgame/';
 			break;
 			default:
 				var appDir = cordova.file.applicationDirectory;

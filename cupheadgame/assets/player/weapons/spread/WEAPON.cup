@@ -59,10 +59,10 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				bullet.fill_style = 'transparent';
 				bullet.tags = ["playerBullet"];
 				bullet.tag = "playerBullet";
-				bullet.bulletsId = scene.data.playerBullets.length;
 				bullet.layer = thisPlayer.layer-1;
 				bullet.supermeter_score = wpnData.supermeter_score;
 				bullet.small_bullet = small;
+				bullet.rdt = b5.Maths.randomRange(1,4) * 1/60;
 
 				viewLayer.addActor(bullet);
 
@@ -124,7 +124,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 
 					//Check overlaps
 					var ols = this.A_overlaps; 
-					for (var i = 0; i < ols.length; i++)
+					if(this.time >= this.rdt) for (var i = 0; i < ols.length; i++)
 				  	if(ols[i]) {
 				  	var l = ols[i];
 						if (ols[i].tags.indexOf("hittableEnemy") != -1) {

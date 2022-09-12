@@ -4,6 +4,12 @@ b5.LoadScene = function(world, scene, data, game) {
 	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
 	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
   
+  //Update presence on Discord
+  game.DiscordSession.updateActivity({
+  	details: 'In the Credits',
+  	state: 'Thanks for playing!'
+  });
+  
   world.camera_update = false;
   game.Flags.pausingEnabled = false;
   //Allow touchscreen
@@ -209,6 +215,13 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
   				},0.3);
   			}
   			else book.returnToMenu();
+  			
+  			if(currentPage == pages.length-1) scene.setTimeout(g => {
+  				game.loadingScreen.nightmare=true;
+  				game.LoadScene('test3', true, true, {
+				 		hourglass: true
+  				});
+  			},36.9);
   		}
   		
   	}

@@ -55,7 +55,7 @@
 		"baseSpeed": 24,
 		"jumpSpeed": 50,
 		"dashTime": 0.3,
-		"jumpHeight": 200,
+		"jumpHeight": 182,
 		"dashSpeed": 50,
 		"dashRecoil": 0.1,
 		"coyote": 0.032,

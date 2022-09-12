@@ -30,6 +30,36 @@ b5.export = function(world, scene, data, game) {
 	
 	var equipCardsManager = scene.data.EquipCardsManager = {
 		cards: [],
+		weaponLay: {
+			columns: 3,
+			rows: 2,
+			length: 6,
+			offsetX: -100,
+			offsetY: -100,
+			padX: 100,
+			padY: 97,
+			scale: 1.25
+		},
+		superLay: {
+			columns: 3,
+			rows: 1,
+			length: 3,
+			offsetX: -100,
+			offsetY: -100,
+			padX: 100,
+			padY: 97,
+			scale: 1.25
+		},
+		charmLay: {
+			columns: 5,
+			rows: 2,
+			length: 10,
+			offsetX: -200,
+			offsetY: -100,
+			padX: 100,
+			padY: 97,
+			scale: 1.25
+		},
 		show: function() {
 			game.Flags.inEquipCard = true;
 			game.Flags.pausingEnabled = false;
@@ -37,7 +67,7 @@ b5.export = function(world, scene, data, game) {
 		},
 		hideAll: function() {
 			game.Flags.inEquipCard = false;
-			game.Flags.pausingEnabled =  !scene.data.players_dead;
+			game.Flags.pausingEnabled = !scene.data.players_dead;
 		}
 	}
 
@@ -47,7 +77,7 @@ b5.export = function(world, scene, data, game) {
 
 	//Card objects (for p1 and p2)
 
-	for (var i = 0, plyrCard; i < characters.length; i++) {
+	for (var i = 0; i < characters.length; i++) {break;
 		//Resources
 		game.parseResources(
 			JSON.parse(b5.File.readSync(b5.Paths.scenes+'common/equipCards/'+characters[i]+'/resources.json')), scene);
@@ -60,13 +90,17 @@ b5.export = function(world, scene, data, game) {
 		plyrCard.id = characters[i];
 		plyrCard.tag = "EquipCardUI";
 		plyrCard.name = characters[i] + "-EquipCard";
-		plyrCard.bitmap = scene.findResource(plyrCard.id+":EquipCardFront", "bitmap");
+		plyrCard.front_Bitmap = scene.findResource(plyrCard.id+":EquipCardFront", "bitmap");
+		plyrCard.back_Bitmap = scene.findResource(plyrCard.id+":EquipCardBack","bitmap");
+		plyrCard.waiting_Bitmap	= scene.findResource('EquipCardReadyAndWaitingBG','bitmap');
+		plyrCard.list_Bitmap = scene.findResource('EquipCardChecklistBG', 'bitmap');
+		plyrCard.bitmap = plyrCard.front_Bitmap;
 		plyrCard.layer = 5;
 
 		// ADD TO SCENE GUI
 		scene_GUI.addActor(plyrCard);
 		equipCardsManager.cards.push(plyrCard);
-		plyrCard._av = false;
+	//	plyrCard._av = false;
 
 		plyrCard.front_sel = 0;
 		plyrCard.front_sel_ids = ["primaryWeapon","secondaryWeapon","super","charm", null];
@@ -82,13 +116,965 @@ b5.export = function(world, scene, data, game) {
 		plyrCard.mask = plyrCardMask;
 		
 		plyrCard.setMask(plyrCardMask);
+		
+		plyrCard.onTick = plyrCard.dirty;
 
 		//Icons
 		plyrCard.isPlyOne =
 		(game.SaveSlots.currentSaveSlot.isPlayer1Mugman && characters[i] == "mugman") ||
-		(!game.SaveSlots.currentSaveSlot.isPlayer1Mugman && characters[i] != "mugman"),
-		plyrCard.loadout = game.SlotUtils.getPlayerLoadouts(plyrCard.isPlyOne ? 'playerOne': 'playerTwo');
+		(!game.SaveSlots.currentSaveSlot.isPlayer1Mugman && characters[i] != "mugman");
+		plyrCard.playerId = plyrCard.isPlyOne ? 'playerOne': 'playerTwo';
+		
+		plyrCard.loadout = game.SlotUtils.getPlayerLoadouts(plyrCard.playerId);
+		plyrCard.inventory = game.SlotUtils.getPlayerInventory(plyrCard.playerId);
+		
+		plyrCard.openSection = function(section) {
+			this.inFrontPage = false;
+			//Animate
+			this.mask._scale_x = 1;
+			this.mask.TweenToWithEnd('_scale_x',0,0.06,b5.Ease.quadin,true,0,f => {
+				//Animate card and mask
+				this.mask.TweenTo('_scale_x',1,0.06,b5.Ease.cubicout,true);
+				this._scale_x = 0.7;
+				this.skew_y = 0;
+				this.TweenTo('_scale_x',1,0.11,b5.Ease.backout,true);
+				
+				//Set bitmap
+				this.bitmap = this.front_sel == 4 ? this.list_Bitmap:this.back_Bitmap;
+				this.frontBox._av = false;
+				
+				//Open section
+				switch(section) {
+					case 'primaryWeapon':
+						this.createWeaponSection(section, b5.Game.Texts.texts.equip_card_shot_a);
+						break;
+					case 'secondaryWeapon':
+						this.createWeaponSection(section, b5.Game.Texts.texts.equip_card_shot_b);
+						break;
+					case 'super':
+						this.createSuperSection(section, b5.Game.Texts.texts.equip_card_super);
+						break;
+					case 'charm':
+						this.createCharmSection(section, b5.Game.Texts.texts.equip_card_charm)
+						break;
+					case 'list':
+						break;
+				}
+			});
+			this.TweenTo('skew_y',0.02,0.06);
+			
+		}
+		
+		plyrCard.goBackToFront = function() {
+			this.inFrontPage = true;
+			//Animate
+			this.mask._scale_x = 1;
+			this.mask.TweenToWithEnd('_scale_x',0,0.06,b5.Ease.quadin,true,0,f => {
+				//Animate card and mask
+				this.mask.TweenTo('_scale_x',1,0.06,b5.Ease.cubicout,true);
+				this._scale_x = 0.7;
+				this.skew_y = 0;
+				this.TweenTo('_scale_x',1,0.11,b5.Ease.backout,true);
+				
+				//Set bitmap
+				this.bitmap = this.front_Bitmap;
+				this.frontBox._av = true;
+				
+				//Destroy previous section
+				if(this.current) {
+					this.current.destroy();
+					this.current = null;
+				}
+				
+				//Update icon
+				for(var x = 0; x < this.front_sel_ids.length-1;x++) this.frontBox.updateIcon(x,
+				  b5.Game.GetItemName(this.loadout[this.front_sel_ids[x]])
+				);
+			});
+			this.TweenTo('skew_y',-0.02,0.06);
+		}
+		
+		/* 
+		* === PRIMARY & SECONDARY WEAPON SECTION ===
+		*/
+		
+		//B&W filter to apply on weapon equiped on primary/secondary
+		plyrCard.BWF = new PIXI.filters.ColorMatrixFilter();
+		plyrCard.BWF.blackAndWhite(1)
+		
+		plyrCard.createWeaponSection = function(idSection,title) {
+			var listBox = new b5.Actor(),
+			textSec = new b5.LabelActor(),
+			textWpnInfo = new b5.LabelActor(),
+			atlas = scene.findResource('EquipCardCommonAtlas','brush'),
+			extraBoldFont = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush'),
+			secondary = idSection == 'secondaryWeapon' ? 'primaryWeapon' : 'secondaryWeapon';
+			
+			textSec.font = textWpnInfo.font = scene_GUI.findResource('CupheadMemphisFont', 'brush');
+			listBox.addActor(textSec);
+			listBox.addActor(textWpnInfo);
+			
+			textWpnInfo.onTick = function() {
+				this.setFormatLine(0, 0, 0, [null, extraBoldFont,0,-25,1.6,1.6],true);
+				this.setFormatLine(1, 0, 0, [null, extraBoldFont,0,-7,1.15,1.15]);
+				
+				this.setFormatLine(2, 0, 0, [null, textSec.font]);
+				this.setFormatLine(3, 0, 0, [null, textSec.font]);
+			}
+			textWpnInfo._scale = 0.62;
+			textWpnInfo.line_height = 50;
+			textWpnInfo._y = 140;
+			
+			textWpnInfo.fill_style = b5.Game.Styles.text_pausemenu;
+			
+			textWpnInfo.updateInfoFor = function(icon) {
+				if(!icon) icon = 'empty';
+				
+				if(icon == 'empty') icon = 'equip_card_empty_locked';
+				this.text = 
+				  b5.Game.Texts.texts[icon] + (icon != 'equip_card_empty_locked' ? '\nEX: ' : '\n') +
+				  b5.Game.Texts.texts[icon+':ex'] +'\n'+
+					b5.Game.Texts.texts[icon+':info'];
+			}
+			
+			textWpnInfo.updateInfoFor( b5.Game.GetItemName(this.loadout[idSection]) );
+			
+			textSec._scale = 1.3;
+			textSec._y = -220;
+			textSec.fill_style = "#d5c2b0";
+			textSec.text = title;
+			
+			for(var i = 0, a = equipCardsManager.weaponLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; i < a.length; i++) {
+				var spc = new b5.Actor();
+				spc.atlas = atlas;
+				listBox.addActor(spc);
+				spc.current_frame = 45;
+				spc._scale = a.scale;
+				spc.opacity = 0.5;
+				
+				spc.setPosition(lx, ly);
+				
+				//Add icon
+				var icon = new b5.Actor(),
+				item = weaponList[i];
+				
+				if(this.inventory._weapons.indexOf(b5.Game.GetItemId(item)) == -1 && !b5.Game.Flags.allItemsUnlocked)
+				  item = 'empty';
+				
+				icon.atlas = scene.findResource(item + ':EQUIP_ICON','brush');
+				icon.frame_speed = 12;
+				icon._scale = 1 / a.scale;
+				icon.oScale = icon.scale;
+				icon.use_parent_opacity = false;
+				icon.name = item;
+				icon.id = icon.name+'-iconBack';
+				icon.tag = "icon";
+				icon.E = null;
+				icon.pos = {
+					x: cl,
+					y: cly
+				};
+				spc.addActor(icon);
+				icon.card = this;
+				
+				//Use black and white filter if equiped on secondary
+				icon.updateSec = function() {
+					if(this.name == b5.Game.GetItemName(this.card.loadout[secondary])) {
+					  this.addFilter(this.card.BWF);
+					  this.equipedOnSecondary = true;
+					}
+					else {
+						this.removeFilter();
+						this.equipedOnSecondary = false;
+					}
+				}
+				
+				icon.updateSec();
+				
+				cl++; 
+				lx += a.padX;
+				cl >= b && (ly += a.padY, lx = a.offsetX, cl = 0, cly++);
+			}
+			
+			listBox.getIconFromPos = function(x,y, actor) {
+				var icons = this.findActorsByTagName('icon',true);
+				for(var i = 0; i < icons.length; i++)
+				  if(icons[i].pos.x == x && icons[i].pos.y == y) return actor ? icons[i] : icons[i].name;
+			}
+			
+			//If not equiped
+			var tmpunequiped = b5.Game.GetItemName(this.loadout[idSection]) == "empty";
+			tmpunequiped && textWpnInfo.updateInfoFor(listBox.getIconFromPos(0,0));
+			
+			//Selector
+			var pIconSel = new b5.Actor(),
+			pos = listBox.findActorById( b5.Game.GetItemName(this.loadout[idSection])+'-iconBack',true);
+			
+			if(!pos || tmpunequiped) pos = {
+			  	parent: {
+			  		x: equipCardsManager.weaponLay.offsetX,
+			  		y: equipCardsManager.weaponLay.offsetY
+			  	},
+			  	pos: {
+			  		x: 0,
+			  		y: 0
+			  	},
+			  	unequiped: true
+			  }
+			
+			pIconSel.atlas = scene.findResource('EquipCardCommonAtlas', 'brush');
+			pIconSel.setPosition(pos.parent.x,pos.parent.y);
+			pIconSel._oy = 2;
+			pIconSel.playAnim('icon_selector', true);
+			pIconSel._scale = pIconSel.oScale = 1.05;
+			pIconSel._layer = 2;
+			pIconSel.pos = {x: pos.pos.x, y: pos.pos.y};
+			
+		  //Sheen
+		  var pIconSheen = new b5.Actor();
+		  pIconSheen.atlas = pIconSel.atlas;
+		  pIconSheen.visible = false;
+		  pIconSheen.onAnimEnd = function() {
+		  	this.visible = false;
+		  }
+		  pIconSheen.sheen = function() {
+		  	this.visible = true;
+		  	this._oy = 50;
+		  	this.playAnim('icon_sheen');
+		  }
+		  pIconSel.addActor(pIconSheen);
+		  
+		  //Equiped marker
+		  var pIconEq = new b5.Actor();
+		  pIconEq.atlas = pIconSheen.atlas;
+		  pIconEq.visible = !pos.unequiped;
+		  pIconEq.playAnim('icon_equiped',true);
+		  listBox.addActor(pIconEq);
+		  pIconEq.x2 = 30;
+		  pIconEq.y2 = -30;
+		  pIconEq._layer = 3;
+		  pIconEq.setPosition(pos.parent.x,pos.parent.y);
+	
+			listBox.addActor(pIconSel);
+	
+			pIconSel.card = plyrCard;
+			pIconSel.box = listBox;
+	
+			//Controls
+			pIconSel.resetHolds = function() {
+				this.btnA = this.btnB = this.btnX = true,
+				this.axis_xm = true;
+				this.axis_ym = true;
+			}
+			pIconSel.resetHolds();
+	
+			pIconSel.onTick = function() {
+				var input = b5.Game.Input,
+				axis_x = Math.round(this.card.isPlyOne ? input.player1.axis_x: input.player2.axis_x),
+				axis_y = Math.round(this.card.isPlyOne ? input.player1.axis_y: input.player2.axis_y),
+				btnA = this.card.isPlyOne ? input.player1.A: input.player2.A,
+				btnB = this.card.isPlyOne ? input.player1.B: input.player2.B,
+				btnX = this.card.isPlyOne ? input.player1.X: input.player2.X,
+				em = equipCardsManager.weaponLay;
+				
+				//Move in columns and rows
+				if(axis_x != 0 && !this.axis_xm) {
+					this.axis_xm = true;
+					
+					this.pos.x += axis_x;
+					this.pos.x < 0 && (this.pos.x = em.columns-1);
+					this.pos.x > em.columns-1 && (this.pos.x = 0);
+				  
+					this.setPosition((this.pos.x * em.padX) + em.offsetX, this.y);
+					
+					textWpnInfo.updateInfoFor(this.box.getIconFromPos(this.pos.x,this.pos.y));
+				}
+				else if(axis_x == 0) this.axis_xm = false;
+				
+				//Move in columns and rows
+				if(axis_y != 0 && !this.axis_ym) {
+					this.axis_ym = true;
+					
+					this.pos.y += axis_y;
+					this.pos.y < 0 && (this.pos.y = em.rows-1);
+					this.pos.y > em.rows-1 && (this.pos.y = 0);
+				  
+				  this.setPosition(this.x, (this.pos.y * em.padY) + em.offsetY);
+				  
+					textWpnInfo.updateInfoFor(this.box.getIconFromPos(this.pos.x,this.pos.y));
+				}
+				else if(axis_y == 0) this.axis_ym = false;
+				
+				//Select
+				if(btnA && !this.btnA) {
+					this.btnA = true;
+					
+					//Equip
+					var icon = this.box.getIconFromPos(this.pos.x,this.pos.y, true),
+					isEmpty = b5.Game.GetItemName(this.card.loadout[idSection]) == 'empty';
+				 	
+				 	//If on secondary and secondaryWeapon is equiped, swap
+				 	if(icon.equipedOnSecondary || icon.name == 'empty') {
+					    if(!isEmpty && icon.name != 'empty') {
+					    this.card.loadout[secondary] = this.card.loadout[idSection];
+					 	
+		  			 	this.card.loadout[idSection] = b5.Game.GetItemId(icon.name);
+						
+					  	for(var m = 0, b = this.box.findActorsByTagName('icon',true);m<b.length;m++)
+		  				  b[m].updateSec();
+		  				  
+				    }
+				    else {
+				    	//No secondaryWeapon equiped
+					    //Play no anim
+					  	this.TweenToWithEnd('_scale', this.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  		s.TweenTo('_scale',s.oScale,0.1);
+					  	});
+				    	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+				  	  	s.TweenTo('_scale',s.oScale,0.1);
+				    	});
+				    }
+				 	}
+				 	else {
+				 		this.card.loadout[idSection] = b5.Game.GetItemId(icon.name);
+				 		isEmpty = false;
+				 	}
+				 	
+				 	//Animate
+				 	if(!isEmpty && icon.name != 'empty') {
+				 		pIconEq.timelines.remove(); //Clear any anim
+						pIconEq.setPosition(this.x,this.y);
+						pIconEq.visible = true;
+						pIconEq._scale = 1;
+						//Anim sheen
+						pIconSheen.sheen();
+						
+						//Anim scale
+					 	this.TweenToWithEnd('_scale', this.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+					 	//Anim icon scale
+					 	icon.TweenToWithEnd('_scale', icon.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+					}
+					
+				}
+				else if(!btnA) this.btnA = false;
+				
+				//Unequip
+				if(btnX && !this.btnX) {
+					this.btnX = true;
+					
+					var icon = this.box.getIconFromPos(this.pos.x,this.pos.y, true),
+					isEmpty = b5.Game.GetItemName(this.card.loadout[idSection]) == 'empty';
+					
+					if(idSection != 'primaryWeapon' && !isEmpty && icon.name != 'empty') {
+						pIconEq._scale = 1;
+						pIconEq.TweenTo('_scale',0,0.2, b5.Ease.linear, true, 0);
+						
+						//Unequip
+						this.card.loadout[idSection] = b5.Game.GetItemId('empty');
+					}
+					else {
+						//Play no anim
+					  this.TweenToWithEnd('_scale', this.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+				  	});
+				   	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+				  	 	s.TweenTo('_scale',s.oScale,0.1);
+				   	});
+					}
+					
+				}
+				else if(!btnX) this.btnX = false;
+				
+				//Back
+				if(btnB && !this.btnB) {
+					this.btnB = true;
+					
+					//Return
+					this.card.goBackToFront();
+				}
+				else if(!btnB) this.btnB = false;
+			}
+			
+			plyrCard.addActor(listBox);
+			listBox.id = idSection + "ListBox";
+			plyrCard.current = listBox;
+		}
+		
+				
+		/* 
+		* ========== SUPERS SECTION ==========
+		*/
+		
+		plyrCard.createSuperSection = function(idSection,title) {
+			var listBox = new b5.Actor(),
+			textSec = new b5.LabelActor(),
+			textWpnInfo = new b5.LabelActor(),
+			atlas = scene.findResource('EquipCardCommonAtlas','brush'),
+			extraBoldFont = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
+			
+			textSec.font = textWpnInfo.font = scene_GUI.findResource('CupheadMemphisFont', 'brush');
+			listBox.addActor(textSec);
+			listBox.addActor(textWpnInfo);
+			
+			textWpnInfo.onTick = function() {
+				this.setFormatLine(0, 0, 0, [null, extraBoldFont,0,-25,1.6,1.6],true);
+				this.setFormatLine(1, 0, 0, [null, extraBoldFont,0,-7,1.15,1.15]);
+				
+				this.setFormatLine(2, 0, 0, [null, textSec.font]);
+				this.setFormatLine(3, 0, 0, [null, textSec.font]);
+			}
+			textWpnInfo._scale = 0.62;
+			textWpnInfo.line_height = 50;
+			textWpnInfo._y = 140;
+			
+			textWpnInfo.fill_style = b5.Game.Styles.text_pausemenu;
+			
+			textWpnInfo.card = this;
+			
+			textWpnInfo.updateInfoFor = function(icon) {
+				if(!icon) icon = 'empty';
+				
+				if(icon == 'empty') icon = 'equip_card_empty_locked';
+				
+				//If astral cookie equiped, change descriptions
+				if( b5.Game.GetItemName(this.card.loadout.charm) == 'cookie')
+				  icon = 'chalice_' + icon; //chalice_superartX
+				  
+				this.text = 
+				  b5.Game.Texts.texts[icon] + '\n' +
+				  b5.Game.Texts.texts[icon+':name'] +'\n'+
+					b5.Game.Texts.texts[icon+':info'];
+			}
+			
+			textWpnInfo.updateInfoFor( b5.Game.GetItemName(this.loadout[idSection]) );
+			
+			textSec._scale = 1.3;
+			textSec._y = -220;
+			textSec.fill_style = "#d5c2b0";
+			textSec.text = title;
+			
+			for(var i = 0, a = equipCardsManager.superLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; i < a.length; i++) {
+				var spc = new b5.Actor();
+				spc.atlas = atlas;
+				listBox.addActor(spc);
+				spc.current_frame = 45;
+				spc._scale = a.scale;
+				spc.opacity = 0.5;
+				
+				spc.setPosition(lx, ly);
+				
+				//Add icon
+				var icon = new b5.Actor(),
+				item = superList[i] || 'empty';
+				
+				if(this.inventory._supers.indexOf(b5.Game.GetItemId(item)) == -1 && !b5.Game.Flags.allItemsUnlocked)
+				  item = 'empty';
+				
+				icon.atlas = scene.findResource(item + ':EQUIP_ICON','brush');
+				icon.frame_speed = 12;
+				icon._scale = 1 / a.scale;
+				icon.oScale = icon.scale;
+				icon.use_parent_opacity = false;
+				icon.name = item;
+				icon.id = icon.name+'-iconBack';
+				icon.tag = "icon";
+				icon.E = null;
+				icon.pos = {
+					x: cl,
+					y: cly
+				};
+				spc.addActor(icon);
+				icon.card = this;
+				
+				cl++; 
+				lx += a.padX;
+				cl >= b && (ly += a.padY, lx = a.offsetX, cl = 0, cly++);
+			}
+			
+			listBox.getIconFromPos = function(x,y, actor) {
+				var icons = this.findActorsByTagName('icon',true);
+				for(var i = 0; i < icons.length; i++)
+				  if(icons[i].pos.x == x && icons[i].pos.y == y) return actor ? icons[i] : icons[i].name;
+			}
+			
+			//If not equiped
+			var tmpunequiped = b5.Game.GetItemName(this.loadout[idSection]) == "empty";
+			tmpunequiped && textWpnInfo.updateInfoFor(listBox.getIconFromPos(0,0));
+			
+			//Selector
+			var pIconSel = new b5.Actor(),
+			pos = listBox.findActorById( b5.Game.GetItemName(this.loadout[idSection])+'-iconBack',true);
+			
+			if(!pos || tmpunequiped) pos = {
+			  	parent: {
+			  		x: equipCardsManager.superLay.offsetX,
+			  		y: equipCardsManager.superLay.offsetY
+			  	},
+			  	pos: {
+			  		x: 0,
+			  		y: 0
+			  	},
+			  	unequiped: true
+			  }
+			
+			pIconSel.atlas = scene.findResource('EquipCardCommonAtlas', 'brush');
+			pIconSel.setPosition(pos.parent.x,pos.parent.y);
+			pIconSel._oy = 2;
+			pIconSel.playAnim('icon_selector', true);
+			pIconSel._scale = pIconSel.oScale = 1.05;
+			pIconSel._layer = 2;
+			pIconSel.pos = {x: pos.pos.x, y: pos.pos.y};
+			
+		  //Sheen
+		  var pIconSheen = new b5.Actor();
+		  pIconSheen.atlas = pIconSel.atlas;
+		  pIconSheen.visible = false;
+		  pIconSheen.onAnimEnd = function() {
+		  	this.visible = false;
+		  }
+		  pIconSheen.sheen = function() {
+		  	this.visible = true;
+		  	this._oy = 50;
+		  	this.playAnim('icon_sheen');
+		  }
+		  pIconSel.addActor(pIconSheen);
+		  
+		  //Equiped marker
+		  var pIconEq = new b5.Actor();
+		  pIconEq.atlas = pIconSheen.atlas;
+		  pIconEq.visible = !pos.unequiped;
+		  pIconEq.playAnim('icon_equiped',true);
+		  listBox.addActor(pIconEq);
+		  pIconEq.x2 = 30;
+		  pIconEq.y2 = -30;
+		  pIconEq._layer = 3;
+		  pIconEq.setPosition(pos.parent.x,pos.parent.y);
+	
+			listBox.addActor(pIconSel);
+	
+			pIconSel.card = plyrCard;
+			pIconSel.box = listBox;
+	
+			//Controls
+			pIconSel.resetHolds = function() {
+				this.btnA = this.btnB = this.btnX = true,
+				this.axis_xm = true;
+				this.axis_ym = true;
+			}
+			pIconSel.resetHolds();
+	
+			pIconSel.onTick = function() {
+				var input = b5.Game.Input,
+				axis_x = Math.round(this.card.isPlyOne ? input.player1.axis_x: input.player2.axis_x),
+				axis_y = Math.round(this.card.isPlyOne ? input.player1.axis_y: input.player2.axis_y),
+				btnA = this.card.isPlyOne ? input.player1.A: input.player2.A,
+				btnB = this.card.isPlyOne ? input.player1.B: input.player2.B,
+				btnX = this.card.isPlyOne ? input.player1.X: input.player2.X,
+				em = equipCardsManager.superLay;
+				
+				//Move in columns and rows
+				if(axis_x != 0 && !this.axis_xm) {
+					this.axis_xm = true;
+					
+					this.pos.x += axis_x;
+					this.pos.x < 0 && (this.pos.x = em.columns-1);
+					this.pos.x > em.columns-1 && (this.pos.x = 0);
+				  
+					this.setPosition((this.pos.x * em.padX) + em.offsetX, this.y);
+					
+					textWpnInfo.updateInfoFor(this.box.getIconFromPos(this.pos.x,this.pos.y));
+				}
+				else if(axis_x == 0) this.axis_xm = false;
+				
+				//Move in columns and rows
+				if(axis_y != 0 && !this.axis_ym) {
+					this.axis_ym = true;
+					
+					this.pos.y += axis_y;
+					this.pos.y < 0 && (this.pos.y = em.rows-1);
+					this.pos.y > em.rows-1 && (this.pos.y = 0);
+				  
+				  this.setPosition(this.x, (this.pos.y * em.padY) + em.offsetY);
+				  
+					textWpnInfo.updateInfoFor(this.box.getIconFromPos(this.pos.x,this.pos.y));
+				}
+				else if(axis_y == 0) this.axis_ym = false;
+				
+				//Select
+				if(btnA && !this.btnA) {
+					this.btnA = true;
+					
+					//Equip
+					var icon = this.box.getIconFromPos(this.pos.x,this.pos.y, true),
+					isEmpty = b5.Game.GetItemName(this.card.loadout[idSection]) == 'empty';
 
+				  if(icon.name == 'empty') {
+					  //Play no anim
+					 	this.TweenToWithEnd('_scale', this.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+				    icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+				  	 	s.TweenTo('_scale',s.oScale,0.1);
+				   	});
+				  }
+				 	else if(icon.name != 'empty') {
+				 		this.card.loadout[idSection] = b5.Game.GetItemId(icon.name);
+				 		isEmpty = false;
+				 	}
+				 	
+				 	//Animate
+				 	if(!isEmpty && icon.name != 'empty') {
+				 		pIconEq.timelines.remove(); //Clear any anim
+						pIconEq.setPosition(this.x,this.y);
+						pIconEq.visible = true;
+						pIconEq._scale = 1;
+						//Anim sheen
+						pIconSheen.sheen();
+						
+						//Anim scale
+					 	this.TweenToWithEnd('_scale', this.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+					 	//Anim icon scale
+					 	icon.TweenToWithEnd('_scale', icon.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+					}
+					
+				}
+				else if(!btnA) this.btnA = false;
+				
+				//Unequip
+				if(btnX && !this.btnX) {
+					this.btnX = true;
+					
+					var icon = this.box.getIconFromPos(this.pos.x,this.pos.y, true),
+					isEmpty = b5.Game.GetItemName(this.card.loadout[idSection]) == 'empty';
+					
+					if(!isEmpty) {
+						pIconEq._scale = 1;
+						pIconEq.TweenTo('_scale',0,0.2, b5.Ease.linear, true, 0);
+						
+						//Unequip
+						this.card.loadout[idSection] = b5.Game.GetItemId('empty');
+					}
+					else {
+						//Play no anim
+					  this.TweenToWithEnd('_scale', this.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+				  	});
+				   	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+				  	 	s.TweenTo('_scale',s.oScale,0.1);
+				   	});
+					}
+					
+				}
+				else if(!btnX) this.btnX = false;
+				
+				//Back
+				if(btnB && !this.btnB) {
+					this.btnB = true;
+					
+					//Return
+					this.card.goBackToFront();
+				}
+				else if(!btnB) this.btnB = false;
+			}
+			
+			plyrCard.addActor(listBox);
+			listBox.id = idSection + "ListBox";
+			plyrCard.current = listBox;
+		}
+		
+				
+		/* 
+		* ========== CHARMS SECTION ==========
+		*/
+		
+		plyrCard.createCharmSection = function(idSection,title) {
+			var listBox = new b5.Actor(),
+			textSec = new b5.LabelActor(),
+			textWpnInfo = new b5.LabelActor(),
+			atlas = scene.findResource('EquipCardCommonAtlas','brush'),
+			extraBoldFont = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
+			
+			textSec.font = textWpnInfo.font = scene_GUI.findResource('CupheadMemphisFont', 'brush');
+			listBox.addActor(textSec);
+			listBox.addActor(textWpnInfo);
+			
+			textWpnInfo.onTick = function() {
+				this.setFormatLine(0, 0, 0, [null, extraBoldFont,0,-25,1.6,1.6],true);
+				this.setFormatLine(1, 0, 0, [null, extraBoldFont,0,-7,1.15,1.15]);
+				
+				this.setFormatLine(2, 0, 0, [null, textSec.font]);
+				this.setFormatLine(3, 0, 0, [null, textSec.font]);
+			}
+			textWpnInfo._scale = 0.62;
+			textWpnInfo.line_height = 50;
+			textWpnInfo._y = 140;
+			
+			textWpnInfo.fill_style = b5.Game.Styles.text_pausemenu;
+			
+			textWpnInfo.card = this;
+			
+			textWpnInfo.updateInfoFor = function(icon) {
+				if(!icon) icon = 'empty';
+				if(icon == 'empty') icon = 'equip_card_empty_locked';
+				
+				this.text = 
+				  b5.Game.Texts.texts[icon] + '\n' +
+				  b5.Game.Texts.texts[icon+':desc'] +'\n'+
+					b5.Game.Texts.texts[icon+':info'];
+			}
+			
+			textWpnInfo.updateInfoFor( b5.Game.GetItemName(this.loadout[idSection]) );
+			
+			textSec._scale = 1.3;
+			textSec._y = -220;
+			textSec.fill_style = "#d5c2b0";
+			textSec.text = title;
+			
+			for(var i = 0, a = equipCardsManager.charmLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; i < a.length; i++) {
+				var spc = new b5.Actor();
+				spc.atlas = atlas;
+				listBox.addActor(spc);
+				spc.current_frame = 45;
+				spc._scale = a.scale;
+				spc.opacity = 0.5;
+				
+				spc.setPosition(lx, ly);
+				
+				//Add icon
+				var icon = new b5.Actor(),
+				item = charmList[i] || 'empty';
+				
+				if(this.inventory._charms.indexOf(b5.Game.GetItemId(item)) == -1 && !b5.Game.Flags.allItemsUnlocked)
+				  item = 'empty';
+				
+				icon.atlas = scene.findResource(item + ':EQUIP_ICON','brush');
+				icon.frame_speed = 12;
+				icon._scale = 1 / a.scale;
+				icon.oScale = icon.scale;
+				icon.use_parent_opacity = false;
+				icon.name = item;
+				icon.id = icon.name+'-iconBack';
+				icon.tag = "icon";
+				icon.E = null;
+				icon.pos = {
+					x: cl,
+					y: cly
+				};
+				spc.addActor(icon);
+				icon.card = this;
+				
+				cl++; 
+				lx += a.padX;
+				cl >= b && (ly += a.padY, lx = a.offsetX, cl = 0, cly++);
+			}
+			
+			listBox.getIconFromPos = function(x,y, actor) {
+				var icons = this.findActorsByTagName('icon',true);
+				for(var i = 0; i < icons.length; i++)
+				  if(icons[i].pos.x == x && icons[i].pos.y == y) return actor ? icons[i] : icons[i].name;
+			}
+			
+			//If not equiped
+			var tmpunequiped = b5.Game.GetItemName(this.loadout[idSection]) == "empty";
+			tmpunequiped && textWpnInfo.updateInfoFor(listBox.getIconFromPos(0,0));
+			
+			//Selector
+			var pIconSel = new b5.Actor(),
+			pos = listBox.findActorById( b5.Game.GetItemName(this.loadout[idSection])+'-iconBack',true);
+			
+			if(!pos || tmpunequiped) pos = {
+			  	parent: {
+			  		x: equipCardsManager.charmLay.offsetX,
+			  		y: equipCardsManager.charmLay.offsetY
+			  	},
+			  	pos: {
+			  		x: 0,
+			  		y: 0
+			  	},
+			  	unequiped: true
+			  }
+			
+			pIconSel.atlas = scene.findResource('EquipCardCommonAtlas', 'brush');
+			pIconSel.setPosition(pos.parent.x,pos.parent.y);
+			pIconSel._oy = 2;
+			pIconSel.playAnim('icon_selector', true);
+			pIconSel._scale = pIconSel.oScale = 1.05;
+			pIconSel._layer = 2;
+			pIconSel.pos = {x: pos.pos.x, y: pos.pos.y};
+			
+		  //Sheen
+		  var pIconSheen = new b5.Actor();
+		  pIconSheen.atlas = pIconSel.atlas;
+		  pIconSheen.visible = false;
+		  pIconSheen.onAnimEnd = function() {
+		  	this.visible = false;
+		  }
+		  pIconSheen.sheen = function() {
+		  	this.visible = true;
+		  	this._oy = 50;
+		  	this.playAnim('icon_sheen');
+		  }
+		  pIconSel.addActor(pIconSheen);
+		  
+		  //Equiped marker
+		  var pIconEq = new b5.Actor();
+		  pIconEq.atlas = pIconSheen.atlas;
+		  pIconEq.visible = !pos.unequiped;
+		  pIconEq.playAnim('icon_equiped',true);
+		  listBox.addActor(pIconEq);
+		  pIconEq.x2 = 30;
+		  pIconEq.y2 = -30;
+		  pIconEq._layer = 3;
+		  pIconEq.setPosition(pos.parent.x,pos.parent.y);
+	
+			listBox.addActor(pIconSel);
+	
+			pIconSel.card = plyrCard;
+			pIconSel.box = listBox;
+	
+			//Controls
+			pIconSel.resetHolds = function() {
+				this.btnA = this.btnB = this.btnX = true,
+				this.axis_xm = true;
+				this.axis_ym = true;
+			}
+			pIconSel.resetHolds();
+	
+			pIconSel.onTick = function() {
+				var input = b5.Game.Input,
+				axis_x = Math.round(this.card.isPlyOne ? input.player1.axis_x: input.player2.axis_x),
+				axis_y = Math.round(this.card.isPlyOne ? input.player1.axis_y: input.player2.axis_y),
+				btnA = this.card.isPlyOne ? input.player1.A: input.player2.A,
+				btnB = this.card.isPlyOne ? input.player1.B: input.player2.B,
+				btnX = this.card.isPlyOne ? input.player1.X: input.player2.X,
+				em = equipCardsManager.charmLay;
+				
+				//Move in columns and rows
+				if(axis_x != 0 && !this.axis_xm) {
+					this.axis_xm = true;
+					
+					this.pos.x += axis_x;
+					this.pos.x < 0 && (this.pos.x = em.columns-1);
+					this.pos.x > em.columns-1 && (this.pos.x = 0);
+				  
+					this.setPosition((this.pos.x * em.padX) + em.offsetX, this.y);
+					
+					textWpnInfo.updateInfoFor(this.box.getIconFromPos(this.pos.x,this.pos.y));
+				}
+				else if(axis_x == 0) this.axis_xm = false;
+				
+				//Move in columns and rows
+				if(axis_y != 0 && !this.axis_ym) {
+					this.axis_ym = true;
+					
+					this.pos.y += axis_y;
+					this.pos.y < 0 && (this.pos.y = em.rows-1);
+					this.pos.y > em.rows-1 && (this.pos.y = 0);
+				  
+				  this.setPosition(this.x, (this.pos.y * em.padY) + em.offsetY);
+				  
+					textWpnInfo.updateInfoFor(this.box.getIconFromPos(this.pos.x,this.pos.y));
+				}
+				else if(axis_y == 0) this.axis_ym = false;
+				
+				//Select
+				if(btnA && !this.btnA) {
+					this.btnA = true;
+					
+					//Equip
+					var icon = this.box.getIconFromPos(this.pos.x,this.pos.y, true),
+					isEmpty = b5.Game.GetItemName(this.card.loadout[idSection]) == 'empty';
+
+				  if(icon.name == 'empty') {
+					  //Play no anim
+					 	this.TweenToWithEnd('_scale', this.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+				    icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+				  	 	s.TweenTo('_scale',s.oScale,0.1);
+				   	});
+				  }
+				 	else if(icon.name != 'empty') {
+				 		this.card.loadout[idSection] = b5.Game.GetItemId(icon.name);
+				 		isEmpty = false;
+				 	}
+				 	
+				 	//Animate
+				 	if(!isEmpty && icon.name != 'empty') {
+				 		pIconEq.timelines.remove(); //Clear any anim
+						pIconEq.setPosition(this.x,this.y);
+						pIconEq.visible = true;
+						pIconEq._scale = 1;
+						//Anim sheen
+						pIconSheen.sheen();
+						
+						//Anim scale
+					 	this.TweenToWithEnd('_scale', this.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+					 	//Anim icon scale
+					 	icon.TweenToWithEnd('_scale', icon.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+					 	});
+					}
+					
+				}
+				else if(!btnA) this.btnA = false;
+				
+				//Unequip
+				if(btnX && !this.btnX) {
+					this.btnX = true;
+					
+					var icon = this.box.getIconFromPos(this.pos.x,this.pos.y, true),
+					isEmpty = b5.Game.GetItemName(this.card.loadout[idSection]) == 'empty';
+					
+					if(!isEmpty) {
+						pIconEq._scale = 1;
+						pIconEq.TweenTo('_scale',0,0.2, b5.Ease.linear, true, 0);
+						
+						//Unequip
+						this.card.loadout[idSection] = b5.Game.GetItemId('empty');
+					}
+					else {
+						//Play no anim
+					  this.TweenToWithEnd('_scale', this.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+					  	s.TweenTo('_scale',s.oScale,0.1);
+				  	});
+				   	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
+				  	 	s.TweenTo('_scale',s.oScale,0.1);
+				   	});
+					}
+					
+				}
+				else if(!btnX) this.btnX = false;
+				
+				//Back
+				if(btnB && !this.btnB) {
+					this.btnB = true;
+					
+					//Return
+					this.card.goBackToFront();
+				}
+				else if(!btnB) this.btnB = false;
+			}
+			
+			plyrCard.addActor(listBox);
+			listBox.id = idSection + "ListBox";
+			plyrCard.current = listBox;
+		}
+		
+		/* 
+		* ============== FRONT BOX ================
+		*/
+		
 		//Create icons
 
 		var iconFrontBox = new b5.Actor();
@@ -99,12 +1085,16 @@ b5.export = function(world, scene, data, game) {
 		plyrCard.inFrontPage = true;
 
 		plyrCard.addActor(iconFrontBox);
+		plyrCard.frontBox = iconFrontBox;
 
 		iconFrontBox.setPosition(2, 165);
 		
-		iconFrontBox.updateIcon = function(icon, itemName) {
-			icon.tag = itemName;
-			icon.atlas = scene.findResource(itemName+':EQUIP_ICON','brush');
+		iconFrontBox.updateIcon = function(id, itemName) {
+			var icon = this.findActorById(id);
+			if(icon) {
+				icon.name = itemName;
+				icon.atlas = scene.findResource(itemName+':EQUIP_ICON','brush');
+			}
 		}
 
 		for (var a = 0, sx = plyrCard.selX, sy = 0, ssp = plyrCard.selSpace, icon; a < 5; a++) {
@@ -117,30 +1107,38 @@ b5.export = function(world, scene, data, game) {
 			sx += ssp;
 			
 			if(a != 4) 
-	  		iconFrontBox.updateIcon(ico, 
+	  		iconFrontBox.updateIcon(ico.id, 
 		  	  game.GetItemName(plyrCard.loadout[plyrCard.front_sel_ids[a]])
 	  		);
 			else {
 				ico.tag = "list";
 				ico.atlas = scene.findResource('EquipCardCommonAtlas', 'brush');
-				ico.frame_speed = 0;
-				ico.current_frame = b5.Maths.randomRange(36, 39);
+				ico.playAnim('list',true);
 			}
 			
 		}
 		
 		//Front text
-		/*
-		ftext = new b5.LabelActor();
+		var ftext = new b5.LabelActor();
 		ftext.fill_style = game.Styles.text_pausemenu;
-	  ftext.font = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
+	  ftext.font = scene_GUI.findResource('CupheadMemphisFont','brush');
+	  ftext.font2 = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
 		iconFrontBox.addActor(ftext);
 		
-		ftext.setFormatLine(1,0,0,[null,null,null,-50,0.7,0.7]);
+		ftext._scale = 0.5;
 		
 		iconFrontBox.frontText = ftext;
-		
-		ftext.text = "Icon texts"*/
+		ftext.card = plyrCard;
+
+		ftext.onTick = function() {
+			var itemName = b5.Game.GetItemName(this.card.loadout[this.card.front_sel_ids[this.card.front_sel]]) 
+	    this.text = b5.Game.Texts.texts.equip_card_front_text+"\n"+
+	    (b5.Game.Texts.texts[itemName] || (this.card.front_sel == 4 ? b5.Game.Texts.texts.list : ''));
+	    
+	    ftext.setFormatLine(0,0,0,[null, null, -845, 235,1,1,0,0,0,'left']);
+	    ftext.setFormatLine(1,0,0,[null,this.font2,null,423,1.88,1.88]);
+	    
+		}
 
 		//Selector
 		var pIconSel = new b5.Actor();
@@ -180,7 +1178,17 @@ b5.export = function(world, scene, data, game) {
 
 					//Select
 					switch (this.card.front_sel) {
-						case 0: //Primary weapon
+						case 0: //Open Primary weapon section
+						  this.card.openSection('primaryWeapon');
+							break;
+						case 1: //Open Secondary weapon section
+						  this.card.openSection('secondaryWeapon');
+							break;
+						case 2: //Open super section
+						  this.card.openSection('super');
+						  break;
+						case 3: 
+							this.card.openSection('charm');
 							break;
 					}
 				} else if (!btnA) this.btnA = false;
@@ -206,7 +1214,6 @@ b5.export = function(world, scene, data, game) {
 				
 				if(btnB && !this.btnB) {
 					this.btnB = true;
-					alert()
 					//Exit card
 					equipCardsManager.hideAll();
 					
@@ -226,7 +1233,7 @@ b5.export = function(world, scene, data, game) {
 				  	icon = this.iconBox.findActorById(this.card.front_sel);
 				  	this.card.loadout[id] = b5.Game.GetItemId("empty");
 				  	
-				  	iconFrontBox.updateIcon(icon, game.GetItemName("empty") );
+				  	iconFrontBox.updateIcon(icon.id, game.GetItemName("empty") );
 				  	
 				  }
 				  else {
@@ -240,7 +1247,6 @@ b5.export = function(world, scene, data, game) {
 				}
 				else if(!btnX) this.btnX = false;
 				
-
 			}
 
 		}

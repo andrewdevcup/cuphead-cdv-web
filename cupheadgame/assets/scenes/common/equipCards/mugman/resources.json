@@ -1,0 +1,12 @@
+{
+	"bitmap": [{
+		"name": "mugman:EquipCardFront",
+		"src": "scenes/common/equipCards/mugman/mm_equip_front_no_text.png"
+	}, {
+		"name": "mugman:EquipCardBack",
+		"src": "scenes/common/equipCards/mugman/mm_equip_back.png"
+	}, {
+		"name": "mugman:EquipCardP2Cover",
+		"src": "scenes/common/equipCards/mugman/mm_equip_front_(second_player_cover).png"
+	}]
+}

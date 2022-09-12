@@ -132,7 +132,7 @@
   Davatar.bitmap = scene_GUI.findResource('playerOne:DiscordAvatarBitmap','bitmap');
   Davatar2.bitmap = scene_GUI.findResource('playerTwo:DiscordAvatarBitmap','bitmap');
   
-  Dname.text = Dname2.text = "Sample text";
+  Dname.text = Dname2.text = "";
  
   pauseMenu.setDiscordAvatarsAndNames = function(p1Avt, p1N, p2Avt, p2N) {
   	if(p1Avt && p1N) {
@@ -155,7 +155,7 @@
 			let guest = b5.Game.Multiplayer.isGuest,
 			logged = b5.Game.DiscordLogged,
 			session = b5.Game.DiscordSession.data,
-			p1Avt, p1N, p2Avt, p2N;
+			p1Avt, p1Name, p2Avt, p2Name;
 			
 			if(!guest) {
 				//Query host discord avatar and name (if logged)
@@ -514,10 +514,10 @@
 		ox = txt.sett_visual_label_x;
 		
 		this.textPart.text = txt.sett_visual_resolution + ": \n"+
-								txt.sett_visual_aspectratio +': \n'+
-								txt.sett_visual_vsync + ": \n"+
+								txt.sett_visual_aspectratio +': \n' +
 								txt.sett_visual_screenfx +": \n"+
 								txt.sett_visual_postfx +": \n"+
+								txt.sett_visual_brightness + ": \n"+
 								txt.sett_visual_overscan + ": \n"+
 								txt.sett_visual_texquality +": \n"+
 								txt.sett_visual_titlemode + ": \n"+ 
@@ -531,9 +531,9 @@
 	  
 	  this.optionPart.text = (Math.round(vcfg.resolution * (AR[0]/AR[1])) + 'x' + vcfg.resolution) +"\n"+
 	  											 vcfg.aspectRatio +'\n'+
-	  											 optcard.yesno(vcfg.vsync)+"\n"+
 	  											 optcard.yesno(vcfg.screenfx_enabled)+"\n"+
 	  											 optcard.yesno(vcfg.colorFX)+"\n"+
+	  											 optcard.slider(vcfg.brightness) +"\n"+
 	  											 optcard.slider(vcfg.overscan)+"\n"+
 	  											 optcard.slider(vcfg.textureQuality)+"\n"+
 	  											 optcard.yesno(b5.Game.cfg.Game.dlc_title, txt.sett_visual_titledlc, txt.sett_visual_titlenodlc)
@@ -598,14 +598,15 @@
 				  index = b5.Maths.cap(index, 0, aspect_ratios.length-1);
 				  vcfg.aspectRatio = aspect_ratios[index];
 				  break;
-				case 3: //VSYNC
-					vcfg.vsync = !vcfg.vsync;
-				break;
-				case 4: //NOISE
+				case 3: //NOISE
 				  vcfg.screenfx_enabled = !vcfg.screenfx_enabled;
 			  break;
-			  case 5: //POSTPROCESS FX
+			  case 4: //POSTPROCESS FX
 					vcfg.colorFX = !vcfg.colorFX;
+				break;
+				case 5: //Brightness
+					vcfg.brightness += axis_x*0.1;
+					vcfg.brightness = b5.Maths.cap(vcfg.brightness,0,1);
 				break;
 			  case 6: // OVERSCAN 
 			    vcfg.overscan += axis_x*0.1;

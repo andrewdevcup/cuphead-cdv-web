@@ -24,6 +24,8 @@ b5.LoadScene = function(world, scene, data, game) {
   data.levelData.charmList = JSON.parse(scene.findResource('CharmsList','raw').data);
   data.levelData.superList = JSON.parse(scene.findResource('SupersList',"raw").data);
   
+  data.levelData.charmList.pop();
+  
   //Add empty for unequip
   //data.levelData.weaponList.push('empty')
   data.levelData.charmList.push('empty')

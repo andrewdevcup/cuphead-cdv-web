@@ -3,4 +3,8 @@
 		"indices":[40,41,42,43,44],"speed":24
 	},"icon_selector": {
 		"indices":[46,47,48],"speed":12
+	},"icon_equiped": {
+		"indices":[23,24,25],"speed":12
+	}, "list": {
+		"indices": [36,37,38],"speed": 12
 	}}
