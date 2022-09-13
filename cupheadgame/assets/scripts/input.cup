@@ -224,7 +224,7 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 		btnB.current_frame = 7; //B-menu
 		btnB.pressed = false;
 		btnB.onBeginTouch = function() {
-			if (b5.Game.Flags.inLevel && !b5.Game.Flags.inPauseMenu) {
+			if (b5.Game.Flags.inLevel && !b5.Game.Flags.inPauseMenu && !b5.Game.Flags.inEquipCard) {
 				//Hold only when on a level
 				this.pressed = !this.pressed;
 				this.touching = this.pressed;
@@ -236,7 +236,7 @@ b5.Game.Input._update = function(pl,useGUI,useKeyboard,useGamepad) {
 			}
 		};
 		btnB.onEndTouch = function() {
-			if (b5.Game.Flags.inLevel && !b5.Game.Flags.inPauseMenu) this.touching = this.pressed;
+			if (b5.Game.Flags.inLevel && !b5.Game.Flags.inPauseMenu && !b5.Game.Flags.inEquipCard) this.touching = this.pressed;
 			else {
 				this.tint_colour = "white";
 				this.value = 0;

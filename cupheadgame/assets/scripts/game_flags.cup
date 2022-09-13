@@ -14,6 +14,7 @@
 		inPlayerJoinedScreen: false,
 		playerCanExecuteSuper: true,
 		multiplayerDamageMultiplier: 0.75,
-		forceChalice: false
+		forceChalice: false,
+		allItemsUnlocked: true
 	};
 })();

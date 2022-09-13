@@ -23,9 +23,10 @@
 		"controllable": true
 	},
 	"components": [
-		"MovementComponent.cup",
-		"AtlasAnimationsComponent.cup",
-		"HitboxesComponent.cup"
+		"Movement.cup",
+		"AtlasAnimations.cup",
+		"Hitboxes.cup",
+		"Equip.cup"
 	],
 	"resources": {
 		"bitmaps": [

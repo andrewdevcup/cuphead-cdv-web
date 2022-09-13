@@ -42,7 +42,38 @@
 		{
 			"name": "MenuCardUpSfx",
 			"src": "scenes/common_worldmap/Menu_CardUp.ogg",
-			"category": "sfx"
+			"category": "sfx",
+			"reuse": true
+		},
+		{
+			"name": "MenuCardDownSfx",
+			"src": "scenes/common_worldmap/Menu_CardDown.ogg",
+			"category": "sfx",
+			"reuse": true
+		},
+		{
+			"name": "MenuCardFlipSfx",
+			"src": "scenes/common_worldmap/Menu_Cardflip.ogg",
+			"category": "sfx",
+			"reuse": true
+		},
+		{
+			"name": "MenuEquipMoveSfx",
+			"src": "scenes/common_worldmap/Menu_Equipment_Move.ogg",
+			"category": "sfx",
+			"reuse": true
+		},
+		{
+			"name": "MenuLockedSfx",
+			"src": "scenes/common_worldmap/Menu_Locked.ogg",
+			"category": "sfx",
+			"reuse": true
+		},
+		{
+			"name": "MenuCardPageSfx",
+			"src": "scenes/common_worldmap/Menu_Equipment_Page.ogg",
+			"category": "sfx",
+			"reuse": true
 		}
 	],
 	"bitmap": [
@@ -73,6 +104,10 @@
 		{
 			"name": "CupheadPosterFontBitmap0",
 			"src": "fonts/CupheadPoster-Regular(Cyr_Lat_English)-0.png"
+		},
+		{
+			"name": "CupheadPosterFontBitmap1",
+			"src": "fonts/CupheadPoster-Regular(Cyr_Lat_English)-1.png"
 		}
 	],
 	"brush": [
@@ -88,7 +123,7 @@
 		},
 		{
 			"name": "CupheadPosterFont",
-			"bitmaps": ["CupheadPosterFontBitmap0"],
+			"bitmaps": ["CupheadPosterFontBitmap0", "CupheadPosterFontBitmap1"],
 			"frames": "fonts/CupheadPoster-Regular(Cyr_Lat_English).bft"
 		}
 	]

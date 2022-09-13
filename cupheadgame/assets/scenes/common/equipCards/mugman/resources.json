@@ -1,7 +1,7 @@
 {
 	"bitmap": [{
 		"name": "mugman:EquipCardFront",
-		"src": "scenes/common/equipCards/mugman/mm_equip_front_no_text.png"
+		"src": "scenes/common/equipCards/mugman/mm_equip_front_no_text2.png"
 	}, {
 		"name": "mugman:EquipCardBack",
 		"src": "scenes/common/equipCards/mugman/mm_equip_back.png"

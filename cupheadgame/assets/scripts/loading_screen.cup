@@ -45,19 +45,21 @@
 
 	//Loading hourglass
 	var hourglass = new b5.Actor();
-//	hourglass.x = 500;
-//	hourglass.y = 160;
-  hourglass.dock_x = b5.Actor.Dock_Right;
-  hourglass.dock_y = b5.Actor.Dock_Bottom;
-  hourglass.margin = [0, -60, 0, -25];
-	hourglass.w = 200;
-	hourglass.h = 200;
+	hourglass.m_x = 135;
+	hourglass.m_y = 180;
 //	hourglass._scale = 1.15;
 	hourglass.opacity = 0;
 	scene_GUI.addActor(hourglass); // Add to scene
 	hourglass.name = "hourglass";
 	hourglass._layer = 7;
 	hourglass._av = false;
+	
+	hourglass.onTick = function() {
+		this.setPosition(
+			(scene_GUI.w / 2) - this.m_x,
+			(scene_GUI.h / 2) - this.m_y
+		)
+	}
 
 	loadScreen.hourglass = hourglass;
 	

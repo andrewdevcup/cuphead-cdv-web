@@ -236,7 +236,10 @@ b5.export = function(world, scene, data, game) {
 		ply.equipedSuper = defs.supers[loadout.super];
 		
 		//Add HUD
-		data.createHUD(ply, (scene.w/2) * (asPlayer2 || prevpl.length > 0 ? 1: -1), scene.h/-2);
+		data.createHUD(ply, 
+		  (scene.w/2) * (asPlayer2 || prevpl.length > 0 ? 1: -1), 
+		  scene.h / 2 * (b5.Utils.IsMobile() ? -1 : 1)
+		);
 
 		//Add components
 		ply.components = {};

@@ -1337,6 +1337,7 @@
 			this.updateAvatarDisplays();
 			
 			app.events.dispatch('pause');
+			sceneMain.events.dispatch('pause');
 			
 			if (fade) {
 				sceneMain.active = false;
@@ -1405,7 +1406,10 @@
 				pauseMenu.state = "hidden";
 			}
 			
-			!hideBecauseLoadingScene && app.events.dispatch('resume');
+			!hideBecauseLoadingScene && (
+				app.events.dispatch('resume'),
+				sceneMain.events.dispatch('resume')
+			);
 		};
 		b5.Game.PauseMenu = pauseMenu;
 		pauseMenu.hide();

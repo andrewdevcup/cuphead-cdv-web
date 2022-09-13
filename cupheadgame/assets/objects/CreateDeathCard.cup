@@ -11,8 +11,12 @@ b5.export = function(world, scene, data, game) {
 	  //Set ui buttons
 		b5.Game.UiButtons.setButtons([
 			{
-				"text": "texts.ui_confirm",
-				"actionButton": "jump"
+				text: "texts.ui_equip",
+				actionButton: "dash"
+			},
+			{
+				text: "texts.ui_confirm",
+				actionButton: "jump"
 			}
 		]);
 		b5.Game.UiButtons.show(true);
@@ -222,7 +226,10 @@ b5.export = function(world, scene, data, game) {
 	  dCardLabel.onTick = function() {
 	  	var input = game.Input,
 	  	axis_y = Math.round(input.player1.axis_y || input.player2.axis_y),
-	  	btn_A = input.player1.A || input.player2.A;
+	  	btn_A = input.player1.A || input.player2.A,
+	  	btn_X = input.player1.X || input.player2.X;
+	  	
+	  	if(this.selected_something) return;
 	  	
 	  	if(axis_y != this.last_AY) {
 	  		this.last_AY = axis_y;
@@ -237,7 +244,7 @@ b5.export = function(world, scene, data, game) {
 	  		}
 	  	}
 	  	
-	  	if(btn_A != this.last_A && !this.selected_something) {
+	  	if(btn_A != this.last_A) {
 	  		this.last_A = btn_A;
 	  		
 	  		if(btn_A > 0) {
@@ -266,9 +273,40 @@ b5.export = function(world, scene, data, game) {
 	  		}
 	  	}
 	  	
+	  	if(btn_X != this.last_X) {
+	  		this.last_X = btn_X;
+	  		
+	  		if(btn_X) {
+	  			//Disable selection
+	  			this.selected_something = true;
+	  			//Open equip menu
+	  			sceneMain.data.EquipCardsManager.show();
+	  			
+	  			//Tween down
+	  			this.parent._y = 0;
+	  			this.parent.TweenTo('_y', scene_GUI.h, 0.2);//,true,0, function(t) {
+	  		}
+	  	}
+	  	
 	  }
 	  
-	  
+	  sceneMain.events.on('hideequipcard', function() {
+	  	dCard.TweenToWithEnd('_y', 0, 0.35, b5.Ease.circout, true, 0, function(t) {
+	  		dCardLabel.selected_something = false;
+	  	});
+	  	//Set ui buttons
+			b5.Game.UiButtons.setButtons([
+				{
+					text: "texts.ui_equip",
+					actionButton: "dash"
+				},
+				{
+					text: "texts.ui_confirm",
+					actionButton: "jump"
+				}
+			]);
+			b5.Game.UiButtons.show();
+	  });
 	  
 	}
 	

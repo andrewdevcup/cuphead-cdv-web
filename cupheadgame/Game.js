@@ -9,7 +9,7 @@
 *
 */
 RELEASE_CODENAME = "Pre-Beta";
-RELEASE_VER = "2.5.5";
+RELEASE_VER = 2.6;
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -246,7 +246,7 @@ b5.loadgame = function() {
 				//app.clear_canvas = app.global_scale < 0.9;
 				app.onResizeBase();
 				//Vsync
-				app.vsync = true; //vcfg.vsync;
+				app.vsync = vcfg.vsync;
 				app.fps_limit = 250;
 				//Noise
 				b5.Game.screenfx && (vcfg.screenfx_enabled ? b5.Game.screenfx.activate() : b5.Game.screenfx.deactivate());
@@ -279,7 +279,7 @@ b5.loadgame = function() {
 			  //Additions
 			  if(vcfg.fastTextureDecoding === void 0) vcfg.fastTextureDecoding = false;
 			  if(vcfg.cupheadFilters === void	0) vcfg.cupheadFilters = true;
-			  if(vcfg.brightness === void 0) vcfg.brightness = 0.2;
+			  if(vcfg.brightness === void 0) vcfg.brightness = 0.3;
 			  
 			  //Filters
 			  var bright = b5.Maths.pos(-0.05, 0.3, vcfg.brightness);
@@ -529,69 +529,6 @@ b5.Game.parseResources = function(json, scene) {
 		}
 };
 
-b5.Game.UI = {
-	createButton: function(text, theme) {
-		if(theme == 'light') {
-			var bg = new b5[text.length>1?'RectActor':'ArcActor'];
-	//		bg.atlas = sceneMain.findResource('SpeechDialogsAtlas','brush');
-			bg.current_frame = 41;
-			bg.center_atlas = true;
-			bg.ignore_atlas_size = true;
-			bg.corner_radius = 8;
-			bg.radius = 14;
-			bg.stroke_filled = true;
-			bg.stroke_thickness = 2;
-			bg.stroke_style = "black";
-			bg.setSize(32,32);
-			bg.tag = "button";
-		}
-		else {
-			if(text.length < 2) {
-	  		var bg = new b5.ArcActor;
-	  		bg.radius = 18;
-	  		bg.fill_style = "black";
-	  		bg.round_pixels = false;
-	  		bg.tag = 'button';
-			}
-			else {
-				var bg = new b5.RectActor;
-				bg.w = 32;
-				bg.h = 32;
-				bg.fill_style = "black";
-				bg.round_pixels = false;
-				bg.tag = "button";
-				bg.corner_radius = 8;
-			}
-		}
-			
-		var label = new b5.LabelActor;
-		label.font = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
-		label.fill_style = theme == 'light' ? 'black' : "white";
-		label.round_pixels = false;
-		label.text_baseline = "middle";
-		label.text = text;
-		bg.addActor(label);
-		label._x = -1;
-		label._y = -1;
-		label._scale = theme === "dark" ? .61 : .6;
-			
-		//Set bg size if text have more than one character
-		label.onTick = function() {
-			text.length > 1 && bg.setSize(this.w/2.5, bg.atlas ? bg.atlas.frames[bg.current_frame].h : bg.h);
-			!this.offscreen && this.dirty();
-		}
-			return bg;
-	},
-	getButtonForPlayer: function(btn,pl) {
-		var b = "";
-		switch(b5.Game.Input.input_player[pl]) {
-    			case "GUI": b = b5.Game.GUI.buttonDefs[btn]; break;
-    			case "Keyboard": b = b5.Game.cfg.Keyboard[pl+"_key_"+btn].toUpperCase(); break;
-    			case "Gamepad": b = b5.Game.cfg.Gamepad[pl+"_btn_"+btn]; break;
-    		}
-    return	b;
-	}
-}
 //Create main scene
 sceneMain = new b5.Scene();
 sceneMain.clip_children = false;

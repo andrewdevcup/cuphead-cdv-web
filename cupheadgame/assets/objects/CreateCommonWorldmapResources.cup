@@ -25,7 +25,7 @@ b5.export = function(world, scene, data, game) {
 		action.main = bg;
 		
 		card.closeGuestEvt = scene.events.once("closetitlecard", evtdata => {
-			if(game.Multiplayer.isGuest) {
+			if(game.Multiplayer.isGuest && !evtdata[1]) {
 				action.onExit && action.onExit();
 				action.onExit = null;
 				card.close(evtdata[0]);
@@ -46,6 +46,7 @@ b5.export = function(world, scene, data, game) {
 			if(game.Multiplayer.isHost) {
 				game.Multiplayer.sendToGuest("DISPATCH_EVENT",["closetitlecard",[1]]);
 			}
+			scene.events.dispatch('closetitlecard',[1, true]);
 			
 			off && scene.events.off(this.closeGuestEvt);
 		}

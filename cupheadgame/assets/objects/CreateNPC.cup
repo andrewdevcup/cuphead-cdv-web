@@ -63,7 +63,7 @@ b5.export = function(world, scene, sceneData, game) {
 								
 								bA && game.Multiplayer.isGuest && (bA = false);
 								
-								if ((bA || thisNpc.triggerInteract) && !A_press && !thisNpc.interacting) {
+								if ((bA || thisNpc.triggerInteract) && !A_press && !thisNpc.interacting && !game.Flags.inEquipCard) {
 									A_press = true;
 									thisNpc.triggerInteract = false;
 									

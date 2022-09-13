@@ -1,3 +1,68 @@
+b5.Game.UI = {
+	createButton: function(text, theme) {
+		if(theme == 'light') {
+			var bg = new b5[text.length>1?'RectActor':'ArcActor'];
+	//		bg.atlas = sceneMain.findResource('SpeechDialogsAtlas','brush');
+			bg.current_frame = 41;
+			bg.center_atlas = true;
+			bg.ignore_atlas_size = true;
+			bg.corner_radius = 8;
+			bg.radius = 14;
+			bg.stroke_filled = true;
+			bg.stroke_thickness = 2;
+			bg.stroke_style = "black";
+			bg.setSize(32,32);
+			bg.tag = "button";
+		}
+		else {
+			if(text.length < 2) {
+	  		var bg = new b5.ArcActor;
+	  		bg.radius = 18;
+	  		bg.fill_style = "black";
+	  		bg.round_pixels = false;
+	  		bg.tag = 'button';
+			}
+			else {
+				var bg = new b5.RectActor;
+				bg.w = 32;
+				bg.h = 32;
+				bg.fill_style = "black";
+				bg.round_pixels = false;
+				bg.tag = "button";
+				bg.corner_radius = 8;
+			}
+		}
+			
+		var label = new b5.LabelActor;
+		label.font = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
+		label.fill_style = theme == 'light' ? 'black' : "white";
+		label.round_pixels = false;
+		label.text_baseline = "middle";
+		label.text = text;
+		bg.addActor(label);
+		label._x = -1;
+		label._y = -1;
+		label._scale = theme === "dark" ? .61 : .6;
+			
+		//Set bg size if text have more than one character
+		label.onTick = function() {
+			text.length > 1 && bg.setSize(this.w/2.5, bg.atlas ? bg.atlas.frames[bg.current_frame].h : bg.h);
+			this.dirty();
+			this.parent.dirty();
+		}
+			return bg;
+	},
+	getButtonForPlayer: function(btn,pl) {
+		var b = "";
+		switch(b5.Game.Input.input_player[pl]) {
+    			case "GUI": b = b5.Game.GUI.buttonDefs[btn]; break;
+    			case "Keyboard": b = b5.Game.cfg.Keyboard[pl+"_key_"+btn].toUpperCase(); break;
+    			case "Gamepad": b = b5.Game.cfg.Gamepad[pl+"_btn_"+btn]; break;
+    		}
+    return	b;
+	}
+};
+
 (function() {
 	var lay = b5.Game.UiButtons = new b5.Actor(),
 	memphis = scene_GUI.findResource('CupheadMemphisFont','brush');
@@ -7,7 +72,7 @@
 	lay.cull = false;
 	lay.h = 50;
 	lay.x2 = -64;
-	lay._y = -325;
+	lay._y = 330 * (b5.Utils.IsMobile() ? -1 : 1);
 //	lay.dock_x = b5.Actor.Dock_Right;
 //	lay.dock_y = b5.Actor.Dock_Top;
 	
@@ -38,16 +103,15 @@
 			btn._scale = 4.2;
 			lbl._scale = 0.45;
 			
-			let pad = 60;
-			
+			let pad = 4;
 			btn.onTick = function() {
 				this._y = -this.textA.h;
 				
-				this.textA.inner_w = (this.textA.w*app.global_font_scale) + pad;
+				this.textA.inner_w = this.textA.w*app.global_font_scale*this.textA.scale_x;
 				
-				this._x = this.textA.inner_w;
+				this._x = (this.textA.inner_w * 2) + (this.w*2.7);
 				
-				this.textA.total_w = (this.textA.inner_w * this.textA.scale_x) + this.w - 20;
+				this.textA.total_w = ((this.textA.inner_w/10) + this.w) * pad;
 			}
 			
 		}
@@ -56,24 +120,25 @@
 			this.aw = 0;
 			for(var i = 0, px = 0; i < this.actors.length; i++) {
 				this.actors[i]._x = px;
-				
 				var iw = this.actors[i].total_w;
 				px += iw;
 				this.aw += iw;
 			}
 			
-			this._x = (sceneMain.w/2) + (-this.aw + (this.actors[this.actors.length-1].total_w/2));
+			this._x = (sceneMain.w/2) + (-this.aw + (this.actors[this.actors.length-1].total_w/2)) + 30;
 		}
 		
 		this.draw();
 	}
 	
 	lay.show = function(anim) {
+		this.timelines.remove();
 		this.opacity = anim ? 0 : 1;
 		anim && this.TweenTo('opacity',1,0.3, b5.Ease.linear, true);
 	}
 		
 	lay.hide = function(anim) {
+		this.timelines.remove();
 		this.opacity = anim ? 1 : 0;
 		anim && this.TweenTo('opacity',0,0.3, b5.Ease.linear, true);
 		

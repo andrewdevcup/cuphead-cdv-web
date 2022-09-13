@@ -21,7 +21,7 @@ b5.export = function(world, scene, data, game) {
 		hudbg._scale = 1.1;
 		//hudbg.center_atlas = false;
 		hudbg.w = 78;
-		hudbg.h = 30;
+		hudbg.h = 32;
 		hudbg.setPosition(x > 0 ? -55: 55, y > 0 ? -25: 25);
 
 		hudbg.currentHp = data[player.name].flags.heartPoints;
@@ -30,7 +30,7 @@ b5.export = function(world, scene, data, game) {
 
 		//White effect
 		var w = new b5.RectActor;
-		w.setSize(78, 30); //hugbg atlas size
+		w.setSize(78, 32); //hugbg atlas size
 		hudbg.addActor(w);
 		w.opacity = 0;
 
@@ -64,7 +64,7 @@ b5.export = function(world, scene, data, game) {
 		cardBG.name = player.name + "-cards";//clip_children = true;
 		cardBG.setSize(30*card_count, 20);
 
-		cardBG.x = hudbg.x + (x < 0 ? hudbg.w*1.5: -hudbg.w*1.6);
+		cardBG.x = hudbg.x + (x < 0 ? hudbg.w*1.55: -hudbg.w*1.6);
 		cardBG.y = hudbg.y + (y < 0 ? -hudbg.h*1.5: hudbg.h*1.55);
 		
 		var hudWpnIcons = new b5.Actor;
@@ -167,7 +167,7 @@ b5.export = function(world, scene, data, game) {
 			card.name = player.name + 'Card'+i;
 
 			card.x = (-originX*(-cardBG.w/2)+ 16*-originX) + (i*24)*-originX;
-			card.ymax = -45 * originY;
+			card.ymax = -50 * originY;
 			card.ymin = -13 * originY;
 			card.index = i+1;
 			card.ly = card.y;

@@ -12,7 +12,7 @@
 	"d_simple": "SIMPLE",
 	"d_regular": "REGULAR",
 	"d_extreme": "EXTREME",
-	"temp_noflower1": "...      ",
-	"temp_noflower2": "...      ",
+	"temp_noflower1": "texts.spanish.temp_noflower1",
+	"temp_noflower2": "texts.spanish.temp_noflower2",
 	"mineyei": "yay!\nyou found me!   "
 }

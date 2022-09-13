@@ -27,6 +27,17 @@ b5.export = function(world, scene, data, game) {
 			b5.Paths.player+ 'supers/' + superList[i] + '/resources-worldmap.json'
 		)), scene);
 		
+	if(game.Flags.allItemsUnlocked) charmList[charmList.indexOf('drew')] = 'empty';
+	
+	var sfxList = {
+		card_up: scene.findResource('MenuCardUpSfx','sound'),
+		card_down: scene.findResource('MenuCardDownSfx','sound'),
+		card_flip: scene.findResource('MenuCardFlipSfx','sound'),
+		equip_move: scene.findResource('MenuEquipMoveSfx','sound'),
+		menu_locked: scene.findResource('MenuLockedSfx','sound'),
+		menu_card_page: scene.findResource('MenuCardPageSfx','sound'),
+		select_sfx: scene_GUI.findResource('MenuSelectSfx','sound')
+	};
 	
 	var equipCardsManager = scene.data.EquipCardsManager = {
 		cards: [],
@@ -62,14 +73,94 @@ b5.export = function(world, scene, data, game) {
 		},
 		show: function() {
 			game.Flags.inEquipCard = true;
+			game.Flags.inSomeMenu = true;
 			game.Flags.pausingEnabled = false;
 			
+			sfxList.card_up && sfxList.card_up.play();
+			//Move the card up or down a little to keep ui texts readable
+			var pY = b5.Utils.IsMobile() ? 12 : -10;
+			
+			for(var i = 0, c = this.cards; i < c.length; i++) {
+				c[i].front_sel = 0;
+				c[i].frontBox.selector._x2 = 0;
+				if(game.Multiplayer.player2Joined) {
+					//Go From side
+					c[i]._av = true;
+					c[i]._rotation = 0;
+					c[i]._x = c[i].isPlyOne ? (-scene_GUI.w/2) - 600 : (scene_GUI.w/2) + 600;
+					c[i]._y = pY;
+					c[i].TweenToWithEnd('_x',c[i].x >= 0 ? (scene_GUI.w / 2) -330 : (-scene_GUI.w / 2) +330,0.5,b5.Ease.cubicout,true,0,
+					  x => x.inFrontPage = true);
+					c[i].TweenTo('_rotation', Math.PI * b5.Maths.randomRange(-0.02,0.02,1), 0.5, b5.Ease.cubicout);
+				}
+				else {
+					//From bottom
+					c[i]._y = (scene_GUI.h/2) + 800;
+					c[i]._x = 0;
+					c[i]._av = c[i].isPlyOne;
+					c[i]._rotation = 0;
+					c[i].TweenToWithEnd('_y',pY,0.5,b5.Ease.cubicout,true,0, x => x.inFrontPage = true);
+					c[i].TweenTo('_rotation', Math.PI * b5.Maths.randomRange(-0.01,0.01,1), 0.5, b5.Ease.cubicout);
+				}
+			}
+			
+			//Update UI
+			b5.Game.UiButtons.setButtons([
+				{
+					text: "texts.ui_confirm",
+					actionButton: "jump"
+				},
+				{
+					text: "texts.general_back",
+					actionButton: "shoot"
+				},
+				{
+					text: "texts.equip_card_unequip",
+					actionButton: "dash"
+				}
+			]);
+			b5.Game.UiButtons.show(true);
+			scene.events.dispatch('showequipcard');
 		},
 		hideAll: function() {
 			game.Flags.inEquipCard = false;
 			game.Flags.pausingEnabled = !scene.data.players_dead;
+			
+			sfxList.card_down && sfxList.card_down.play();
+			
+			for(var i = 0, c = this.cards; i < c.length; i++) {
+				!c[i].inFrontPage && c[i].goBackToFront();
+				if(game.Multiplayer.player2Joined) {
+					//Go to side
+					c[i].TweenToWithEnd('_x',c[i].x >= 0 ? (scene_GUI.w/2) + 600 : (-scene_GUI.w/2) - 600,0.2,b5.Ease.quadin,true,0, d => {
+						d._av = false;
+						game.Flags.inSomeMenu = false;
+					});
+				}
+				else {
+					//Go down
+					c[i].TweenToWithEnd('_y',800,0.2,b5.Ease.quadout,true,0, d => {
+						d._av = false;
+						game.Flags.inSomeMenu = false;
+					});
+				}
+			}
+			b5.Game.UiButtons.hide(true);
+			scene.events.dispatch('hideequipcard');
 		}
 	}
+	
+	//Hide if player joined or quit
+	scene.events.on('playeradded', mp => {
+		for(var i = 0; i < equipCardsManager.cards.length; i++)
+		  equipCardsManager.cards[i].goBackToFront();
+		equipCardsManager.hideAll();
+	});
+	scene.events.on('playerremoved', mp => {
+		for(var i = 0; i < equipCardsManager.cards.length; i++)
+		  equipCardsManager.cards[i].goBackToFront();
+		equipCardsManager.hideAll();
+	});
 
 
 	const characters = ["cuphead",
@@ -77,14 +168,14 @@ b5.export = function(world, scene, data, game) {
 
 	//Card objects (for p1 and p2)
 
-	for (var i = 0; i < characters.length; i++) {break;
+	for (var i = 0; i < characters.length; i++) {
 		//Resources
 		game.parseResources(
 			JSON.parse(b5.File.readSync(b5.Paths.scenes+'common/equipCards/'+characters[i]+'/resources.json')), scene);
 
 		//Card
 
-		var plyrCard = new b5.Actor();
+		const plyrCard = new b5.Actor();
 		plyrCard.setSize(595, 668);
 
 		plyrCard.id = characters[i];
@@ -100,7 +191,7 @@ b5.export = function(world, scene, data, game) {
 		// ADD TO SCENE GUI
 		scene_GUI.addActor(plyrCard);
 		equipCardsManager.cards.push(plyrCard);
-	//	plyrCard._av = false;
+		plyrCard._av = false;
 
 		plyrCard.front_sel = 0;
 		plyrCard.front_sel_ids = ["primaryWeapon","secondaryWeapon","super","charm", null];
@@ -128,8 +219,20 @@ b5.export = function(world, scene, data, game) {
 		plyrCard.loadout = game.SlotUtils.getPlayerLoadouts(plyrCard.playerId);
 		plyrCard.inventory = game.SlotUtils.getPlayerInventory(plyrCard.playerId);
 		
+		//Create player cover
+		var cover = new b5.Actor();
+		if(!plyrCard.isPlyOne) {
+			cover.bitmap = scene.findResource(plyrCard.id + ':EquipCardP2Cover','bitmap');
+			cover.setSize(106,128);
+			cover.setPosition(221.5,-249);
+		}
+		plyrCard.addActor(cover);
+		plyrCard.pCover = cover;
+		
 		plyrCard.openSection = function(section) {
 			this.inFrontPage = false;
+			//Sfx
+			sfxList.card_flip && sfxList.card_flip.play();
 			//Animate
 			this.mask._scale_x = 1;
 			this.mask.TweenToWithEnd('_scale_x',0,0.06,b5.Ease.quadin,true,0,f => {
@@ -137,10 +240,13 @@ b5.export = function(world, scene, data, game) {
 				this.mask.TweenTo('_scale_x',1,0.06,b5.Ease.cubicout,true);
 				this._scale_x = 0.7;
 				this.skew_y = 0;
-				this.TweenTo('_scale_x',1,0.11,b5.Ease.backout,true);
+				this.pCover._av = false;
+				this.frontBox.selector._av = false;
+				this.TweenTo('_scale_x',1,0.11,b5.Ease.backout);
 				
 				//Set bitmap
 				this.bitmap = this.front_sel == 4 ? this.list_Bitmap:this.back_Bitmap;
+				if(section == 'waiting') this.bitmap = this.waiting_Bitmap;
 				this.frontBox._av = false;
 				
 				//Open section
@@ -158,6 +264,10 @@ b5.export = function(world, scene, data, game) {
 						this.createCharmSection(section, b5.Game.Texts.texts.equip_card_charm)
 						break;
 					case 'list':
+						this.createListSection();
+						break;
+					case 'waiting':
+				//		this.createWaitingSection();
 						break;
 				}
 			});
@@ -167,6 +277,8 @@ b5.export = function(world, scene, data, game) {
 		
 		plyrCard.goBackToFront = function() {
 			this.inFrontPage = true;
+			//Sfx
+			sfxList.card_flip && sfxList.card_flip.play();
 			//Animate
 			this.mask._scale_x = 1;
 			this.mask.TweenToWithEnd('_scale_x',0,0.06,b5.Ease.quadin,true,0,f => {
@@ -174,7 +286,9 @@ b5.export = function(world, scene, data, game) {
 				this.mask.TweenTo('_scale_x',1,0.06,b5.Ease.cubicout,true);
 				this._scale_x = 0.7;
 				this.skew_y = 0;
-				this.TweenTo('_scale_x',1,0.11,b5.Ease.backout,true);
+				this.pCover._av = true;
+				this.frontBox.selector._av = true;
+				this.TweenTo('_scale_x',1,0.11,b5.Ease.backout);
 				
 				//Set bitmap
 				this.bitmap = this.front_Bitmap;
@@ -244,7 +358,7 @@ b5.export = function(world, scene, data, game) {
 			textSec.fill_style = "#d5c2b0";
 			textSec.text = title;
 			
-			for(var i = 0, a = equipCardsManager.weaponLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; i < a.length; i++) {
+			for(var m = 0, a = equipCardsManager.weaponLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; m < a.length; m++) {
 				var spc = new b5.Actor();
 				spc.atlas = atlas;
 				listBox.addActor(spc);
@@ -256,7 +370,7 @@ b5.export = function(world, scene, data, game) {
 				
 				//Add icon
 				var icon = new b5.Actor(),
-				item = weaponList[i];
+				item = weaponList[m];
 				
 				if(this.inventory._weapons.indexOf(b5.Game.GetItemId(item)) == -1 && !b5.Game.Flags.allItemsUnlocked)
 				  item = 'empty';
@@ -298,8 +412,8 @@ b5.export = function(world, scene, data, game) {
 			
 			listBox.getIconFromPos = function(x,y, actor) {
 				var icons = this.findActorsByTagName('icon',true);
-				for(var i = 0; i < icons.length; i++)
-				  if(icons[i].pos.x == x && icons[i].pos.y == y) return actor ? icons[i] : icons[i].name;
+				for(var g = 0; g < icons.length; g++)
+				  if(icons[g].pos.x == x && icons[g].pos.y == y) return actor ? icons[g] : icons[g].name;
 			}
 			
 			//If not equiped
@@ -384,6 +498,9 @@ b5.export = function(world, scene, data, game) {
 					this.pos.x += axis_x;
 					this.pos.x < 0 && (this.pos.x = em.columns-1);
 					this.pos.x > em.columns-1 && (this.pos.x = 0);
+					
+					//Sfx
+					sfxList.equip_move && sfxList.equip_move.play();
 				  
 					this.setPosition((this.pos.x * em.padX) + em.offsetX, this.y);
 					
@@ -398,6 +515,9 @@ b5.export = function(world, scene, data, game) {
 					this.pos.y += axis_y;
 					this.pos.y < 0 && (this.pos.y = em.rows-1);
 					this.pos.y > em.rows-1 && (this.pos.y = 0);
+					
+					//Sfx
+					sfxList.equip_move && sfxList.equip_move.play();
 				  
 				  this.setPosition(this.x, (this.pos.y * em.padY) + em.offsetY);
 				  
@@ -433,6 +553,9 @@ b5.export = function(world, scene, data, game) {
 				    	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
 				  	  	s.TweenTo('_scale',s.oScale,0.1);
 				    	});
+				    	
+				    	//Sfx
+				    	sfxList.menu_locked && sfxList.menu_locked.play();
 				    }
 				 	}
 				 	else {
@@ -448,6 +571,8 @@ b5.export = function(world, scene, data, game) {
 						pIconEq._scale = 1;
 						//Anim sheen
 						pIconSheen.sheen();
+						
+						sfxList.select_sfx.play();
 						
 						//Anim scale
 					 	this.TweenToWithEnd('_scale', this.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
@@ -475,6 +600,8 @@ b5.export = function(world, scene, data, game) {
 						
 						//Unequip
 						this.card.loadout[idSection] = b5.Game.GetItemId('empty');
+						
+						sfxList.select_sfx.play();
 					}
 					else {
 						//Play no anim
@@ -484,6 +611,8 @@ b5.export = function(world, scene, data, game) {
 				   	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
 				  	 	s.TweenTo('_scale',s.oScale,0.1);
 				   	});
+				   	
+				   	sfxList.menu_locked && sfxList.menu_locked.play();
 					}
 					
 				}
@@ -538,10 +667,10 @@ b5.export = function(world, scene, data, game) {
 			textWpnInfo.updateInfoFor = function(icon) {
 				if(!icon) icon = 'empty';
 				
+				//If no item present, set to locked
+				//Otherwise if astral cookie equiped, change descriptions
 				if(icon == 'empty') icon = 'equip_card_empty_locked';
-				
-				//If astral cookie equiped, change descriptions
-				if( b5.Game.GetItemName(this.card.loadout.charm) == 'cookie')
+				else if( b5.Game.GetItemName(this.card.loadout.charm) == 'cookie')
 				  icon = 'chalice_' + icon; //chalice_superartX
 				  
 				this.text = 
@@ -557,7 +686,7 @@ b5.export = function(world, scene, data, game) {
 			textSec.fill_style = "#d5c2b0";
 			textSec.text = title;
 			
-			for(var i = 0, a = equipCardsManager.superLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; i < a.length; i++) {
+			for(var m = 0, a = equipCardsManager.superLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; m < a.length; m++) {
 				var spc = new b5.Actor();
 				spc.atlas = atlas;
 				listBox.addActor(spc);
@@ -569,7 +698,7 @@ b5.export = function(world, scene, data, game) {
 				
 				//Add icon
 				var icon = new b5.Actor(),
-				item = superList[i] || 'empty';
+				item = superList[m] || 'empty';
 				
 				if(this.inventory._supers.indexOf(b5.Game.GetItemId(item)) == -1 && !b5.Game.Flags.allItemsUnlocked)
 				  item = 'empty';
@@ -597,8 +726,8 @@ b5.export = function(world, scene, data, game) {
 			
 			listBox.getIconFromPos = function(x,y, actor) {
 				var icons = this.findActorsByTagName('icon',true);
-				for(var i = 0; i < icons.length; i++)
-				  if(icons[i].pos.x == x && icons[i].pos.y == y) return actor ? icons[i] : icons[i].name;
+				for(var g = 0; g < icons.length; g++)
+				  if(icons[g].pos.x == x && icons[g].pos.y == y) return actor ? icons[g] : icons[g].name;
 			}
 			
 			//If not equiped
@@ -680,6 +809,9 @@ b5.export = function(world, scene, data, game) {
 				if(axis_x != 0 && !this.axis_xm) {
 					this.axis_xm = true;
 					
+					//Sfx
+					sfxList.equip_move && sfxList.equip_move.play();
+					
 					this.pos.x += axis_x;
 					this.pos.x < 0 && (this.pos.x = em.columns-1);
 					this.pos.x > em.columns-1 && (this.pos.x = 0);
@@ -693,6 +825,9 @@ b5.export = function(world, scene, data, game) {
 				//Move in columns and rows
 				if(axis_y != 0 && !this.axis_ym) {
 					this.axis_ym = true;
+					
+					//Sfx
+					sfxList.equip_move && sfxList.equip_move.play();
 					
 					this.pos.y += axis_y;
 					this.pos.y < 0 && (this.pos.y = em.rows-1);
@@ -720,6 +855,8 @@ b5.export = function(world, scene, data, game) {
 				    icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
 				  	 	s.TweenTo('_scale',s.oScale,0.1);
 				   	});
+				   	
+				   	sfxList.menu_locked && sfxList.menu_locked.play();
 				  }
 				 	else if(icon.name != 'empty') {
 				 		this.card.loadout[idSection] = b5.Game.GetItemId(icon.name);
@@ -734,6 +871,9 @@ b5.export = function(world, scene, data, game) {
 						pIconEq._scale = 1;
 						//Anim sheen
 						pIconSheen.sheen();
+						
+						//Sfx
+				  	sfxList.select_sfx.play();
 						
 						//Anim scale
 					 	this.TweenToWithEnd('_scale', this.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
@@ -761,6 +901,8 @@ b5.export = function(world, scene, data, game) {
 						
 						//Unequip
 						this.card.loadout[idSection] = b5.Game.GetItemId('empty');
+						
+						sfxList.select_sfx.play();
 					}
 					else {
 						//Play no anim
@@ -770,6 +912,8 @@ b5.export = function(world, scene, data, game) {
 				   	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
 				  	 	s.TweenTo('_scale',s.oScale,0.1);
 				   	});
+				   	
+				   	sfxList.menu_locked && sfxList.menu_locked.play();
 					}
 					
 				}
@@ -838,7 +982,7 @@ b5.export = function(world, scene, data, game) {
 			textSec.fill_style = "#d5c2b0";
 			textSec.text = title;
 			
-			for(var i = 0, a = equipCardsManager.charmLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; i < a.length; i++) {
+			for(var m = 0, a = equipCardsManager.charmLay, lx = a.offsetX, ly = a.offsetY, cl = 0, cly = 0, b = a.columns; m < a.length; m++) {
 				var spc = new b5.Actor();
 				spc.atlas = atlas;
 				listBox.addActor(spc);
@@ -850,7 +994,7 @@ b5.export = function(world, scene, data, game) {
 				
 				//Add icon
 				var icon = new b5.Actor(),
-				item = charmList[i] || 'empty';
+				item = charmList[m] || 'empty';
 				
 				if(this.inventory._charms.indexOf(b5.Game.GetItemId(item)) == -1 && !b5.Game.Flags.allItemsUnlocked)
 				  item = 'empty';
@@ -878,8 +1022,8 @@ b5.export = function(world, scene, data, game) {
 			
 			listBox.getIconFromPos = function(x,y, actor) {
 				var icons = this.findActorsByTagName('icon',true);
-				for(var i = 0; i < icons.length; i++)
-				  if(icons[i].pos.x == x && icons[i].pos.y == y) return actor ? icons[i] : icons[i].name;
+				for(var g = 0; g < icons.length; g++)
+				  if(icons[g].pos.x == x && icons[g].pos.y == y) return actor ? icons[g] : icons[g].name;
 			}
 			
 			//If not equiped
@@ -961,6 +1105,8 @@ b5.export = function(world, scene, data, game) {
 				if(axis_x != 0 && !this.axis_xm) {
 					this.axis_xm = true;
 					
+					sfxList.equip_move && sfxList.equip_move.play();
+					
 					this.pos.x += axis_x;
 					this.pos.x < 0 && (this.pos.x = em.columns-1);
 					this.pos.x > em.columns-1 && (this.pos.x = 0);
@@ -974,6 +1120,8 @@ b5.export = function(world, scene, data, game) {
 				//Move in columns and rows
 				if(axis_y != 0 && !this.axis_ym) {
 					this.axis_ym = true;
+					
+					sfxList.equip_move && sfxList.equip_move.play();
 					
 					this.pos.y += axis_y;
 					this.pos.y < 0 && (this.pos.y = em.rows-1);
@@ -1001,6 +1149,8 @@ b5.export = function(world, scene, data, game) {
 				    icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
 				  	 	s.TweenTo('_scale',s.oScale,0.1);
 				   	});
+				   	
+				   	sfxList.menu_locked && sfxList.menu_locked.play();
 				  }
 				 	else if(icon.name != 'empty') {
 				 		this.card.loadout[idSection] = b5.Game.GetItemId(icon.name);
@@ -1015,6 +1165,8 @@ b5.export = function(world, scene, data, game) {
 						pIconEq._scale = 1;
 						//Anim sheen
 						pIconSheen.sheen();
+						
+						sfxList.select_sfx.play();
 						
 						//Anim scale
 					 	this.TweenToWithEnd('_scale', this.oScale + 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
@@ -1042,6 +1194,8 @@ b5.export = function(world, scene, data, game) {
 						
 						//Unequip
 						this.card.loadout[idSection] = b5.Game.GetItemId('empty');
+						
+						sfxList.select_sfx.play();
 					}
 					else {
 						//Play no anim
@@ -1051,6 +1205,8 @@ b5.export = function(world, scene, data, game) {
 				   	icon.TweenToWithEnd('_scale', icon.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
 				  	 	s.TweenTo('_scale',s.oScale,0.1);
 				   	});
+				   	
+				   	sfxList.menu_locked && sfxList.menu_locked.play();
 					}
 					
 				}
@@ -1072,12 +1228,50 @@ b5.export = function(world, scene, data, game) {
 		}
 		
 		/* 
+		* ========== LIST SECTION ==========
+		*/
+		
+		plyrCard.createListSection = function() {
+			textSec = new b5.LabelActor(),
+			secBox = new b5.Actor(),
+			atlas = scene.findResource('EquipCardCommonAtlas','brush'),
+			extraBoldFont = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush'),
+			
+			textSec.font = extraBoldFont;
+			secBox.addActor(textSec);
+			secBox.card = this;
+			
+			textSec._y = -218;
+			textSec._scale = 1.25;
+			textSec.fill_style = "#d5c2b0";
+			textSec.setTextFmt(game.Texts.texts.equip_card_list);
+			
+			secBox.btnB = true;
+			
+			secBox.onTick = function() {
+				var input = b5.Game.Input,
+		  	axis_x = Math.round(this.card.isPlyOne ? input.player1.axis_x: input.player2.axis_x),
+	  		btnB = this.card.isPlyOne ? input.player1.B: input.player2.B;
+			 
+			 if(btnB && !this.btnB) {
+					this.btnB = true;
+					this.card.goBackToFront();
+				}
+				else if(!btnB) this.btnB = false;
+				
+			}
+			
+			plyrCard.addActor(secBox);
+			plyrCard.current = secBox;
+		}
+		
+		/* 
 		* ============== FRONT BOX ================
 		*/
 		
 		//Create icons
 
-		var iconFrontBox = new b5.Actor();
+		const iconFrontBox = new b5.Actor();
 
 		plyrCard.selX = -201,
 		plyrCard.selSpace = 100;
@@ -1119,7 +1313,7 @@ b5.export = function(world, scene, data, game) {
 		}
 		
 		//Front text
-		var ftext = new b5.LabelActor();
+		const ftext = new b5.LabelActor();
 		ftext.fill_style = game.Styles.text_pausemenu;
 	  ftext.font = scene_GUI.findResource('CupheadMemphisFont','brush');
 	  ftext.font2 = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
@@ -1153,12 +1347,14 @@ b5.export = function(world, scene, data, game) {
 
 		pIconSel.card = plyrCard;
 		pIconSel.iconBox = iconFrontBox;
+		iconFrontBox.selector = pIconSel;
 
 		//Controls
 		pIconSel.resetHolds = function() {
 			this.btnA = this.btnB = this.btnX = true,
 			this.axis_xm = true;
 		}
+		pIconSel.onAVChanged = pIconSel.resetHolds;
 		pIconSel.resetHolds();
 
 		pIconSel.onTick = function() {
@@ -1190,6 +1386,8 @@ b5.export = function(world, scene, data, game) {
 						case 3: 
 							this.card.openSection('charm');
 							break;
+						case 4:
+							this.card.openSection('list');
 					}
 				} else if (!btnA) this.btnA = false;
 
@@ -1206,6 +1404,8 @@ b5.export = function(world, scene, data, game) {
 					this.x2 = this.card.selSpace * this.card.front_sel;
 					this.dirty();
 					
+					sfxList.equip_move && sfxList.equip_move.play();
+					
 					//Update text with weapon name 
 					
 				} else if (axis_x == 0) this.axis_xm = false;
@@ -1216,7 +1416,7 @@ b5.export = function(world, scene, data, game) {
 					this.btnB = true;
 					//Exit card
 					equipCardsManager.hideAll();
-					
+					this.card.inFrontPage = false;
 				}
 				else if(!btnB) this.btnB = false;
 				
@@ -1235,12 +1435,15 @@ b5.export = function(world, scene, data, game) {
 				  	
 				  	iconFrontBox.updateIcon(icon.id, game.GetItemName("empty") );
 				  	
+				  	sfxList.select_sfx.play();
 				  }
 				  else {
 				  	//Play no anim
 				  	this.TweenToWithEnd('_scale', this.oScale - 0.17, 0.1, b5.Ease.linear, true,	0, function(s) {
 				  		s.TweenTo('_scale',s.oScale,0.1);
 				  	});
+				  	
+				  	sfxList.menu_locked && sfxList.menu_locked.play();
 				  	
 				  }
 					
@@ -1251,7 +1454,7 @@ b5.export = function(world, scene, data, game) {
 
 		}
 
-		break;
+	//	break;
 	}
 
 	app.events.once('sceneunload', function() {

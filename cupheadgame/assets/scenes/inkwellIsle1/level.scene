@@ -22,8 +22,57 @@ b5.LoadScene = function(world, scene, data, game) {
   house.use_parent_opacity = false;
   house.playAnim('ek_house',true);
   
+  //Background dim
+	var bg = new b5.RectActor();
+	bg.w = 1280;
+	bg.h = 720;
+	bg.x = bg.y = 0;
+	bg.opacity = 0;
+	bg.fill_style = b5.Game.Styles.black_bg;
+	bg.name = "BGDim";
+	bg.fit = b5.Actor.FitSize;
+	bg._layer = 3;
+	scene.addActor(bg);
+
   world.order_changed = true;
+  
+  scene.events.on('showequipcard', function() {
+  //	world.active = false;
+  	bg.opacity = 0;
+  	bg.TweenTo('opacity',0.45, 0.35, b5.Ease.linear, true);
+  	b5.Tweener(scene, 'BLUR_MULTIPLIER', null, 0, 1.4, 0.35, b5.Ease.linear, 0, world).start();
+  	
+  	for(var i = 0, p = world.findActorsByTagName('player',true); i < p.length; i++)
+  		p[i].flags.controllable = false;
+  });
+  scene.events.on('hideequipcard', function() {
+  //	world.active = true;
+  	data.upd_ui();
+  	bg.opacity = 0.45;
+  	bg.TweenTo('opacity',0, 0.35, b5.Ease.linear, true);
+  	b5.Tweener(scene, 'BLUR_MULTIPLIER', null, 1.4, 0, 0.35, b5.Ease.linear, 0, world).start();
+  	
+  	for(var i = 0, p = world.findActorsByTagName('player',true); i < p.length; i++)
+  		p[i].flags.controllable = true;
+  });
+  
+  scene.events.on('resume', function() {
+  	data.upd_ui();
+  });
+  scene.events.on('closetitlecard', function() {
+  	data.upd_ui();
+  });
  
+  //Update UI
+  data.upd_ui = function() {
+		b5.Game.UiButtons.setButtons([{
+			text: "texts.ui_equip",
+			actionButton: "dash"
+		}]);
+  	b5.Game.UiButtons.show();
+  }
+  
+	data.upd_ui();
 };
 b5.onLoadingScreenOut = function(world, scene, data, game) {
 	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
