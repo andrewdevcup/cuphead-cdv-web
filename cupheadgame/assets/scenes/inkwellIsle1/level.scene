@@ -37,7 +37,6 @@ b5.LoadScene = function(world, scene, data, game) {
   world.order_changed = true;
   
   scene.events.on('showequipcard', function() {
-  //	world.active = false;
   	bg.opacity = 0;
   	bg.TweenTo('opacity',0.45, 0.35, b5.Ease.linear, true);
   	b5.Tweener(scene, 'BLUR_MULTIPLIER', null, 0, 1.4, 0.35, b5.Ease.linear, 0, world).start();
@@ -46,7 +45,6 @@ b5.LoadScene = function(world, scene, data, game) {
   		p[i].flags.controllable = false;
   });
   scene.events.on('hideequipcard', function() {
-  //	world.active = true;
   	data.upd_ui();
   	bg.opacity = 0.45;
   	bg.TweenTo('opacity',0, 0.35, b5.Ease.linear, true);

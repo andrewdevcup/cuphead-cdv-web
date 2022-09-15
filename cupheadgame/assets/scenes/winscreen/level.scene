@@ -130,11 +130,6 @@ b5.LoadScene = function(world, scene, data, game) {
   !stats.optimalTime && (stats.optimalTime = 100000);
   !stats.type && (stats.type = "boss");
   
-  //Dots
-  var createDots = function(dots) {
-  	return new Array(dots).fill(" .");
-  };
-  
   //Score counter
   data.scoreCounter = {
   	time: 0,
@@ -154,9 +149,7 @@ b5.LoadScene = function(world, scene, data, game) {
 		skill: 2 //easy-0,normal-1,hard-2
 	}
 	
-	data.gradeTable = [
-		"?", "D", "D+", "C-", "C", "C+", "B-", "B", "B+", "A-", "A", "A+", "S", "P"
-	];
+	data.gradeTable = game.GradeTable;
 	
 	data.grade = 0;
 	
@@ -171,7 +164,7 @@ b5.LoadScene = function(world, scene, data, game) {
   
   //Replace dots with character of strings
   var dotLine = function(dotCount,rightText) {
-  	var dots = createDots(dotCount);
+  	var dots = new Array(dotCount).fill(" .");
   	//Right
   	for(var i = 0, r = rightText; i < r.length; i++) dots[i] = r[i];
   	//Left

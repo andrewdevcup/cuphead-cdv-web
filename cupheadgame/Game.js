@@ -151,7 +151,6 @@ b5.loadgame = function() {
 	
 	app.splash = b5.Splash();
 
-
 	dev = {
 		fastcoding: 0,
 		loadscene: 'notice2', //8
@@ -160,18 +159,10 @@ b5.loadgame = function() {
 	
 	// Beta tester methods
 	
-	salaDeArmas = function() {
-		b5.Game.LoadScene('betatestloadout',false,true,{
-			hourglass:true
-		});
-	}
-	
 	MultiplayerReSync = function() {
 		b5.Game.Multiplayer.sendToGuest('HIDE_LS');
 		b5.Game.SceneLoader.AllLoaded();
 	}
-	
-
 
 	//Set screen mode
 	b5.Utils.SetBackButtonEnabled(false);

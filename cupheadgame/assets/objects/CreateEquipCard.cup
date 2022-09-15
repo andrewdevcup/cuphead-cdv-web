@@ -4,7 +4,8 @@ b5.export = function(world, scene, data, game) {
 	//Load weapons, charms and supers resources
 	let weaponList = JSON.parse(b5.File.readSync(b5.Paths.player+'weapons.json')),
 	charmList = JSON.parse(b5.File.readSync(b5.Paths.player+'charms.json')),
-	superList = JSON.parse(b5.File.readSync(b5.Paths.player+'supers.json'));
+	superList = JSON.parse(b5.File.readSync(b5.Paths.player+'supers.json')),
+	levelDisplays = JSON.parse(b5.File.readSync(b5.Paths.scenes+'display_levels.json'));
 
 	//Load weapon icons
 	for (var i = 0; i < weaponList.length; i++)
@@ -78,7 +79,7 @@ b5.export = function(world, scene, data, game) {
 			
 			sfxList.card_up && sfxList.card_up.play();
 			//Move the card up or down a little to keep ui texts readable
-			var pY = b5.Utils.IsMobile() ? 12 : -10;
+			var pY = 12; //b5.Utils.IsMobile() ? 12 : -10;
 			
 			for(var i = 0, c = this.cards; i < c.length; i++) {
 				c[i].front_sel = 0;
@@ -264,7 +265,7 @@ b5.export = function(world, scene, data, game) {
 						this.createCharmSection(section, b5.Game.Texts.texts.equip_card_charm)
 						break;
 					case 'list':
-						this.createListSection();
+						this.createListSection('world1');
 						break;
 					case 'waiting':
 				//		this.createWaitingSection();
@@ -1231,11 +1232,12 @@ b5.export = function(world, scene, data, game) {
 		* ========== LIST SECTION ==========
 		*/
 		
-		plyrCard.createListSection = function() {
-			textSec = new b5.LabelActor(),
+		plyrCard.createListSection = function(mapWorldName) {
+			var textSec = new b5.LabelActor(),
 			secBox = new b5.Actor(),
 			atlas = scene.findResource('EquipCardCommonAtlas','brush'),
 			extraBoldFont = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush'),
+			memphisFont = scene_GUI.findResource('CupheadMemphisFont','brush');
 			
 			textSec.font = extraBoldFont;
 			secBox.addActor(textSec);
@@ -1260,6 +1262,148 @@ b5.export = function(world, scene, data, game) {
 				else if(!btnB) this.btnB = false;
 				
 			}
+			
+			//Worlds texts
+			var worldTextBox = new b5.Actor();
+			secBox.addActor(worldTextBox);
+			worldTextBox.setPosition(-180,-120);
+			
+			worldTextBox.updateDisplay = function(scale, pad, startIndex) {
+				this.removeAllActors();
+				for(var a = startIndex || 0, x = 0, b = levelDisplays.display; a < b.length; a++) {
+				  var wrld = new b5.LabelActor();
+					wrld.font = extraBoldFont;
+					wrld.text = b5.Game.Texts.texts[b[a]];
+					wrld.fill_style = b5.Game.Styles.text_pausemenu;
+					wrld._x = x;
+					wrld._scale = scale;
+					x += pad;
+					this.addActor(wrld);
+					
+					//Temp
+					if(a > 0) wrld.fill_style = '#767676';
+					
+					if(a >= 3) break;
+				}
+			}
+			
+			worldTextBox.updateDisplay(0.52, 120);
+			
+			//Head bar
+			var topBar = new b5.Actor();
+			topBar.atlas = scene.findResource('EquipCardCommonAtlas', 'brush');
+			topBar.current_frame = b5.Maths.randomRange(17,18);
+			topBar._y = -80;
+			secBox.addActor(topBar);
+			
+			//Head texts
+			var contractL = new b5.LabelActor();
+			contractL.font = extraBoldFont;
+			contractL.fill_style = '#d5c2b0';
+			contractL.text_align = 'left';
+			contractL.setPosition(-230,6);
+			contractL._scale = 0.42;
+			contractL.text = game.Texts.texts.equip_card_contract;
+			topBar.addActor(contractL);
+			
+			var gradeL = new b5.LabelActor();
+			gradeL.font = extraBoldFont;
+			gradeL.fill_style = '#d5c2b0';
+			gradeL.setPosition(110,6);
+			gradeL._scale = 0.42;
+			gradeL.text = game.Texts.texts.equip_card_grade;
+			topBar.addActor(gradeL);
+			
+			var timeL = new b5.LabelActor();
+			timeL.font = extraBoldFont;
+			timeL.fill_style = '#d5c2b0';
+			timeL.text_align = 'right';
+			timeL.setPosition(231,6);
+			timeL._scale = 0.42;
+			timeL.text = game.Texts.texts.equip_card_time;
+			topBar.addActor(timeL);
+			
+			//List
+		  listLBox = new b5.Actor();
+		  secBox.addActor(listLBox);
+		  listLBox.setPosition(-220,-45);
+		  listLBox.pad_y = 33;
+		  
+		  //Replace dots with character of strings
+		  listLBox.dotLine = function(dotCount,rightText) {
+		  	var dots = new Array(dotCount).fill(" .");
+		  	//Right
+		  	for(var i = 0, r = rightText; i < r.length; i++) dots[i] = r[i];
+		  	//Left
+		  	return dots.join('');
+		  };
+		  
+		  listLBox.updateList = function(mWorld) {
+			  for(var m = 0, py = 0, g = levelDisplays.worlds[mWorld]; m < g.length; m++) {
+			  	//Create check box 
+			  	var cb = new b5.Actor();
+			  	cb.atlas = topBar.atlas;
+			  	cb.current_frame = b5.Maths.randomRange(0,6);
+			  	cb._y = py;
+			  	listLBox.addActor(cb);
+			  	py += listLBox.pad_y;
+			  	
+			  	//Level data
+			  	const lvd = game.SlotUtils.getLevelData(game.LevelIDs[g[m]]);
+			  	if(lvd) {
+				  	if(lvd.completed) {
+				  		//Add checkmark or star (if completed on extreme)
+				  		var chm = new b5.Actor();
+				  		chm.atlas = cb.atlas;
+				  		cb.addActor(chm);
+				  		chm.current_frame = lvd.difficultyBeaten == 2 ? b5.Maths.randomRange(19,21) : b5.Maths.randomRange(7,16);
+				  	}
+				  	
+				  	//Level name
+				    var lvNLabel = new b5.LabelActor();
+				  	lvNLabel.font = memphisFont;
+				  	lvNLabel._y = cb.y;
+				  	lvNLabel.text_align = 'left';
+				  	lvNLabel._scale = 0.58;
+				  	lvNLabel._x = 17;
+				  	lvNLabel._y2 = 8;
+				  	lvNLabel.text = lvd.played ? game.Texts.texts[g[m]] : '?????????????';
+				  	lvNLabel.text = this.dotLine(22,lvNLabel.text);
+				  	lvNLabel.fill_style = game.Styles.text_pausemenu;
+				  	listLBox.addActor(lvNLabel);
+				  	
+				  	//Grade
+				  	var gradeLabel = new b5.LabelActor();
+				  	gradeLabel.font = memphisFont;
+				  	gradeLabel._y = cb.y;
+				  	gradeLabel._x = 320;
+				  	gradeLabel._y2 = 8;
+				  	gradeLabel._scale = 0.58;
+				  	gradeLabel.text_align = 'left';
+				  	gradeLabel.fill_style = lvNLabel.fill_style;
+				  	gradeLabel.text = lvd.played ? game.GradeTable[lvd.grade] : '?';
+				  	listLBox.addActor(gradeLabel);
+				  	
+				  	//Time
+				  	var tm = new Date(lvd.bestTime*1000);
+				  	timeLabel = new b5.LabelActor();
+				  	timeLabel.font = memphisFont;
+				  	timeLabel._y = cb.y;
+				  	timeLabel._y2 = 8;
+				  	timeLabel._x = 430;
+				  	timeLabel._scale = 0.58;
+				  	timeLabel.fill_style = lvNLabel.fill_style;
+				  	
+				  	timeLabel.text = lvd.played && lvd.completed ? (
+				  		String(tm.getMinutes()) + ':' + String(tm.getSeconds()).padStart(2,'0')
+				  	) : '?:??';
+				  	listLBox.addActor(timeLabel);
+				  	
+			  	}
+			  }
+		  }
+		  
+		  listLBox.updateList(mapWorldName);
 			
 			plyrCard.addActor(secBox);
 			plyrCard.current = secBox;

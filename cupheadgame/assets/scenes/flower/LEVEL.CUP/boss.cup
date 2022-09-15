@@ -55,20 +55,7 @@ return {
 					flowerBlink.active = false;
 					
 					flower.playAnimWithEnd('intro',fl => {
-				//		fl.playAnim('idle',true);
-						
-						flower.current_frame = 0;
-						flower.frame_speed = 24;
-						flower.frames_repeat = false;
-						flower.anim_frames = null;
-						flower.current_anim = "";
-						flower.atlas_i = 1;
-						
-						flower.setInterval(function() {
-							flower.atlas_i =flower.atlas_i == 1 ? 2 : 1;
-							flower.current_frame = 0;
-							flower.atlas = scene.findResource('FlowerAtlasPH'+flower.atlas_i,'brush');
-						},5);
+			    	fl.playAnim('idle',true);
 					});
 					
 					flowerObj._scale = 0.97;

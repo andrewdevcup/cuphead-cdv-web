@@ -72,7 +72,7 @@ b5.Game.UI = {
 	lay.cull = false;
 	lay.h = 50;
 	lay.x2 = -64;
-	lay._y = 330 * (b5.Utils.IsMobile() ? -1 : 1);
+	lay._y = 325 * -1;//(b5.Utils.IsMobile() ? -1 : 1);
 //	lay.dock_x = b5.Actor.Dock_Right;
 //	lay.dock_y = b5.Actor.Dock_Top;
 	

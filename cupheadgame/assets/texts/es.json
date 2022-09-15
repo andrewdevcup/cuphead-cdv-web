@@ -80,6 +80,9 @@
 	"chalice": "MS. CHALICE",
 	"equip_card_unequip": "QUITAR",
 	"equip_card_list": "LISTA DE TAREAS",
+	"equip_card_contract": "Contrato de alma",
+	"equip_card_grade": "Nivel",
+	"equip_card_time": "Tiempo",
 	"ui_equip": "EQUIPAR",
 	"equip_card_front_text": "Tiro A      Tiro B        Súper     Amuleto     Lista",
 	"equip_card_shot_a": "TIRO A",
@@ -158,5 +161,15 @@
 	"inkwell_isle_1": "Isla Tintero Uno",
 	"inkwell_isle_2": "Isla Tintero Dos",
 	"inkwell_isle_3": "Isla Tintero Tres",
-	"inkwell_hell": "Infierno Tintero"
+	"inkwell_hell": "Infierno Tintero",
+	"world1": "MUNDO 1",
+	"world2": "MUNDO 2",
+	"world3": "MUNDO 3",
+	"finale": "FINAL",
+	"dlc": "CD",
+	"--levels--": "--names--",
+	"veggies": "La Pandilla Raíz",
+	"slime": "Goopy Le Grande",
+	"blimp": "Hilda Berg",
+	"flower": "Clavel de Cagney"
 }

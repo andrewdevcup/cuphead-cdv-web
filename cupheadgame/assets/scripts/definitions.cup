@@ -51,6 +51,25 @@ b5.Game.GameDefIDs = {
 		"superart3": 1467617939
 	}
 };
+b5.Game.LevelIDs = {
+	veggies: 6,
+	slime: 7,
+	blimp: 8,
+	flower: 1428495827
+};
+b5.Game.WorldIDs = {
+	world1: 3,
+	world2: 4,
+	world3: 5,
+	finale: 6,
+	dlc: 7
+};
+b5.Game.GradeTable = [
+	"?", "D", "D+", "C-", "C", "C+",
+	"B-", "B", "B+", "A-", "A", "A+", 
+	"S", "P"
+];
+
 b5.Game.GetItemName = function(id) {
 	for(var i in this.GameDefIDs)
 	  if(id in this.GameDefIDs[i]) return	this.GameDefIDs[i][id];

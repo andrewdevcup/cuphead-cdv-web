@@ -15,6 +15,7 @@
 		playerCanExecuteSuper: true,
 		multiplayerDamageMultiplier: 0.75,
 		forceChalice: false,
-		allItemsUnlocked: true
+		allItemsUnlocked: true,
+		originalCupheadHud: false
 	};
 })();
