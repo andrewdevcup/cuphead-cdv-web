@@ -88,7 +88,7 @@ b5.File = {
 };
 b5.File.readSync = function(file) {
     //Browser compatibility
-  if(!file.startsWith('filesystem:')) {
+  if(!file.startsWith('file')) {
     var r = new XMLHttpRequest(), e = !0, t = !0;
     r.open('GET',file, !1);
     try{r.send()}catch(o){e=!1}
@@ -99,7 +99,7 @@ b5.File.readSync = function(file) {
 },
 b5.File.read = function(file) {
   var n = { onload: null, onerror: null };
-	if( b5.Cordova.file && !file.startsWith('filesystem:')) {
+	if( b5.Cordova.file && !file.startsWith('file')) {
 		var e = file.lastIndexOf('/')+1,
 		t = file.substr(0,e),
 		o = file.substr(e);
@@ -112,7 +112,7 @@ b5.File.read = function(file) {
 },
 b5.File.write = function(file, text, add, pos) {
 	var n = { onwrite: null, onerror: null };
-	if( b5.Cordova.file && !file.startsWith('filesystem:')) {
+	if( b5.Cordova.file && !file.startsWith('file')) {
 		var e = file.lastIndexOf('/')+1,
 		t = file.substr(0,e),
 		o = file.substr(e),
@@ -171,7 +171,7 @@ b5.File.copyDir = function(src,dest) {
 },
 b5.File.createDir = function(dir) {
 	var n = { oncreate: null, onerror: null };
-	if( b5.Cordova.file && !dir.startsWith('filesystem:')) {
+	if( b5.Cordova.file && !dir.startsWith('file')) {
 		var e = dir.lastIndexOf('/')+1,
 		t = dir.substr(0,e),
 		o = dir.substr(e);
@@ -181,7 +181,7 @@ b5.File.createDir = function(dir) {
 },
 b5.File.delete = function(type, entry) {
 	var n = { ondelete: null, onerror: null };
-	if( b5.Cordova.file && !file.startsWith('filesystem:')) {
+	if( b5.Cordova.file && !file.startsWith('file')) {
 		var e = entry.lastIndexOf('/')+1,
 		t = entry.substr(0,e),
 		o = entry.substr(e);
@@ -194,7 +194,7 @@ b5.File.delete = function(type, entry) {
 },
 b5.File.exists = function(entry) {
 	//Browser compatibility
-	if(!entry.startsWith('filesystem:')) {
+	if(!entry.startsWith('file')) {
 		var r = new XMLHttpRequest(),
 		e = !0;
 		r.open('GET',entry,!1);
@@ -269,7 +269,7 @@ b5.Cordova.statusbar && (b5.Utils.SetFullscreen = function(e,t) {
 */
 
 b5.Utils.loadRAW = function(e, t, o, a) {
-  if(e.startsWith('filesystem:')) return o(localStorage.getItem(e)), !0;
+  if(e.startsWith('file')) return o(localStorage.getItem(e)), !0;
   var n = new XMLHttpRequest;
   n.open('GET', e, t),
   e.endsWith('.json') && n.overrideMimeType('application/json'),
