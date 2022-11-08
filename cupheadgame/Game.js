@@ -9,7 +9,7 @@
 *
 */
 RELEASE_CODENAME = "Pre-Beta";
-RELEASE_VER = 2.6;
+RELEASE_VER = 2.9;
 
 b5.Splash = function() {
 	var div = document.createElement('div'),
@@ -62,10 +62,10 @@ b5.onload = function() {
 	
 //Add buttons for mobile devices to flip the screen
 if(b5.Utils.IsMobile() && (cordova.platformId == "browser"|| window.DebugBuild)) {
-var mbtn = document.createElement('button');
-mbtn.textContent = "Fullscreen";
-document.body.appendChild(mbtn);
-mbtn.onclick = function() {
+b5.fsbtn = document.createElement('button');
+b5.fsbtn.textContent = "Fullscreen";
+document.body.appendChild(b5.fsbtn);
+b5.fsbtn.onclick = function() {
 	b5.Utils.SetFullscreen(true);
 	b5.Utils.SetOrientation('landscape');
 }
@@ -86,27 +86,12 @@ mbtn.onclick = function() {
 
 b5.loadgame()
 
-/*
-b5.dbgtxt = document.createElement('p');
-b5.dbgtxt.style.position='absolute';
-document.body.appendChild(b5.dbgtxt);
-b5.dbgtxt.style.color = "#ffffffcc";
-
-new FontFace('CupheadVogueExtraBold', `url("${internalDir+'assets/fonts/truetype/CupheadVogue-ExtraBold-merged.otf'}")`).load().then(font=>{document.fonts.add(font)})
-b5.dbgtxt.style.font = "8pt CupheadVogueExtraBold";
-b5.dbgtxt.style.textAlign = "center";
-b5.dbgtxt.style.paddingLeft = "0%";
-self.addEventListener('resize',a => b5.dbgtxt.style.marginTop = "2%",!1);
-b5.dbgtxt.style.width = "inherit"
-b5.dbgtxt.style.marginBlock = "inherit";
-b5.dbgtxt.style.overflow = "hidden";
-*/
-
 b5.dbgtxt = new b5.LabelActor();
 b5.dbgtxt._scale = 0.5;
 b5.dbgtxt.dock_y = b5.Actor.Dock_Top;
-b5.dbgtxt.oy = -60;
-b5.dbgtxt.y2 = 40;
+//b5.dbgtxt.oy = -60;
+b5.dbgtxt.y2 = 20;
+b5.dbgtxt.line_height = 50;
 }
 
 b5.loadgame = function() {
@@ -137,11 +122,11 @@ b5.loadgame = function() {
 	app.disable_dock_screen = true;
 	app.global_font_scale = .55;
 	app.physics_step = 2;
-	app.min_speed = 1/12;
+	app.min_speed = 1/24;
 	app.hide_cursor = true;
 	app.texture_resolution = 1;
 	//Fill canvas to screen
-	app.setCanvasScalingMethod(b5.App.FitBest);
+	app.setCanvasScalingMethod(b5.App.FitBest)
 
 	//Initialize Audio
 	b5.Sound.init(null, {
@@ -393,7 +378,7 @@ object;
   	var a = (this.Multiplayer.isGuest || this.Multiplayer.isHosting) && this.Multiplayer.player2joined ? ' | Online' : '';
   	switch(d) {
   		case 0: return 'Simple' + a;
-  		case 2: return 'Extreme' + a;
+  		case 2: return 'Expert' + a;
   		default: return 'Regular' + a;
   	}
   }
@@ -439,6 +424,7 @@ b5.Game.parseResources = function(json, scene) {
 		  			seq = new Array(b.pad).fill('#').join('');
 		  			for(var c = b.start; c <= b.end; c++) {
 		  				var bitmap = new b5.Bitmap(b.name.replace(/%i/g,c), b5.Paths.assets + b.src.replace(seq,c.toString().padStart(b.pad,"0")), b.preload);
+		  				if(res.resolution !== void 0) bitmap.resource.resolution = res.resolution;
 		  				scene.addResource(bitmap,i, b.persist);
 		  			}
 		  		}
@@ -569,6 +555,13 @@ if (scene_GUI.areResourcesLoaded()) {
 
 app.start();
 app.splash.destroy();
+
+var d = new Date();
+b5.Game.Flags.spookyMode = b5.Game.SlotUtils.getPlayerLoadouts('playerOne').charm == b5.Game.GetItemName('drew')
+  ||
+	(d.getMonth() == 9 && (d.getDate() == 22 || d.getDate() == 31));
+
+
 b5.Game.LoadScene(dev.loadscene, false, false, {
 hide_anim: 'fade', hide_speed: 0.2,hourglass:false
 },dev.data);
@@ -664,6 +657,7 @@ this.setRotation(0);
 this.setPosition(0,0);
 this._x2 = this._y2 = 0;
 this.ox = this.oy = 0;
+this._x = this._y = 0;
 this.camera_update = true;
 this.ox_scale = this.oy_scale = 1;
 };
@@ -727,13 +721,15 @@ scene_GUI.addActor(b5.dbgtxt);
 b5.dbgtxt._layer = 20;
 b5.dbgtxt.font = scene_GUI.findResource('CupheadVogueExtraBoldFont','brush');
 
+
 app.updateInfoText = function() {
-	b5.dbgtxt.clearFormat();
-	b5.dbgtxt.setTextFmt( (window.debugText||"")+//'--p1--\n'+ Obj2(b5.Game.Input.player1)+"\n--p2--\n"+Obj2(b5.Game.Input.player2)+'\n'
-(!sceneMain.areResourcesLoaded()? _loadingtext()+' |':_statusText())+ " "+RELEASE_CODENAME + " "+ RELEASE_VER + " | "+
+	var n = !sceneMain.areResourcesLoaded()
+//	b5.dbgtxt.clearFormat();
+	b5.dbgtxt.text= (window.debugText||"")+//'--p1--\n'+ Obj2(b5.Game.Input.player1)+"\n--p2--\n"+Obj2(b5.Game.Input.player2)+'\n'
+	" "+RELEASE_CODENAME + " "+ RELEASE_VER + " | "+
   fpt +'fps' + ' mem: '+ 
   (app.memoryUsage.indexOf('.') != -1 ? app.memoryUsage : app.memoryUsage.replace('%','.0%')) +
-  ' dC: '+app.display.drawCount)
+  ' dC: '+app.display.drawCount+'\n'+(n?_loadingtext(): (app.texture_state || " "))
 }
 
 app.onTick = function() {
@@ -747,6 +743,9 @@ sceneMain.active && sceneMain.view.active && sceneMain.view.camera_update && sce
 
 sceneMain.time_step = app.dt;
 
+b5.Game.Flags.spookyMode && (app.display.stage.filters || '').length == 0? 
+	app.display.stage.rotation = Math.cos(app.now*.0001)*0.023 :
+	app.display.stage.rotation = 0;
 
 //Update pause
 var btnPause = (b5.Game.Input.player1.Start || b5.Game.Input.player2.Start) && !b5.Game.Flags.inSomeMenu;
@@ -756,8 +755,8 @@ b5.Game.PauseMenu.show(b5.Game.Flags.inWorldmap ? "worldmap": b5.Game.Flags.inLe
 app.now > l+1000 ? (fpt = fptc+1,
   fptc = 0, 
   l = app.now,
-  cordova.platformId != 'electron' && app.getMemoryUsage(), 
-  app.updateInfoText()
+  cordova.platformId != 'electron' && app.getMemoryUsage(),
+app.updateInfoText()
 ): fptc++;
 //app.updateInfoText()
 
@@ -765,24 +764,21 @@ app.now > l+1000 ? (fpt = fptc+1,
 }
 
 function _loadingtext() {
-	var r = 'LOADING', t = "";
+	var t = 'NOW LOADING ', a = sceneMain.countLoadedResources(), b = sceneMain.countLoadableResources();/*
 	for(var i = 0, a = sceneMain.countLoadedResources() / sceneMain.countLoadableResources(); i < r.length; i++) {
 		var s = Math.floor(.2+r.length*a);
 		if(s > -1 && i < s) {
 			t += `&f[#008000]${r[i]}&f`
 		}
-		else t += r[i]
-	}
-	return t;
+		else t += r[i];
+	}*/
+	var p = '( '+ a + ' of ' + b + ' )' /*String(
+		Math.round((a/b)*1000)/10
+	);
+	p.indexOf('.') == -1 && (p += '.0');
+	p += '%'*/
+	return t + p;
 }
-function _statusText() {
-	switch(app.texture_state) {
-		case "uploading": return '&f[#ffff00]UPLOADING&f |';
-		case "reading": return '&f[#0000ff]READING&f |';
-		default: return "";
-	}
-}
-
 }
 
 }

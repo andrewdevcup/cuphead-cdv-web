@@ -2,5 +2,6 @@
 	"black_bg": "black",
 	"text_pausemenu": "#343434",
 	"text_pausemenu_selected": "#9c181a",
-	"text_pausemenu_gray": "#6e6661"
+	"text_pausemenu_gray": "#6e6661",
+	"text_warning_unselected": "#b29f82"
 }

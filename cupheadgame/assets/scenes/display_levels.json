@@ -1,10 +1,13 @@
 {
 	"worlds": {
 		"world1": [
-			"veggies",
-			"slime",
-			"blimp",
-			"flower"
+			"veggies:boss",
+			"slime:boss",
+			"blimp:boss",
+			"flower:boss",
+			"frogs:boss",
+			"forestfollies:platforming",
+			"treetoptrouble:platforming"
 		]
 	},
 	"display": ["world1", "world2", "world3", "finale", "dlc"]

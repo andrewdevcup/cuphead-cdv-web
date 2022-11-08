@@ -4,13 +4,28 @@ b5.LoadScene = function(world, scene, data, game) {
 	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
 	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
   
-  data.levelID = 10; //Original Cuphead level ID
+  data.levelID = game.LevelIDs.flower; //Original Cuphead level ID
 
-//  game.SlotUtils.getLevelData(9).played = true;
+  game.SlotUtils.getLevelData(data.levelID).played = true;
   
   game.importObject('CreateLevel')
       .init()
       .loadFightTextsResources();
+	  
+	  
+	data.addFlowerParticle = function(name, x, y, layer) {
+		switch(name) {
+			case 'HandPotSpawn':
+				var d = new b5.Actor();
+				d.atlas = scene.findResource("FlowerGattlingFXAtlas", "brush");
+				d.playAnim("hand_pot_fx");
+				d.onAnimEnd = d.destroy;
+				d._layer = 2;
+				d.setPosition(x,y);
+				world['Layer'+ layer].addActor(d);
+				return d;
+		}
+	}
       
   //Load only on Difficulty > 0 (Normal / Hard)
   if(data.Statistics.skill > 0) void 0;
@@ -24,7 +39,7 @@ b5.LoadScene = function(world, scene, data, game) {
   data.Statistics.level_type = 'boss'; //For winscreen
   data.Statistics.optimalTime = 180; //Time to beat the boss for score
   
-  world.camera_speed_x = 0.12;
+  world.camera_speed_x = 0.15;
   
   game.DiscordSession.updateActivity({
   	details: "Floral Fury | " + game.d_getDifficulty(data.Statistics.skill),
@@ -45,7 +60,7 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
   	data.playersIntroAnimation();
 	}
 	
-	//scene.findResource('MUS_Flower','sound').play();
+	scene.findResource('Mus_Flower','sound').play();
  
 };
 b5.addSceneResources = function(scene, data, game) {

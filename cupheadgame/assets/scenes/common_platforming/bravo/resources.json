@@ -1,0 +1,28 @@
+{
+	"bitmap": [{
+		"name": "BravoBitmap0",
+		"src": "scenes/common_platforming/bravo/SpriteAtlasTexture_Bravo-0.png"
+	}],
+	"brush": [{
+		"name": "BravoTextAtlas",
+		"bitmaps": ["BravoBitmap0"],
+		"frames": "scenes/common_platforming/bravo/SpriteAtlasTexture_Bravo.csv"
+	}],
+	"sound": [{
+		"name": "AnnouncerBravoSfx1",
+		"src": "scenes/common_platforming/bravo/sfx_platforming_outro_bravo_a.ogg",
+		"category": "sfx"
+	},{
+		"name": "AnnouncerBravoSfx2",
+		"src": "scenes/common_platforming/bravo/sfx_platforming_outro_bravo_b.ogg",
+		"category": "sfx"
+	},{
+		"name": "AnnouncerBravoSfx3",
+		"src": "scenes/common_platforming/bravo/sfx_platforming_outro_bravo_c.ogg",
+		"category": "sfx"
+	},{
+		"name": "AnnouncerBravoSfx4",
+		"src": "scenes/common_platforming/bravo/sfx_platforming_outro_bravo_d.ogg",
+		"category": "sfx"
+	}]
+}

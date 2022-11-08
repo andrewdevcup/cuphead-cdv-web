@@ -1,0 +1,134 @@
+{
+	"bitmap": [{
+		"name": "GhostsBitmap0",
+		"src": "scenes/common_mausoleum/SpriteAtlasTexture_Ghosts-0.png"
+	},{
+		"name": "GhostsBitmap1",
+		"src": "scenes/common_mausoleum/SpriteAtlasTexture_Ghosts-1.png"
+	},{
+		"automatize": {
+			"name": "LegendaryGhostBitmap%i",
+			"start": 0,
+			"end": 4,
+			"pad": 1,
+			"src": "scenes/common_mausoleum/SpriteAtlasTexture_LegendaryGhost-#.png"
+		}
+	},{
+		"automatize": {
+			"name": "LightRaysBitmap%i",
+			"start": 0,
+			"end": 2,
+			"pad": 1,
+			"src": "scenes/common_mausoleum/light_rays/SpriteAtlasTexture_LightRays-#.jpg"
+		}
+	},{
+		"name": "LegendaryGhostBeamBitmap",
+		"src": "scenes/common_mausoleum/SpriteAtlasTexture_LegendaryGhostBeam-0.png"
+	},{
+		"name": "LegendaryGhostFXBitmap",
+		"src": "scenes/common_mausoleum/SpriteAtlasTexture_LegendaryGhostFX.png"
+	}],
+	"brush": [{
+		"name": "GhostAtlas",
+		"bitmaps": ["GhostsBitmap0", "GhostsBitmap1"],
+		"frames": "scenes/common_mausoleum/SpriteAtlasTexture_Ghosts.csv",
+		"anims": "scenes/common_mausoleum/ghosts.anims.json"
+	},{
+		"name": "LegendaryGhostAtlas",
+		"bitmaps": {
+			"name-prefix": "LegendaryGhostBitmap%i",
+			"start": 0,
+			"end": 4
+		},
+		"frames": "scenes/common_mausoleum/SpriteAtlasTexture_LegendaryGhost.csv",
+		"anims": "scenes/common_mausoleum/legendaryGhost.anims.json"
+	},{
+		"name": "LegendaryGhostBeamAtlas",
+		"bitmaps": ["LegendaryGhostBeamBitmap"],
+		"frames": "scenes/common_mausoleum/SpriteAtlasTexture_LegendaryGhostBeam.csv"
+	},{
+		"name": "LegendaryGhostFXAtlas",
+		"bitmaps": ["LegendaryGhostFXBitmap"],
+		"frames": "scenes/common_mausoleum/SpriteAtlasTexture_LegendaryGhostFX.csv",
+		"anims": "scenes/common_mausoleum/legendaryGhostFX.anims.json"
+	},{
+		"name": "MausLightRaysAtlas",
+		"bitmaps": {
+			"name-prefix": "LightRaysBitmap%i",
+			"start": 0,
+			"end": 2
+		},
+		"frames": "scenes/common_mausoleum/light_rays/SpriteAtlasTexture_LightRays.csv"
+	}],
+	"sound": [{
+		"automatize": {
+			"name": "voMausFailSfx%i",
+			"start": 1,
+			"end": 6,
+			"pad": 3,
+			"src": "scenes/common_mausoleum/vo/vo_maus_fail_###.ogg",
+			"category": "sfx",
+			"preload": true
+		}
+	},{
+		"name": "FailedTempSfx",
+		"src": "scenes/common_worldmap/Menu_CardUp.ogg",
+		"category": "sfx"
+	},{
+		"name": "voMausOpeningSfx1",
+		"src": "scenes/common_mausoleum/vo/vo_maus_opening_line_001.ogg",
+		"category": "sfx",
+		"preload": true
+	},{
+		"name": "voMausOpeningSfx2",
+		"src": "scenes/common_mausoleum/vo/vo_maus_opening_line_002.ogg",
+		"category": "sfx",
+		"preload": true
+	},{
+		"name": "ghostJarBurstSfx",
+		"src": "scenes/common_mausoleum/sfx/sfx_level_mausoluem_ghost_jar_burst_ISOLATED.ogg",
+		"category": "sfx",
+		"preload": true
+	},{
+		"name": "queenGhostAppearSfx",
+		"src": "scenes/common_mausoleum/sfx/sfx_level_mausoluem_ghost_jar_queen_ghost_appear_01.ogg",
+		"category": "sfx",
+		"preload": true
+	},{
+		"name": "ghostJarTravelSfx",
+		"src": "scenes/common_mausoleum/sfx/sfx_level_mausoluem_ghost_jar_travel_01.ogg",
+		"category": "sfx",
+		"preload": true
+	},{
+		"name": "jarShakeSfx",
+		"src": "scenes/common_mausoleum/sfx/sfx_level_mausoluem_jar_shake_01.ogg",
+		"category": "sfx",
+		"preload": true
+	},{
+		"automatize": {
+			"name": "queenGhostSpeechSfx%i",
+			"start": 1,
+			"end": 10,
+			"pad": 2,
+			"src": "scenes/common_mausoleum/sfx/sfx_level_mausoluem_queen_ghost_speech_##.ogg",
+			"category": "sfx",
+			"preload": true
+		}
+	},{
+		"name": "Mus_Mausoleum",
+		"src": "scenes/common_mausoleum/MUS_Mausoleum.ogg",
+		"category": "music",
+		"preload": true,
+		"loop": true,
+		"options": {
+			"limiter": true,
+			"equalizer": true
+		}
+	},{
+		"name": "Mus_LegendaryGhost",
+		"src": "scenes/common_mausoleum/MUS_LegendaryGhost.ogg",
+		"category": "music",
+		"preload": true,
+		"loop": true
+	}]
+}

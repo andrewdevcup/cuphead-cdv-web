@@ -16,7 +16,6 @@ b5.export = function(world, scene, data, game) {
 	var myexports = {};
 
 	game.importObject('CreateCommonPlayerResources');
-	game.importObject('CreatePlayerParticles');
 	game.importObject('CreateWeapons');
 	game.importObject('CreateCharms');
 	game.importObject('CreateSuper');
@@ -195,7 +194,7 @@ b5.export = function(world, scene, data, game) {
 				hbx.activeTime = h.times;
 				hbx.visible = !!game.Flags.debugShowHitboxes;
 				hbx.tag = player +"hitbox" + (h.name == "ParryHitbox" ? '-intangible':'');
-				hbx.tags = ["player","hitbox"];
+				hbx.tags = ["player","hitbox", "playerhitbox"];
 			}
 		}
 		

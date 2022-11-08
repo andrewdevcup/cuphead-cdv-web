@@ -40,7 +40,7 @@ float mirror(float n, float x) {
 	float m = abs(n) / x;
 	float o = floor(m);
 	float p = fract(m);
-	float q = even(o) ? p: 1. - p;
+	float q = fract(o * .5) == 0. ? p: 1. - p;
 	return q * x;
 }
 

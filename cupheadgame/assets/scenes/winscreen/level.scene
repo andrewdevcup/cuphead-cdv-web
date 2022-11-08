@@ -31,10 +31,13 @@ b5.LoadScene = function(world, scene, data, game) {
   data.loadMap = function() {
   	//Update level stats
   	if(data.levelPreviousStats) {
+  		//Set best time if skill is greater to the previous stats or if same skill, if time is lower
+  		(data.stats.skill > data.levelPreviousStats.difficultyBeaten || data.stats.time < data.levelPreviousStats.bestTime) && (data.levelPreviousStats.bestTime = data.stats.time);
+  		//Set grade if greater
   		data.grade > data.levelPreviousStats.grade && (data.levelPreviousStats.grade = data.grade);
   		data.levelPreviousStats.completed = true;
+  		//Set skill if greater
   		(data.stats.skill > data.levelPreviousStats.difficultyBeaten) && (data.levelPreviousStats.difficultyBeaten = data.stats.skill);
-  		data.stats.time < data.levelPreviousStats.bestTime && (data.levelPreviousStats.bestTime = data.stats.time);
   		//Save game
   	 	game.save();
   	}

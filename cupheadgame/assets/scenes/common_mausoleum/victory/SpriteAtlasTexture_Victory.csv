@@ -1,0 +1,27 @@
+bitmap_index,sx,sy,sw,sh,ox,oy,notes
+0,0,0,512,288,0,0, Mausoleum-Victory_0000
+0,512,0,512,288,0,0, Mausoleum-Victory_0001
+0,1024,0,512,288,0,0, Mausoleum-Victory_0002
+0,1536,0,512,288,0,0, Mausoleum-Victory_0003
+0,0,288,512,288,0,0, Mausoleum-Victory_0004
+0,512,288,512,288,0,0, Mausoleum-Victory_0005
+0,1024,288,512,288,0,0, Mausoleum-Victory_0006
+0,1536,288,512,288,0,0, Mausoleum-Victory_0007
+0,0,576,512,288,0,0, Mausoleum-Victory_0008
+0,512,576,512,288,0,0, Mausoleum-Victory_0009
+0,1024,576,512,288,0,0, Mausoleum-Victory_0010
+0,1536,576,512,288,0,0, Mausoleum-Victory_0011
+0,0,864,512,288,0,0, Mausoleum-Victory_0012
+0,512,864,512,288,0,0, Mausoleum-Victory_0013
+0,1024,864,512,288,0,0, Mausoleum-Victory_0014
+0,1536,864,512,288,0,0, Mausoleum-Victory_0015
+0,0,1152,512,288,0,0, Mausoleum-Victory_0016
+0,512,1152,512,288,0,0, Mausoleum-Victory_0017
+0,1024,1152,512,288,0,0, Mausoleum-Victory_0018
+0,1536,1152,512,288,0,0, Mausoleum-Victory_0019
+0,0,1440,512,288,0,0, Mausoleum-Victory_0020
+0,512,1440,512,288,0,0, Mausoleum-Victory_0021
+0,1024,1440,512,288,0,0, Mausoleum-Victory_0022
+0,1536,1440,512,288,0,0, Mausoleum-Victory_0023
+0,0,1728,512,288,0,0, Mausoleum-Victory_0024
+0,512,1728,512,288,0,0, Mausoleum-Victory_0025

@@ -114,7 +114,10 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		if (air != flags.inAir) {
 			air = flags.inAir;
 			//Reset dash in ground
-			if (!flags.inAir) dashes = 0;
+			if (!flags.inAir && !flags.dashing) {
+				dashes = 0;
+				dashtime = 0;
+			}
 		}
 
 		if (flags.dashing) {

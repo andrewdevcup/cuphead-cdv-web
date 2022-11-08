@@ -14,7 +14,7 @@
 		}
 	},
 	"variables": {
-		"baseSpeed": 11,
+		"baseSpeed": 12,
 		"facingAngle": 90
 	},
 	"flags": {

@@ -11,6 +11,9 @@
 	"general_back": "VOLVER",
   "general_on": "SÍ",
 	"general_off": "NO",
+	"confirm_yes": "SÍ",
+	"confirm_no": "NO",
+	"slot_delete": "CONFIRMA QUE\nQUIERES ELIMINAR:",
 	"ui_confirm": "CONFIRMAR",
 	"ui_delete": "ELIMINAR",
 	"ui_multiplayer": "LOCAL/ONLINE",
@@ -171,5 +174,8 @@
 	"veggies": "La Pandilla Raíz",
 	"slime": "Goopy Le Grande",
 	"blimp": "Hilda Berg",
-	"flower": "Clavel de Cagney"
+	"flower": "Clavel de Cagney",
+	"frogs": "Hosco y Tosco",
+	"forestfollies": "Locuras del bosque",
+	"treetoptrouble": "Problemas en las copas"
 }

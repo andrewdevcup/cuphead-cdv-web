@@ -1,0 +1,16 @@
+{
+	"bitmap": [{
+		"name": "VictoryBitmap0",
+		"src": "scenes/common_mausoleum/victory/SpriteAtlasTexture_Victory-0.png"
+	}],
+	"brush": [{
+		"name": "VictoryTextAtlas",
+		"bitmaps": ["VictoryBitmap0"],
+		"frames": "scenes/common_mausoleum/victory/SpriteAtlasTexture_Victory.csv"
+	}],
+	"sound": [{
+		"name": "AnnouncerVictorySfx",
+		"src": "scenes/common_mausoleum/victory/mausoleum_victory.ogg",
+		"category": "sfx"
+	}]
+}

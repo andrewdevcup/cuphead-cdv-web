@@ -216,6 +216,13 @@
 			"preload": false,
 			"reuse": true,
 			"category": "sfx"
+		},
+		{
+			"name": "PlayerChalicePowerUpSfx",
+			"src": "player/common/sfx_anim_player_chalice_powerup.ogg",
+			"preload": false,
+			"reuse": true,
+			"category": "sfx"
 		}
 	],
 	"bitmap": [

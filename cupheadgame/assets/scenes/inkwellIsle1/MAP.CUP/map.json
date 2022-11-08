@@ -213,7 +213,7 @@
 		"pos": [105,130],
 		"visible": true,
 		"layer": 2,
-		"tags": ["NPC"],
+		"tags": [],
 		"add_collider": true,
 		"scale": 1,
 		"color": "transparent"
@@ -230,10 +230,7 @@
 		"atlas": "LevelsIconsAtlas",
 		"base_anim": "shop",
 		"cull": false,
-		"anim_loop": true,
-		"properties": {
-			"tint_colour": "#ffc000"
-		}
+		"anim_loop": true
 	},
 	{
 		"name": "NPC_Slime",
@@ -284,6 +281,32 @@
 		"scale": 1.2,
 		"atlas": "LevelsIconsAtlas",
 		"base_anim": "flower",
+		"cull": false,
+		"anim_loop": true
+	},
+	{
+		"name": "NPC_Mausoleum",
+		"type": "Rect",
+		"size": [130,130],
+		"pos": [1100,630],
+		"visible": true,
+		"layer": 2,
+		"tags": ["NPC"],
+		"add_collider": true,
+		"scale": 1,
+		"color": "transparent"
+	},
+	{
+		"name": "MausoleumEntrance",
+		"type": "",
+		"size": [150,150],
+		"pos": [2330,660],
+		"visible": true,
+		"appendTo": "MAP",
+		"sub_layer": 2,
+		"scale": 0.9,
+		"atlas": "LevelsIconsAtlas",
+		"base_anim": "mausoleum",
 		"cull": false,
 		"anim_loop": true
 	},
@@ -455,6 +478,14 @@
 				"options": {
 					"equalizer": true,
 					"limiter": true
+				}
+			},
+			{
+				"name": "ss",
+				"src": "fanservice/ss",
+				"category": "music",
+				"options": {
+					"equalizer": true
 				}
 			}
 		]

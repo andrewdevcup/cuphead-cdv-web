@@ -97,8 +97,8 @@ b5.Game.Sfx.volume = 1;
 })();
 
 //Global volume control
-b5.Game.Sfx.stopAll = function(destroy) {
-	for(var i=0, snds=this.sounds; i < snds.length; i++) if(!snds[i].global_stream){
+b5.Game.Sfx.stopAll = function(destroy, absolutelyAll) {
+	for(var i=0, snds=this.sounds; i < snds.length; i++) if(!snds[i].global_stream || absolutelyAll){
 		snds[i].stop();
 		destroy && snds[i].destroy();
 	}

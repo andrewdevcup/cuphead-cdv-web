@@ -1,0 +1,96 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [0,0],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 2,
+		"playerLayer": 1,
+		"zoom": 0.9,
+		"world_depth": 1.0,
+		"cameraExtents": [-10,-10,10,10],
+		"cameraRange": 0.04
+	},
+	"physicsObjects": [
+		{
+			"name": "LevelFloor",
+			"type": "RectActor",
+			"size": [2048, 10],
+			"detectionSize": [2048,12],
+			"detectionTags": ["floor"],
+			"pos": [0, 330],
+			"color": "blue",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["floor"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [-630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 500],
+			"detectionSize": [10,500],
+			"pos": [630, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		}
+	],
+	"worldObjects": [{
+		"name": "BG",
+		"type": "Rect",
+		"size": [1280,720],
+		"pos": [0,0],
+		"visible": true,
+		"appendTo": "scene_background",
+		"sub_layer": 0,
+		"scale": 1,
+		"color": "#c1c1c1"
+	},
+	{
+		"name": "BulletEmitter",
+		"type": "Rect",
+		"size": [50,50],
+		"pos": [0,0],
+		"visible": true,
+		"layer": 1,
+		"sub_layer": 1,
+		"scale": 1,
+		"color": "red",
+		"add_collider": true
+	}
+	]
+}

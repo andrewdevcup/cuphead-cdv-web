@@ -1265,7 +1265,8 @@ return {
 			}
 		}
 		
-		if(!data.levelData.fightStarted) data.playEvent('SlimeIntro');
+	//	if(!data.levelData.fightStarted) 
+		data.playEvent('SlimeIntro', [], true);
 		
 		//Basic defeat manager
 		var dead = false,

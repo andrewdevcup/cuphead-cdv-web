@@ -35,6 +35,9 @@ return function(thisNpc, world, scene, game, data) {
   	//Do more things
   };
   
+  var ss = scene.findResource('ss','sound'),
+  mus = scene.findResource('MUS_InkwellIsleOne','sound');
+  
   //On dialogEnd
   //When index reached dialog length
   thisNpc.onDialogEnd = function() {
@@ -47,8 +50,26 @@ return function(thisNpc, world, scene, game, data) {
   	//Allow players to move
   	for(var a = 0, b = world.findActorsByTagName('player',true); a < b.length; a++)
   	  data[b[a].name].flags.controllable = true;
-
+  	
+  	mus.resume();
+  	mus.Tween('gain:main',1,1.5);
+  			 
+    ss.Tween('gain:main',0,0.5);
+    thisNpc.setTimeout(f => ss.stop(), 0.6);
+    game.Flags.pausingEnabled = true;
   };
+  
+  thisNpc.tasks.clear();
+  mus.Tween('gain:main',0,1.5);
+  
+  game.Flags.pausingEnabled = false;
+  ss.setGain(0);
+  ss.setPlaybackSpeed(0.99);
+  ss.play();
+  thisNpc.setTimeout(f=> {
+  	ss.Tween('gain:main',0.2,3);
+  	mus.pause();
+ 	}, 1.5);
   
   //Create dialog
   dialog = data.createDialog(thisNpc,

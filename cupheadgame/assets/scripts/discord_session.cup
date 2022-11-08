@@ -6,8 +6,8 @@
 		activity: {
 			application_id: "971820323806806036",
 			name: 'Cuphead CDV '+ b5.Utils.GetPlatform().toLowerCase().capitalize() + (cordova.platformId == 'browser'?' (Browser)':''),
-			details: ' ',
-			state: " ",
+			details: null,
+			state: null,
 			largeImageKey: "971826208826327062",
 			largeImageText: RELEASE_CODENAME + " " + RELEASE_VER,
 			startTimestamp: Date.now()

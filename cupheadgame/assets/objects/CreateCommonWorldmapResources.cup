@@ -326,9 +326,10 @@ b5.export = function(world, scene, data, game) {
 				//Label
 				var labelMain = new b5.LabelActor();
 				labelMain.setTextFmt(text);
-				labelMain.y = -60;
+				labelMain.y = text.split('\n').length == 1 ? -30 : -60;
 				labelMain.line_height = 55;
 				labelMain._scale = 1.15;
+			  labelMain.name = "TitleCardGeneralLabelMain";
 				labelMain.font = scene.findResource('CupheadHenrietteFont', 'brush');
 				card.addActor(labelMain);
 

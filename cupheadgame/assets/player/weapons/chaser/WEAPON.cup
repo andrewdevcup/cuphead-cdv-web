@@ -65,8 +65,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			bullet.time = 0;
 			bullet.rotation = angle || 0;
 			bullet.fill_style = 'transparent';
-			bullet.tags = ["playerBullet"];
-			bullet.tag = "playerBullet";
+			bullet.tag = thisPlayer.data.bulletTag;
+			bullet.tags = [bullet.tag];
 			bullet.layer = thisPlayer.layer-1;
 			bullet.supermeter_score = wpnData.supermeter_score;
 
@@ -136,7 +136,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 
 				//Get target
 				if (this.target === null) {
-					var olhB = world.findActorsWithTagsName('hittableEnemy', true); //this.detectionHitbox.A_overlaps;
+					var olhB = world.findActorsWithTagsName(thisPlayer.data.enemy, true); //this.detectionHitbox.A_overlaps;
 					for (var i = 0, prevDistance = Number.MAX_VALUE, target = null; i < olhB.length; i++) {
 						var distance = b5.Maths.distanceFast(this.x, this.y, olhB[i].x, olhB[i].y);
 						if (distance < prevDistance && distance < this.enemyDetectionRange) {
@@ -166,7 +166,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				for (var i = 0; i < ols.length; i++)
 					if (ols[i]) {
 					var l = ols[i];
-					if (ols[i].tags.indexOf("hittableEnemy") != -1) {
+					if (ols[i].tags.indexOf(thisPlayer.data.enemy) != -1) {
 						//Enemy was hit
 						if (!this.destroyed) {
 							this.destroyBullet();
@@ -201,7 +201,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					p.atlas = thisAtlas;
 					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
 					p.setPosition(pos[0], pos[1]);
-					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || flags.ducking? 1: 0);
 					thisPlayer.parent.addActor(p);
 					p._scale = 0.92;
 					p.playAnim('spark');
@@ -284,8 +284,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				exb.damage = (wpnData.ex.damage * thisPlayer.data.damageMultiplier) / scene.data.players.activePlayers.length;
 				exb.time = 0;
 				exb.fill_style = "transparent";
-				exb.tags = ["playerBullet"];
-				exb.tag = "playerBullet";
+				exb.tag = thisPlayer.data.bulletTag;
+				exb.tags = [exb.tag];
 				exb.id = i;
 				exb.layer = body.sub_layer;
 				exb.supermeter_score = 0;
@@ -377,7 +377,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			if (this.target === null) {
 
 				if (!this.orbit) {
-					var olhB = world.findActorsWithTagsName('hittableEnemy', true); //this.detectionHitbox.A_overlaps;
+					var olhB = world.findActorsWithTagsName(thisPlayer.data.enemy, true); //this.detectionHitbox.A_overlaps;
 					for (var i = 0, prevDistance = Number.MAX_VALUE, target = null; i < olhB.length; i++) {
 						var distance = b5.Maths.distanceFast(this.x, this.y, olhB[i].x, olhB[i].y);
 						if (distance < prevDistance && distance < this.enemyDetectionRange) {
@@ -412,7 +412,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			//Check overlaps
 			var ols = this.A_overlaps;
 			for (var a = 0, ol = null; a < ols.length; a++)
-				if (ol = ols[a], ol.tags.indexOf("hittableEnemy") != -1) {
+				if (ol = ols[a], ol.tags.indexOf(thisPlayer.data.enemy) != -1) {
 				//Enemy was hit
 				//Stun
 				ol.onBulletHit && ol.onBulletHit(this);

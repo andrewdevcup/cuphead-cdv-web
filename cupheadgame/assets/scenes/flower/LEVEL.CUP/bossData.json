@@ -27,25 +27,37 @@
 				}
 			]
 		},
-  	{
+		{
 			"damageMultiplier": 1,
 			"data": {
-				"phase1": {
-					"laserProbability": 0.45,
-					"laserUpProbability": 0.5,
-					"laserDownProbability": 0.5,
+				"flower": {
+					"attack_list": ["laser","magicHands","gattling"],
+					"attackWaitTimeRanges": [0.9, 2],
 					"laserChargeDuration": 0.9,
 					"laserHoldDuration": 0.9,
-					"magicHandsProbability": 0.6,
+					"magicHandsWait": 0.9,
+					"magic_hands_attack_list": ["acorn","boomerang"],
+					"magicHandsAcornWait": 2,
+					"magicHandsBoomerangWait": 1.5,
+					"magicHandsTimes": [2,3],
 					"boomerang": {
-						"speed": 30,
+						"speed": 32,
+						"releaseTime": 0.5,
 						"turnaroundTime": 0.6
 					},
 					"acornAttack": {
-						"acorns": 4,
-						"acornSpeed": 40,
-						"acornAcceleration": 600
-					}
+						"acorns": 3,
+						"acornSpeed": 28,
+						"acceleration": 3,
+						"releaseTime": 0.6,
+						"startY": 170,
+						"endY": -210
+					},
+					"gattling": {
+						"durationTimeRanges": [4, 7],
+						"seedSpawnIntervalRanges": [0.4,0.4]
+					},
+					"morphHP": 600
 				}
 			},
 			"phases": [
@@ -58,7 +70,23 @@
 					}
 				},
 				{
-					"health": 650,
+					"health": 120,
+					"deathCardMessage": "flower",
+					"mugshot": {
+						"bitmap": "FlowerMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 410,
+					"deathCardMessage": "flower",
+					"mugshot": {
+						"bitmap": "FlowerMugshot",
+						"offset": [0,0]
+					}
+				},
+				{
+					"health": 700,
 					"deathCardMessage": "flower-form2",
 					"mugshot": {
 						"bitmap": "FlowerMugshot2",

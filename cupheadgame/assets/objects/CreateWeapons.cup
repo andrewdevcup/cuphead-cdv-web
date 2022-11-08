@@ -33,8 +33,13 @@ b5.export = function(world, scene, data, game) {
 	}
   
   data.loadWeapon = function(name) {
-  	data.weapons[name] = JSON.parse(b5.File.readSync(b5.Paths.player + 'weapons/'+name+'/weapon.json'));
-
+  	var wpath = b5.Paths.player + 'weapons/' + name + '/';
+  	
+  	//Load weapon data
+  	new b5.Raw(name+":WeaponData", wpath + 'weapon.json', true, wdat => {
+  		data.weapons[name] = JSON.parse(wdat);
+  	}, true);
+  	
 		//Load weapon resources
 		var res = data.weapons[name].resources;
     
@@ -42,7 +47,10 @@ b5.export = function(world, scene, data, game) {
 
 		//Parse events
 		var weapon = data.weapons[name];
-		weapon.setupActions = Function(b5.File.readSync(b5.Paths.player + 'weapons/' + name + '/WEAPON.cup'))();
+		new b5.Raw(name + ":WeaponScript", wpath + 'WEAPON.cup', true, wsc => {
+			weapon.setupActions = Function(wsc)();
+		}, true);
+
   }
   
 	//Load weapon data
@@ -58,7 +66,7 @@ b5.export = function(world, scene, data, game) {
 		if (name != "empty") {
 			if(!data.weapons[name]) data.loadWeapon(name);
 			this.wpn = data.weapons[name];
-			this.data = this.wpn.setupActions(player, data[player.name].flags, world, scene, game, this.wpn);
+			this.data = this.wpn.setupActions(player, player.flags, world, scene, game, this.wpn);
 			this.updateBehavior = function() {
 				this.data.onTick(this.data.bullets, this.data.exBullets)};
 		} else return null;

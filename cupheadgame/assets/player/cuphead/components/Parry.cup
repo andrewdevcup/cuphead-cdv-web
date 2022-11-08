@@ -67,7 +67,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
     	thisPlayer.body.m_linearVelocity.y = !flags.dashing ? -thisPlayer.data.jumpSpeed*thisPlayer.data.parryJumpHeightMultiplier : 0;
     	flags.parrying = true;
     	flags.jumpState = 1; //Recover parry
-    	thisPlayer.body.SetActive(true);
+    	thisPlayer.body.SetActive(!flags.shootingEX);
     	game.Flags.pausingEnabled = !data.players_dead;
     	scene.world.m_sleep = false;
     	//Continue parryActive until anim ends

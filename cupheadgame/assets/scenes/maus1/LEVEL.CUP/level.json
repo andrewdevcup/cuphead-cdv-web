@@ -1,0 +1,178 @@
+{
+	"player": {
+		"spawn": {
+			"pos": [-380,0],
+			"facing": 1
+		}
+	},
+	"view": {
+		"layers": 2,
+		"playerLayer": 1,
+		"playerSubLayer": 3,
+		"zoom": 0.935,
+		"world_depth": 1.6,
+		"cameraExtents": [-55,0,55,0],
+		"cameraRange": 0.05
+	},
+	"physicsObjects": [
+		{
+			"name": "LevelFloor",
+			"type": "RectActor",
+			"size": [2048, 10],
+			"detectionSize": [2048,12],
+			"pos": [0, 300],
+			"color": "blue",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["floor"],
+			"detectionTags": ["floor"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall1",
+			"type": "RectActor",
+			"size": [10, 1000],
+			"detectionSize": [10,1000],
+			"pos": [-650, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "LevelWall2",
+			"type": "RectActor",
+			"size": [10, 1000],
+			"detectionSize": [10,1000],
+			"pos": [670, 0],
+			"color": "red",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": ["wall"],
+			"detectionTags": ["wall"],
+			"body": {
+				"friction": 1,
+				"fixedRotation": true,
+		    "bodyType": "static"
+			}
+		},
+		{
+			"name": "CenterPlatform",
+			"type": "RectActor",
+			"size": [320, 10],
+			"detectionSize": [320,12],
+			"pos": [0,100],
+			"color": "green",
+			"visible": false,
+			"layer": 1,
+			"sub_layer": 2,
+			"tags": [],
+			"detectionTags": ["platform"],
+			"body": {
+				"friction": 1,
+		    "fixedRotation": true,
+		    "bodyType": "static"
+			}
+		}
+	],
+	"worldObjects": [{
+		"name": "BG",
+		"type": "",
+		"size": [1724,899],
+		"pos": [0,0],
+		"visible": true,
+		"layer": 1,
+		"sub_layer": 0,
+		"scale": 1,
+		"color": "white",
+		"bitmap": "MausBG"
+	},
+	{
+		"name": "FG",
+		"type": "",
+		"size": [1687,949],
+		"pos": [0,-20],
+		"visible": true,
+		"layer": 2,
+		"sub_layer": 0,
+		"scale": 1.05,
+		"color": "white",
+		"bitmap": "MausFG"
+	},
+	{
+		"name": "LightRays",
+		"type": "",
+		"size": [20,20],
+		"pos": [310,80],
+		"visible": true,
+		"tags": [],
+		"layer": 1,
+		"opacity": 0.55,
+		"sub_layer": 4,
+		"scale": 3.1,
+		"color": "white"
+	},
+	{
+		"name": "Urn",
+		"type": "",
+		"size": [120,20],
+		"pos": [0,13],
+		"visible": true,
+		"tags": ["boss"],
+		"layer": 1,
+		"sub_layer": 2,
+		"scale": 1.02,
+		"color": "white",
+		"atlas": "UrnAtlas"
+	},
+	{
+			"name": "NPC_LegendaryGhost",
+			"type": "",
+			"size": [50,1],
+			"pos": [422,-2],
+			"scale": 0.95,
+			"layer": 1,
+			"sub_layer": 3,
+			"tags": ["NPC"],
+			"add_collider": true,
+			"opacity": 1
+		}
+	],
+	"resources": {
+		"bitmap": [{
+			"name": "MausBG",
+			"src": "scenes/maus1/mausoleum_bg_w1.png"
+		},
+		{
+			"name": "MausFG",
+			"src": "scenes/maus1/mausoleum_fg_w1.png"
+		},
+		{
+			"name": "UrnBitmap",
+			"src": "scenes/maus1/SpriteAtlasTexture_Urn_M1-0.png"
+		},
+		{
+			"name": "Maus1Mugshot",
+			"src": "scenes/maus1/death_card_mugshot_mausoleum_ghosts1.png"
+		}],
+		"brush": [{
+			"name": "UrnAtlas",
+			"bitmaps": ["UrnBitmap"],
+			"frames": "scenes/maus1/SpriteAtlasTexture_Urn_M1.csv",
+			"anims": "scenes/maus1/urn.anims.json"
+		}]
+	}
+}

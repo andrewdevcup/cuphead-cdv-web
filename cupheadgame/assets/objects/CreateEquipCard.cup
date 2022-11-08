@@ -6,29 +6,37 @@ b5.export = function(world, scene, data, game) {
 	charmList = JSON.parse(b5.File.readSync(b5.Paths.player+'charms.json')),
 	superList = JSON.parse(b5.File.readSync(b5.Paths.player+'supers.json')),
 	levelDisplays = JSON.parse(b5.File.readSync(b5.Paths.scenes+'display_levels.json'));
+	
+	data.EquipmentList = {
+		weapons: weaponList,
+		charms: charmList,
+		supers: superList
+	};
 
 	//Load weapon icons
 	for (var i = 0; i < weaponList.length; i++)
-		game.parseResources(JSON.parse(
+		if(weaponList[i] && weaponList[i] != 'empty') game.parseResources(JSON.parse(
 		b5.File.readSync(
 			b5.Paths.player+ 'weapons/' + weaponList[i] + '/resources-worldmap.json'
 		)), scene);
 
 	//Load charm icons
 	for (var i = 0; i < charmList.length; i++)
-		game.parseResources(JSON.parse(
+		if(charmList[i] && charmList[i] != 'empty') game.parseResources(JSON.parse(
 		b5.File.readSync(
 			b5.Paths.player+ 'charms/' + charmList[i] + '/resources-worldmap.json'
 		)), scene);
 
 	//Load super icons
 	for (var i = 0; i < superList.length; i++)
-		game.parseResources(JSON.parse(
+		if(superList[i] && superList[i] != 'empty') game.parseResources(JSON.parse(
 		b5.File.readSync(
 			b5.Paths.player+ 'supers/' + superList[i] + '/resources-worldmap.json'
 		)), scene);
 		
-	if(game.Flags.allItemsUnlocked) charmList[charmList.indexOf('drew')] = 'empty';
+	if( game.Flags.allItemsUnlocked && 
+	   game.SlotUtils.getPlayerInventory('playerOne')._charms.indexOf(game.GetItemId('drew')) == -1
+	  ) charmList[charmList.indexOf('drew')] = 'empty';
 	
 	var sfxList = {
 		card_up: scene.findResource('MenuCardUpSfx','sound'),
@@ -72,10 +80,14 @@ b5.export = function(world, scene, data, game) {
 			padY: 97,
 			scale: 1.25
 		},
+		locked_level: '?????',
+		BWF: new PIXI.filters.ColorMatrixFilter(),
 		show: function() {
 			game.Flags.inEquipCard = true;
 			game.Flags.inSomeMenu = true;
 			game.Flags.pausingEnabled = false;
+
+			if(!game.Flags.inLevel) game.PauseMenu.TweenMusic(true);
 			
 			sfxList.card_up && sfxList.card_up.play();
 			//Move the card up or down a little to keep ui texts readable
@@ -101,7 +113,7 @@ b5.export = function(world, scene, data, game) {
 					c[i]._av = c[i].isPlyOne;
 					c[i]._rotation = 0;
 					c[i].TweenToWithEnd('_y',pY,0.5,b5.Ease.cubicout,true,0, x => x.inFrontPage = true);
-					c[i].TweenTo('_rotation', Math.PI * b5.Maths.randomRange(-0.01,0.01,1), 0.5, b5.Ease.cubicout);
+					c[i].TweenTo('_rotation', Math.PI * b5.Maths.randomRange(-0.022,0.022,1), 0.5, b5.Ease.cubicout);
 				}
 			}
 			
@@ -123,11 +135,12 @@ b5.export = function(world, scene, data, game) {
 			b5.Game.UiButtons.show(true);
 			scene.events.dispatch('showequipcard');
 		},
-		hideAll: function() {
+		hideAll: function(nofx) {
 			game.Flags.inEquipCard = false;
 			game.Flags.pausingEnabled = !scene.data.players_dead;
 			
 			sfxList.card_down && sfxList.card_down.play();
+			if(!nofx && !game.Flags.inLevel) game.PauseMenu.TweenMusic(false);
 			
 			for(var i = 0, c = this.cards; i < c.length; i++) {
 				!c[i].inFrontPage && c[i].goBackToFront();
@@ -151,11 +164,13 @@ b5.export = function(world, scene, data, game) {
 		}
 	}
 	
+	equipCardsManager.BWF.blackAndWhite(1);
+	
 	//Hide if player joined or quit
 	scene.events.on('playeradded', mp => {
 		for(var i = 0; i < equipCardsManager.cards.length; i++)
 		  equipCardsManager.cards[i].goBackToFront();
-		equipCardsManager.hideAll();
+		equipCardsManager.hideAll(true);
 	});
 	scene.events.on('playerremoved', mp => {
 		for(var i = 0; i < equipCardsManager.cards.length; i++)
@@ -314,8 +329,7 @@ b5.export = function(world, scene, data, game) {
 		*/
 		
 		//B&W filter to apply on weapon equiped on primary/secondary
-		plyrCard.BWF = new PIXI.filters.ColorMatrixFilter();
-		plyrCard.BWF.blackAndWhite(1)
+		plyrCard.BWF = equipCardsManager.BWF;
 		
 		plyrCard.createWeaponSection = function(idSection,title) {
 			var listBox = new b5.Actor(),
@@ -1339,19 +1353,25 @@ b5.export = function(world, scene, data, game) {
 		  };
 		  
 		  listLBox.updateList = function(mWorld) {
-			  for(var m = 0, py = 0, g = levelDisplays.worlds[mWorld]; m < g.length; m++) {
+			  for(var m = 0, py = 0, r = null, g = levelDisplays.worlds[mWorld]; m < g.length; m++) {
+			  	//Get level name and type
+			  	r = g[m].split(':');
+			  	
+			  	var levelName = r[0],
+			  	levelType = r[1];
+			  	
 			  	//Create check box 
 			  	var cb = new b5.Actor();
-			  	cb.atlas = topBar.atlas;
+			  	if(levelType == 'boss') cb.atlas = topBar.atlas;
 			  	cb.current_frame = b5.Maths.randomRange(0,6);
 			  	cb._y = py;
 			  	listLBox.addActor(cb);
 			  	py += listLBox.pad_y;
 			  	
 			  	//Level data
-			  	const lvd = game.SlotUtils.getLevelData(game.LevelIDs[g[m]]);
+			  	const lvd = game.SlotUtils.getLevelData(game.LevelIDs[levelName]);
 			  	if(lvd) {
-				  	if(lvd.completed) {
+				  	if(lvd.completed && levelType == 'boss') {
 				  		//Add checkmark or star (if completed on extreme)
 				  		var chm = new b5.Actor();
 				  		chm.atlas = cb.atlas;
@@ -1367,7 +1387,7 @@ b5.export = function(world, scene, data, game) {
 				  	lvNLabel._scale = 0.58;
 				  	lvNLabel._x = 17;
 				  	lvNLabel._y2 = 8;
-				  	lvNLabel.text = lvd.played ? game.Texts.texts[g[m]] : '?????????????';
+				  	lvNLabel.text = lvd.played ? (game.Texts.texts[levelName] || equipCardsManager.locked_level) : equipCardsManager.locked_level;
 				  	lvNLabel.text = this.dotLine(22,lvNLabel.text);
 				  	lvNLabel.fill_style = game.Styles.text_pausemenu;
 				  	listLBox.addActor(lvNLabel);

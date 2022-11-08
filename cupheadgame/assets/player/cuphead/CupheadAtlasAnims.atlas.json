@@ -105,4 +105,6 @@
 		"frames":[388,389,390,391,392,393,45,46,47,48],"speed":30
 	},"revive_finale": {
 		"frames":[388,389,390,391,392,393],"speed":30
+	},"scared_mausoleum": {
+		"frames": [394], "speed": 0
 	}}

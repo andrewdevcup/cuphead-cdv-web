@@ -266,3 +266,28 @@ promptAsync = function(subtitle, text, options) {
   	};
   });
  }
+ 
+WorkerTicker = function(ms, start) {
+	this.script = `
+let interval;
+onmessage = function(evt) {
+	setTicker(evt.data);
+}
+setTicker = function(ms) {
+  clearInterval(interval);
+	interval = setInterval(f => postMessage('tick'), ms);
+}
+`;
+  this.file = URL.createObjectURL(new Blob([this.script]));
+  this.worker = new Worker(this.file);
+  this.onTick = null;
+  this.worker.onmessage = f => this.onTick && this.onTick();
+  start && this.worker.postMessage(ms);
+}
+WorkerTicker.prototype.setTicker = function(ms) {
+	this.worker.postMessage(ms);
+}
+WorkerTicker.prototype.destroy = function() {
+	URL.revokeObjectURL(this.file);
+	this.worker.terminate();
+}

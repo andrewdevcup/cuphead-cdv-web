@@ -17,10 +17,19 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	hb.fill_style = "aqua";
 	hb.opacity = 0.5;
 	
+	//Bullet hitbox detection
+	thisPlayer.onBulletHit = function() {
+		if(this.flags.hittable && !this.flags.damageHit && !flags.intangible) this.flags.damageHit = true;
+	}
+	
 	//List hitboxes
 	var hitboxes = (function() {
-		for(var i = 0, a = thisPlayer.hitboxes, h = {}; i < a.length; i++)
+		for(var i = 0, a = thisPlayer.hitboxes, h = {}; i < a.length; i++) {
 		  h[a[i].name] = a[i];
+		  a[i].onBulletHit = function() {
+		  	this.player.onBulletHit();
+		  }
+		}
 		return h;
 	})();
 	

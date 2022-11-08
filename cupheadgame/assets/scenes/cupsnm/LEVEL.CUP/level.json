@@ -9,10 +9,10 @@
 		"layers": 2,
 		"playerLayer": 1,
 		"playerSubLayer": 3,
-		"zoom": 1.06,
+		"zoom": 1.0,
 		"world_depth": 1.0,
-		"cameraExtents": [-2,0,2,0],
-		"cameraRange": 0.01
+		"cameraExtents": [-5,-5,5,5,0],
+		"cameraRange": 0.02
 	},
 	"physicsObjects": [
 		{
@@ -95,6 +95,19 @@
 		"scale": 0.7,
 		"layer": 1,
 		"sub_layer": 0
+	},
+	{
+		"name": "BulletEmitter",
+		"type": "Rect",
+		"size": [50,250],
+		"pos": [0,-50],
+		"tags": ["boss","hittableEnemy","enemy"],
+		"visible": false,
+		"layer": 1,
+		"sub_layer": 1,
+		"scale": 1,
+		"color": "red",
+		"add_collider": true
 	}
 	],
 	"resources": {
@@ -112,6 +125,10 @@
 			{
 				"name": "cuphead",
 				"src": "scenes/cupsnm/cupheads_nightmare.png"
+			},
+			{
+				"name": "PSIFX-B",
+				"src": "scenes/cupsnm/PSI-FX_SR.png"
 			}
 		],
 		"brush": [
@@ -119,6 +136,11 @@
 				"name": "bg-atlas",
 				"bitmaps": ["bgb-0","bgb-1"],
 				"frames": "scenes/cupsnm/background.frames.json"
+			},
+			{
+				"name": "PSIFXAtlas",
+				"bitmaps": ["PSIFX-B"],
+				"frames": "scenes/cupsnm/psi.frames.json"
 			}
 		],
 		"sound": [

@@ -40,8 +40,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			bullet.despawnTime = wpnData.despawnTime;
 			bullet.damage = wpnData.damage * thisPlayer.data.damageMultiplier;
 			bullet.time = 0;
-			bullet.tags = ["playerBullet"];
-			bullet.tag = "playerBullet";
+			bullet.tag = thisPlayer.data.bulletTag;
+			bullet.tags = [bullet.tag];
 	//		bullet.angle = angle;
 			bullet.layer = thisPlayer.layer-1;
 			bullet.supermeter_score = wpnData.supermeter_score;
@@ -49,6 +49,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			bullet.inFloor = false;
 			bullet.pStFloor = false;
 			bullet.bounces = 0;
+			bullet.airTime = 0;
 			
 			bullet.playAnimWithEnd('lobber_start',b=>b.playAnim('lobber_loop',true));
 
@@ -58,6 +59,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			bullet.parent.addActor(bulletsns);
 
 			bullet.destroyBullet = function(timeout) {
+				this.tasks.clear();
 				if(!timeout) thisWeapon.SpawnParticle("bulletDeath", [this.x,this.y]);
 				this.sensor.release(true);
 	      this.release(true);
@@ -100,6 +102,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 		  
 			bullet.onTick = function() {
 				this.time += app.dt;
+				this.airTime += app.dt;
 				if (this.time > this.despawnTime) {
 					this.destroyBullet(true);
 					return;
@@ -112,7 +115,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				for (var i = 0; i < ols.length; i++)
 				if (ols[i]) {
 					var l = ols[i];
-					if (ols[i].tags.indexOf("hittableEnemy") != -1) {
+					if (ols[i].tags.indexOf(thisPlayer.data.enemy) != -1) {
 						//Enemy was hit
 						if (!this.destroyed) {
 							this.destroyBullet();
@@ -139,7 +142,11 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				if(this.inFloor != this.pStFloor ) {
 					this.pStFloor = this.inFloor;
 					if(this.inFloor) {
+						this.body.SetActive(false);
+						this.playAnimWithEnd(this.airTime >= 0.3 ? 'bounce_high':'bounce_low', f => f.playAnim('lobber_loop',true));
+						this.setTimeout(f => f.data.body.SetActive(true), 2/60);
 						this.bounces++;
+						this.airTime = 0;
 						this.bounces >= wpnData.max_bounce && this.destroyBullet();
 					}
 				}
@@ -157,7 +164,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					p.atlas = thisAtlas;
 					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
 					p.setPosition(pos[0], pos[1]);
-					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || flags.ducking? 1: 0);
 					thisPlayer.parent.addActor(p);
 					p._scale = 0.92;
 					p.playAnim('spark');
@@ -180,7 +187,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			  	p.atlas = thisAtlas;
 					p.setPosition(pos[0], pos[1]);
 					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
-					p.layer = thisPlayer.layer + 1; //(thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					p.layer = thisPlayer.layer + 1; 
 					thisPlayer.parent.addActor(p);
 					p._scale = wpnData.scale;
 					p.playAnimWithEnd('lobber_death',f=>f.destroy());
@@ -190,7 +197,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					var p = new b5.Actor;
 			  	p.atlas = thisAtlas;
 					p.setPosition(pos[0], pos[1]);
-					p.layer = thisPlayer.layer + 1; //(thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					p.layer = thisPlayer.layer + 1; 
 					thisPlayer.parent.addActor(p);
 					p._scale = 1.05;//wpnData.scale;
 					p.playAnimWithEnd('ex_death',f=>f.destroy());
@@ -200,7 +207,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					var p = new b5.Actor;
 			  	p.atlas = thisAtlas;
 					p.setPosition(pos[0], pos[1]);
-					p.layer = thisPlayer.layer; //(thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					p.layer = thisPlayer.layer;
 					thisPlayer.parent.addActor(p);
 					p.fx = ['a','b','c'][b5.Maths.randomRange(0,2)];
 					p.playAnimWithEnd('ex_fx_'+ p.fx,f=>f.destroy());
@@ -220,8 +227,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			exb.damage = wpnData.ex.damage * thisPlayer.data.damageMultiplier;
 			exb.time = 0;
 			//	exb.fill_style = 'transparent';
-			exb.tags = ["playerBullet"];
-			exb.tag = "playerBullet";
+			exb.tag = thisPlayer.data.bulletTag;
+			exb.tags = [exb.tag];
 			//exb.bulletsId = scene.data.playerBullets.length;
 			exb.layer = thisPlayer.layer+2;
 			exb.supermeter_score = 0;
@@ -281,7 +288,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			for (var i = 0; i < ols.length; i++)
 				if (ols[i]) {
 					var l = ols[i];
-				if (ols[i].tags.indexOf("hittableEnemy") != -1) {
+				if (ols[i].tags.indexOf(thisPlayer.data.enemy) != -1) {
 					//Enemy was hit
 					ols[i].onBulletHit && ols[i].onBulletHit(this);
 					this.onEnemyHit && this.onEnemyHit(ols[i]);

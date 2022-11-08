@@ -8,9 +8,12 @@
 */
 
 (function() {
-	DiscordGatewayRPC = function(token) {
+	DiscordGatewayRPC = function(token, autoReconnect) {
 		this.token = token;
 		this.activity = null,
+		this.session_status = null,
+		this.closing = false,
+		this.auto_reconnect = !!autoReconnect,
 		this.debug = false,
 		this._onloggedin = null,
 		this.onReady = null,
@@ -26,9 +29,9 @@
 				d: {
 					token: _this.token,
 					properties: {
-						"$os": "android",
-						"$browser": "Chrome",
-						"$device": b5.Utils.IsMobile() ? "mobile" : "unknown"
+						os: b5.Utils.GetPlatform().toLowerCase(),
+						browser: "cordova",
+						device: b5.Utils.IsMobile() ? "mobile" : "desktop"
 					},
 					compress: false,
 					intents: 0
@@ -50,6 +53,9 @@
 				switch (data.op) {
 					case 0: //Dispatch event
 						if (data.t == "READY") {
+							//Save status and sync
+							this.rpc.session_status = d.sessions[0].status;
+							
 							this.rpc.onReady && this.rpc.onReady(d);
 							this.rpc._onloggedin && this.rpc._onloggedin(d);
 							console.log('[Gateway] Logged in as '+d.user.username+'#'+d.user.discriminator);
@@ -63,6 +69,10 @@
 									d: s
 								}));
 							},d.heartbeat_interval);
+						}
+						else if(data.t == "SESSIONS_REPLACE") {
+							//Save status and sync
+							this.rpc.session_status = d[0].status;
 						}
 						break;
 					case 10: //Hello
@@ -104,17 +114,18 @@
 			this.socket.onclose = function(r) {
 				self.clearInterval(this.rpc.heart_start);
 				this.onClose && this.onClose(r);
-				//		if(r.code == 1000 && r.reason === '') this.rpc.resetConn();
+				if(!this.rpc.closing && this.rpc.auto_reconnect) this.rpc.resetConnection();
 			}
 		}
 
 		this.resetConnection = function() {
-			let a = this.activity,
+			let a = this.activity, t = this.token, e = this.auto_reconnect,
 			funcs = {};
 			for (var i in this)typeof this[i] == "function" && (funcs[i] = this[i]);
-			DiscordGatewayRPC.call(this);
+			DiscordGatewayRPC.call(this, t, e);
 
 			console.log('Gateway reset');
+			this.createClient();
 
 			for (var i in funcs) this[i] = funcs[i];
 			funcs = null;
@@ -146,12 +157,13 @@
 					}],
 					afk: true,
 					since: data.startTimestamp,
-					status: null
+					status: this.session_status
 				}
 		}));
 	}
 	
 	this.close = function() {
+		this.closing = true;
 		this.socket.close();
 		self.clearInterval(this.heartbeat_interval);
 	}
@@ -159,6 +171,8 @@
 DiscordGatewayRPC.Activity = {
 	PLAYING: 0,
 	STREAMING: 1,
-	LISTENING: 2
+	LISTENING: 2,
+	WATCHING: 3,
+	CUSTOM: 4
 }
 })();

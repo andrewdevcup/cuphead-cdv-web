@@ -38,7 +38,7 @@ myexports.loadResources = function() {
 	}
 }
 	//Play
-	data.playFightText = function(text, onAnimEnd) {
+	data.playFightText = function(text, onAnimEnd, noAnn1, noAnn2) {
 		switch (text) {
 			case 'GetReady':
 				game.Flags.pausingEnabled = false;
@@ -51,14 +51,16 @@ myexports.loadResources = function() {
 
 
 				//Announcer
-				[
+				!noAnn1 && [
 					scene.findResource('AnnouncerGetReady1', 'sound'),
 					scene.findResource('AnnouncerGetReady2', 'sound'),
 					scene.findResource('AnnouncerGetReady3', 'sound'),
 					scene.findResource('AnnouncerGetReady4', 'sound'),
 					scene.findResource('AnnouncerGetReady5', 'sound')
 				][b5.Maths.randomRange(0, 4)].play();
+				
 				scene.findResource('LevelBellIntro', 'sound').play(0.8);
+				
 				world.setTimeout(function() {
 					var a = new b5.Actor;
 					a.atlas = scene.findResource('FightTextGetReadyAtlas', 'brush');
@@ -73,7 +75,7 @@ myexports.loadResources = function() {
 					world.setTimeout(function() {
 						game.Flags.pausingEnabled = !game.Multiplayer.isGuest;
 						data.levelData.fightStarted = true;
-						[
+						!noAnn2 && [
 							scene.findResource('AnnouncerFight1', 'sound'),
 							scene.findResource('AnnouncerFight2', 'sound'),
 							scene.findResource('AnnouncerFight3', 'sound'),
@@ -104,8 +106,9 @@ myexports.loadResources = function() {
 				a.setSize(1076, 232);
 				a.use_parent_opacity = false;
 				a.round_pixels = false;
-				a.onTick = function() {
-					this.setPosition(
+				a.setInterval(function(b) {
+					var _this = b.data;
+					_this.setPosition(
 						b5.Maths.randomRange(-1,
 							1,
 							true),
@@ -113,7 +116,8 @@ myexports.loadResources = function() {
 							1,
 							true)
 					);
-				}
+				},1/24);
+				
 				bg.addActor(a);
 				bg.name = "YouDiedTextBackground"
 				scene.addActor(bg);
@@ -163,10 +167,75 @@ myexports.loadResources = function() {
 						world.setTimeout(function() {
 							game.Sfx.fade_out(1.99);
 							!game.Multiplayer.isGuest && scene.events.dispatch('onfightwin:nextscene');
-							game.Flags.pausingEnabled = !game.Multiplayer.isGuest;
+							game.Flags.pausingEnabled = true;
 						},2);
 					}, 1.5);
 				};
+				break;
+			case 'Bravo':
+				game.Flags.pausingEnabled = false;
+				
+				var guihidden = game.GUI.hidden;
+				game.GUI.hide();
+				
+				//Announcer
+				!noAnn1 && [
+					scene.findResource('AnnouncerBravoSfx1', 'sound'),
+					scene.findResource('AnnouncerBravoSfx2', 'sound'),
+					scene.findResource('AnnouncerBravoSfx3', 'sound'),
+					scene.findResource('AnnouncerBravoSfx4', 'sound')
+				][b5.Maths.randomRange(0, 3)].play();
+				
+				var a = new b5.Actor;
+				a.atlas = scene.findResource('BravoTextAtlas', 'brush');
+				scene.addActor(a);
+				a._layer = 5;
+				a._scale = 2.5;
+				a.frame_speed = 24;
+				a.frames_repeat = false;
+				world.active = false;
+				scene.world.m_sleep = true;
+				game.Flags.pausingEnabled = false;
+				
+				data.levelData.fightStarted = false;
+				
+				a.onAnimEnd = function() {
+					world.active = true;
+					scene.world.m_sleep = false;
+					scene.events.dispatch('after-knockout');
+					a.destroy();
+				}
+				break;
+			case 'Victory':
+				game.Flags.pausingEnabled = false;
+				
+				var guihidden = game.GUI.hidden;
+				game.GUI.hide();
+				
+				//Announcer
+				!noAnn1 && scene.findResource('AnnouncerVictorySfx', 'sound').play();
+				
+				var a = new b5.Actor;
+				a.atlas = scene.findResource('VictoryTextAtlas', 'brush');
+				scene.addActor(a);
+				a._layer = 5;
+				a._scale = 2.5;
+				a.frame_speed = 24;
+				a.frames_repeat = false;
+				world.active = false;
+				scene.world.m_sleep = true;
+				game.Flags.pausingEnabled = false;
+				
+				data.levelData.fightStarted = false;
+				
+				a.onAnimEnd = function() {
+					!guihidden && game.GUI.show();
+					world.active = true;
+					onAnimEnd && onAnimEnd();
+					scene.world.m_sleep = false;
+					scene.events.dispatch('after-knockout');
+					a.destroy();
+				}
 				break;
 		}
 	};

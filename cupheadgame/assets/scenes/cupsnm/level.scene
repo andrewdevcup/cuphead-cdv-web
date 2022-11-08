@@ -4,15 +4,20 @@ b5.LoadScene = function(world, scene, data, game) {
 	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
 	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
   
-  game.importObject('CreateLevel').init();
+  game.importObject('CreateLevel')
+    .init()
+    .loadFightTextsResources();
   game.importObject('CreatePlayer');
+  game.importObject('CreateCommonBossLevelResources');
+  game.importObject('CreateBoss');
 
   scene.findResource('MUS_Cuphead','sound').loop_start = 4.435;
   
   game.DiscordSession.updateActivity({
   	details: "Cuphead's Nightmare | EXTREME",
-  	state: "I'M THE EVIL PART OF YOUR HEART. YOU CAN'T BEAT	ME."
+  	state: "403 FORBIDDEN"
   });
+  
 };
 b5.onLoadingScreenOut = function(world, scene, data, game) {
 	//Called when the loading screen is fading out, here you can start animating your actors and do whatever you want!
@@ -23,6 +28,11 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
  game.Multiplayer.Initialize(world,data);
  
  scene.findResource('MUS_Cuphead','sound').play();
+ 
+ if(!data.levelData.fightStarted) {
+		data.playFightText('GetReady');
+  	data.playersIntroAnimation();
+	}
  
 };
 b5.addSceneResources = function(scene, data, game) {

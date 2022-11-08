@@ -15,6 +15,10 @@
 		"dialogs": [],
 		"script": "scripts/shop.cup"
 	},
+	"NPC_Mausoleum": {
+		"dialogs": [],
+		"script": "scripts/mausoleum.cup"
+	},
 	"NPC_Flower": {
 		"dialogs": [
 			{
@@ -23,7 +27,7 @@
 			}
 		],
 		"cameraOffset": [-250,-50],
-		"script": "scripts/temp_flower.cup"
+		"script": "scripts/flower.cup"
 	},
 	"Minero": {
 		"dialogs": [

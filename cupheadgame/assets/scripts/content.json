@@ -16,7 +16,8 @@
 		"cheevs_card.cup",
 		"definitions.cup",
 		"current_save_slot.cup",
-		"player_joined_screen.cup"
+		"player_joined_screen.cup",
+		"confirm.cup"
 	],
 	"sav": [
 		"cuphead_player_data_v1_slot_0.sav",

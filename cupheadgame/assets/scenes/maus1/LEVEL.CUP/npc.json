@@ -1,0 +1,18 @@
+{
+	"NPC_LegendaryGhost": {
+		"glyphTitle": "",
+		"playerTalkPosition": 90,
+		"playerFacing": 1,
+		"script": "scripts/chalice.cup",
+		"dialogs": [
+			{ 
+				"texts": ["chalice1-1","chalice1-2","chalice1-3","chalice1-4","chalice1-5","chalice1-6"],
+				"times": [0.3,0.3,0.3,0.3,3,0.3],
+				"data": [false, false, false, false, true, false]
+			},
+			{
+			},
+			{}
+		]
+	}
+}

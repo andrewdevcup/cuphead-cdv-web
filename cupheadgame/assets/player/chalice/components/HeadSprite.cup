@@ -25,6 +25,8 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 	axis_x = 0,
 	axis_y = 0,
 	triggerShot = false;
+	
+	headSprite.playAnim('shooting_straight_boil_head',true);
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {
 		//This is a loop function

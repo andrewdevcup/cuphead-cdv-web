@@ -22,7 +22,7 @@
 	},"laser_down_intro": {
 		"indices":[76,77,78,79],"speed":24
 	},"laser_down_prepare": {
-		"indices":[80,81],"speed":20
+		"indices":[80,81],"speed":18
 	},"laser_down_start": {
 		"indices":[82,83,84,85],"speed":24
 	},"laser_down_loop": {
@@ -34,7 +34,7 @@
 	},"laser_up_start": {
 		"indices":[101,102,103,104],"speed":24
 	},"laser_up_prepare": {
-		"indices":[99,100],"speed":20
+		"indices":[99,100],"speed":18
 	},"laser_up_loop": {
 		"indices":[105,106,107,108],"speed":20
 	},"laser_up_back": {

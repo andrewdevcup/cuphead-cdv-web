@@ -70,8 +70,8 @@ return {
 				  
 				  potato.atlas = scene.findResource('PotatoAtlas','brush');
 				  world.PlayerLayer.addActor(potato);
-				  potato.setPosition(365,9.6);
-				  potato._scale = 1.27;
+				  potato.setPosition(365,8);
+				  potato._scale = 1.32;
 				  potato.layer = 2;
 				  potato.visible = false;
 				  
@@ -259,8 +259,8 @@ return {
 				 	scene.events.off(potato.allplayersdeadevent);
 				  	
 				 	//Use hitbox as mask
-				 	potato.hitbox.setSize(500,563);
-				 	potato.hitbox._y -= 1
+				 	potato.hitbox.setSize(520,580);
+				 	potato.hitbox.setPosition(potato.hitbox.x, potato.hitbox.y - 20);
 			  	potato.hitbox.visible = true;
 				 	potato.setMask(potato.hitbox);
 				  	
@@ -335,7 +335,7 @@ return {
 				  onionTA.atlas = scene.findResource('OnionTearsAtlas','brush');
 				  onionTA.visible = false;
 				  world.PlayerLayer.addActor(onionTA);
-				  onionTA._layer = 3;
+				  onionTA._layer = 6;
 				  onionTA._scale = .9;
 				  onionTA.setPosition(60,-53);
 				  
@@ -343,7 +343,7 @@ return {
 				  onionTB.atlas = onionTA.atlas;
 				  onionTB.visible = false;
 				  world.PlayerLayer.addActor(onionTB);
-				  onionTB._layer = 3;
+				  onionTB._layer = 6;
 				  onionTB._scale = .95;
 				  onionTB.scale_x = -0.95;
 				  onionTB.setPosition(-22,-50);

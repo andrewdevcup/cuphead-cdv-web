@@ -36,8 +36,8 @@
 		{
 			"name": "LevelWall1",
 			"type": "RectActor",
-			"size": [10, 500],
-			"detectionSize": [10,500],
+			"size": [10, 1000],
+			"detectionSize": [10,1000],
 			"pos": [-630, 0],
 			"color": "red",
 			"visible": false,
@@ -54,8 +54,8 @@
 		{
 			"name": "LevelWall2",
 			"type": "RectActor",
-			"size": [10, 500],
-			"detectionSize": [10,500],
+			"size": [10, 1000],
+			"detectionSize": [10,1000],
 			"pos": [640, 0],
 			"color": "red",
 			"visible": false,

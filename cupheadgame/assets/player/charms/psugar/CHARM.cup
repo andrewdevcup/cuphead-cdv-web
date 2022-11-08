@@ -14,7 +14,9 @@ return function(thisPlayer, flags, world, scene, game, charmData) {
 			if(lasthp != flags.heartPoints) {
 				lasthp = flags.heartPoints;
 				
-				lasthp == 0 && (thisPlayer.hitboxes[5].hitbox_active = false);
+				thisPlayer.hitboxes[5].hitbox_active = false;
+				sugarActive = false;
+				return;
 			}
 			
 			if(flags.inAir != air) {
@@ -22,13 +24,14 @@ return function(thisPlayer, flags, world, scene, game, charmData) {
 				
 				if(air && !flags.shootingEX && !flags.damageHit && flags.heartPoints > 0) {
 					sugarActive = true;
-					thisPlayer.setTimeout(m=>thisPlayer.Sprite.playAnim('jump_parry',true), app.dt*2);
+					thisPlayer.setTimeout(m=>
+					  !flags.damageHit && !flags.shootingEX && thisPlayer.Sprite.playAnim('jump_parry',true), app.dt*2);
 					thisPlayer.hitboxes[5].hitbox_active = true;
 				}
 				else thisPlayer.hitboxes[5].hitbox_active = false;
 			}
 			
-			if(flags.dashing != pDash) {
+			if(flags.dashing != pDash && lasthp > 0) {
 				pDash = flags.dashing;
 				
 				pDash ? (sugarActive && (
@@ -39,7 +42,8 @@ return function(thisPlayer, flags, world, scene, game, charmData) {
 					//Restore sugar after dash
 					sugarActive = true,
 					thisPlayer.hitboxes[5].hitbox_active = true,
-					thisPlayer.setTimeout(m=>thisPlayer.Sprite.playAnim('jump_parry',true), app.dt*2)
+					thisPlayer.setTimeout(m=>
+					!flags.damageHit && !flags.shootingEX && thisPlayer.Sprite.playAnim('jump_parry',true), app.dt*2)
 				)
 			}
 			

@@ -68,7 +68,9 @@
 		"diedAt": 0,
 		"times_died": 0,
 		"damageMultiplier": 1,
-		"level_type": "platforming"
+		"level_type": "platforming",
+		"enemy": "hittableEnemy",
+		"bulletTag": "playerBullet"
 	},
 	"flags": {
 		"standing": true,

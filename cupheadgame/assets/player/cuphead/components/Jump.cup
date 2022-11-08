@@ -24,11 +24,19 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 		scene.findResource('PlayerLandSfx2', 'sound')
 	];
 	
+	thisPlayer.jumpHoldTimerTasks = [];
+	
+	thisPlayer.clearJumpTimerTasks = function() {
+		for(var i = 0; i < this.jumpHoldTimerTasks.length; i++)
+		  this.tasks.remove(this.jumpHoldTimerTasks[i]);
+		this.jumpHoldTimerTasks = [];
+	}
+	
 	//Hold func
 	var unhold = function(i,h) {
-		thisPlayer.setTimeout(f => {
-			!h && i.A ? (hold2 = A_hold = true, unhold(i,1)) : A_hold = false;
-		},A_holdTime + (h ? .2 : 0));
+		thisPlayer.jumpHoldTimerTasks.push(thisPlayer.setTimeout(f => {
+			!h && i.A ? (hold2 = A_hold = !flags.dashing, unhold(i,1)) : A_hold = false;
+		},A_holdTime + (h ? .2 : 0)));
 	}
 
 	return function(thisPlayer, flags, input, world, scene, game, data) {
@@ -74,6 +82,7 @@ return function(thisPlayer, flags, input, world, scene, game, data) {
 				//Reset hold
 				A_hold = false;
 				hold2 = false;
+				thisPlayer.clearJumpTimerTasks();
 				//Spawn particle
 				data.spawnPlayerParticle('landDust', thisPlayer);
 				//Play sfx

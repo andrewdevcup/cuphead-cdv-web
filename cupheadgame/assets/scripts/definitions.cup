@@ -53,9 +53,13 @@ b5.Game.GameDefIDs = {
 };
 b5.Game.LevelIDs = {
 	veggies: 6,
-	slime: 7,
-	blimp: 8,
-	flower: 1428495827
+	slime: 1450863107,
+	blimp: 1449745424,
+	flower: 1450266910,
+	frogs: 7,
+	forestfollies: 1464969490,
+	treetoptrouble: 1464969491,
+	mausoleum1: 1481199742
 };
 b5.Game.WorldIDs = {
 	world1: 3,

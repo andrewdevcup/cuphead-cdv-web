@@ -16,10 +16,12 @@ b5.LoadScene = function(world, scene, data, game) {
 	bg.x = bg.y = 0;
 	bg.setSize(1414, 841);
 	bg._scale = 0.98;
-	bg.name = 'SecTitleScreenBG'
+	bg.name = 'SecTitleScreenBG';
 	bg.bitmap = scene.findResource('CupheadSecondaryTitleScreen', 'bitmap');
 	world.addActor(bg);
 	bg.fit = b5.Actor.FitBest;
+	
+	if(game.Flags.spookyMode) bg.tint_colour = 'salmon';
 
 	bg.shake_funcX = b5.generateRandomMovement(20);
 	bg.shake_funcY = b5.generateRandomMovement(20);
@@ -632,6 +634,52 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 				} else if (!btnA) this.btnA_pressed = false; //Reset
 
 				//BUTTON X (DELETE)
+				if(btnX && !this.btnX_pressed) {
+					this.btnX_pressed = true;
+					
+					//Find selected slot 
+					const selsl = data.selected_slot-1,
+					sl = slotsCard.findActor('Slot-' + selsl, true),
+					saveName = sl.mainLabel.text,
+					sav = b5.Paths.saves + 'cuphead_player_data_v1_slot_'+ selsl + '.sav';
+					
+					//If slot is new don't show delete dialog
+					if(sl.is_new) return;
+					
+					data.slot_page = "SlotDeleteConfirm";
+					
+					let confirmPromise = game.Confirm(
+						game.Texts.texts.slot_delete,
+						saveName,
+						game.Texts.texts.confirm_yes,
+						game.Texts.texts.confirm_no
+					);
+					
+					game.PauseMenu.playSfx();
+					//Yes
+					confirmPromise.then( f => {
+						sl.setNew();
+						data.slot_page = "LocalSaves";
+						slotsCard.btnA_pressed = true;
+						
+						//Copy default slot data
+						console.log("Saving data... " + selsl);
+						b5.File.delete(sav, 'file');
+		      	setTimeout(f => 
+		      	  b5.File.extractAsset(internalDir + 'saves/cuphead_player_data_v1_slot_'+selsl+'.sav', sav, g =>
+		      	    game.SaveSlots["slot" + selsl] = JSON.parse(b5.File.readSync(sav))
+		      	  )
+		      	, 50);
+					});
+					//No
+					confirmPromise.catch( f => {
+						data.slot_page = "LocalSaves";
+						slotsCard.btnA_pressed = true;
+						slotsCard.btnB_pressed = true;
+					});
+					
+				}
+				else if (!btnX) this.btnX_pressed = false;
 
 				//BUTTON R (Switch to Multiplayer)
 

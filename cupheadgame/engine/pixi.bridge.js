@@ -39,12 +39,13 @@ b5.PixiDisplay = function(canvas, use_image_bitmaps) {
 /*
 *   	PIXI3D Plugin!!
 */
+  if(window.PIXI3D) {
+		//Setup	lighting environment
+		var light = Object.assign(new PIXI3D.Light(), { intensity: 15, type:"directional"});
+		light.rotationQuaternion.setEulerAngles(0,180,0);
 
-	//Setup	lighting environment
-	var light = Object.assign(new PIXI3D.Light(), { intensity: 15, type:"directional"});
-	light.rotationQuaternion.setEulerAngles(0,180,0);
-
-	PIXI3D.LightingEnvironment.main.lights.push(light);
+		PIXI3D.LightingEnvironment.main.lights.push(light);
+  }
 
 };
 b5.PixiDisplay.prototype.transformScene = function(obj, x, y, w, h, rot, scx, scy, ox, oy, skx, sky, texture, v, opacity, layer) {

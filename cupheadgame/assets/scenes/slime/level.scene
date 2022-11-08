@@ -4,9 +4,9 @@ b5.LoadScene = function(world, scene, data, game) {
 	//game is equivalent to b5.Game where there's things like the loading screen, scene loader, player, configs and	more.
 	//you should add local variables on data object, for them to be removed when another scene is being loaded, for global variables add them to game or write it to a file.
   
-  data.levelID = 7; //Original Cuphead level ID
+  data.levelID = game.LevelIDs.slime; //Original Cuphead level ID
 
-  game.SlotUtils.getLevelData(7).played = true;
+  game.SlotUtils.getLevelData(data.levelID).played = true;
   
   data.spawnParticle = function(name, target) {
   	switch(name) {

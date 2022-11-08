@@ -49,8 +49,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			/ Math.max(scene.data.players.activePlayers.length * game.Flags.multiplayerDamageMultiplier,1);
 			bullet.time = 0;
 			bullet.fill_style = 'transparent';
-			bullet.tags = ["playerBullet"];
-			bullet.tag = "playerBullet";
+			bullet.tag = thisPlayer.data.bulletTag;
+			bullet.tags = [bullet.tag];
 			bullet.bulletsId = scene.data.playerBullets.length;
 			bullet.layer = thisPlayer.layer-1;
 			bullet.supermeter_score = wpnData.supermeter_score;
@@ -119,7 +119,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 				for (var i = 0; i < ols.length; i++)
 					if (ols[i]) {
 					var l = ols[i];
-					if (ols[i].tags.indexOf("hittableEnemy") != -1) {
+					if (ols[i].tags.indexOf(thisPlayer.data.enemy) != -1) {
 						//Enemy was hit
 						if (!this.destroyed) {
 							this.destroyBullet();
@@ -156,7 +156,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 					p.atlas = thisAtlas;
 					p.rotation = Math.PI * b5.Maths.randomRange(-1, 1, true);
 					p.setPosition(pos[0], pos[1]);
-					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || scene.data[thisPlayer.name].flags.ducking? 1: 0);
+					p.layer = thisPlayer.layer + (thisPlayer.data.shootAngle == b5.Maths.degToRad(90) || flags.ducking? 1: 0);
 					thisPlayer.parent.addActor(p);
 					p._scale = 0.92;
 					p.playAnim('spark');
@@ -228,8 +228,8 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			exb.time = 0;
 			exb.fill_style = "transparent";
 			//	exb.fill_style = 'transparent';
-			exb.tags = ["playerBullet"];
-			exb.tag = "playerBullet";
+			exb.tag = thisPlayer.data.bulletTag;
+			exb.tags = [exb.tag];
 			//exb.bulletsId = scene.data.playerBullets.length;
 			exb.layer = thisPlayer.layer+2;
 			exb.supermeter_score = 0;
@@ -293,7 +293,7 @@ return function(thisPlayer, flags, world, scene, game, wpnData) {
 			var ols = this.A_overlaps; 
 			for (var i = 0; i < ols.length; i++)
 				if (ols[i]) {
-				if (ols[i].tags.indexOf("hittableEnemy") != -1) {
+				if (ols[i].tags.indexOf(thisPlayer.data.enemy) != -1) {
 					//Enemy was hit
 					//Stun
 					if (!this.enemy_hit) {

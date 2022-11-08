@@ -20,7 +20,17 @@ b5.LoadScene = function(world, scene, data, game) {
   //Touchscreen
   world.touchable = true;
   
-  
+  var logo = new b5.Actor();
+	logo.w = 1280;
+	logo.h = 720;
+	logo.atlas = scene.findResource('LogoSeqAtlas','brush');
+	logo.name = "TitleLogo";
+	world.addActor(logo);
+	logo._layer = 3;
+	logo.fit = b5.Actor.FitX;
+	
+  /*
+  // 3D MODEL
 	//Logo background
 	var logo = new b5.RectActor();
 	logo.w = 2000;
@@ -112,7 +122,7 @@ b5.LoadScene = function(world, scene, data, game) {
 		logo3d.name = "Logo3D";
 		logo.addActor(logo3d);
 		logo3d.visible=false;
-  };
+  };*/
   
 	//Title background
 	var titlebg = new	b5.Actor();
@@ -165,6 +175,12 @@ b5.LoadScene = function(world, scene, data, game) {
 		cuphead._scale = mugman._scale = 0.98;
 	}
 	
+	if(game.Flags.spookyMode) {
+		cuphead.frame_speed =
+		mugman.frame_speed = 
+		chalice.frame_speed = 0;
+	}
+	
 
 	//Start Label
 	var labelstart = new b5.LabelActor();
@@ -193,10 +209,12 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 	var titlebg = world.findActor('TitleBackground');
   
   var logoModel = logo.findActor('Logo3D');
+  
+  var intm = scene.findResource('intm','sound');
   //Tween sprites
 	b5.Utils.RunafterTime(1, function() {
 		//Animate zoom out
-  	logo._depth=0.8;
+  /*	logo._depth=0.8;
 	  logo.TweenTo('_depth',1.3,8,b5.Ease.quadout,!1);
     
 		var D = logo.findActor('D');
@@ -234,14 +252,44 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
     	//Play animations
  	  	app.setTimeout(()=>{ 
 	  		logoModel.model && logoModel.model.animations[0].play();
-	  	},.3);
+	  	},.3);*/
+	  	logo.frame_speed = 30;
+	  	logo.frames_repeat = false;
+	  	
+	  	var hsh = scene.findResource('bsh','shader');
+	  	if(game.Flags.spookyMode) {
+	  		world.addFilter(hsh.filter);
+	  		data.shaderVars = {
+	  			amp: [0,0],
+	  			freq: [5.1,12]
+	  		}
+	  		world.onPreDraw = function() {
+	  			//Update shader
+	  			hsh.amplitude = data.shaderVars.amp;
+	  			hsh.frequency = data.shaderVars.freq;
+	  		}
+	  	}
 	  	
 	  	//Wait some time and fade
 	  	app.setTimeout(()=>{
 	  		logo.TweenTo('opacity',0,0.5,b5.Ease.linear);
 	  		//Play music
 				var mus_ddv = scene.findResource('MUS_DontDealVocal', 'sound');
-				mus_ddv.play();
+				
+				if(game.Flags.spookyMode) {
+					intm.play();
+					const t1 = new b5.Tweener(sceneMain.data.shaderVars,'amp',0,0,0.4,12,0,0,world),
+					t2 = new b5.Tweener(sceneMain.data.shaderVars,'amp',0,0.4,0,12,0,0,world),
+					t3 = new b5.Tweener(sceneMain.data.shaderVars,'amp',1,0,0.4,12,0,0,world),
+					t4 = new b5.Tweener(sceneMain.data.shaderVars,'amp',1,0.4,0,12,0,0,world);
+					
+					t4.onfinish = t1.start; 
+					t1.onfinish = t2.start; 
+					t2.onfinish = t3.start; 
+					t3.onfinish = t4.start;
+					t1.start();
+				}
+				else mus_ddv.play();
 				
 				//Play instrumental when it's over
 				mus_ddv.onComplete = function() {
@@ -254,8 +302,8 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
 				app.setTimeout(()=>{
 	  		 	titlebg.touchable = true;
 				},.5);
-	  	},3.9);
-    };
+	  	},5.1);
+  //  };
 	});
 	
 	//Animate text 
@@ -287,7 +335,7 @@ b5.addSceneResources = function(scene, data, game) {
   //Load 3D Model and shaders!
   
   scene.addResource( new b5.Shader('MotionBlurShader', data.resourcePath + 'shader/MotionBlur.ish',true), 'shader');
-  
+  /*
   var logoBitmap = new b5.Bitmap('LogoBitmap', data.resourcePath + 'model/Image_1.png');
   scene.addResource(logoBitmap,'bitmap');
   
@@ -299,7 +347,29 @@ b5.addSceneResources = function(scene, data, game) {
   scene.addResource( atlas, 'brush');
   
   var model = new b5.Model('Logo3DModel', data.resourcePath + 'model/LOGO.gltf');
-  scene.addResource(model, 'raw');
+  scene.addResource(model, 'raw');*/
+  
+  game.parseResources({
+  	bitmap:[{
+  		automatize: {
+  			name: 'LogoSeqBitmap%i',
+  			start: 0,
+  			end: 204,
+  			pad: 4,
+  			src: 'scenes/title/logo/logo_####.jpg'
+  		},
+  		resolution: 1
+  	}],
+  	brush: [{
+  		name: 'LogoSeqAtlas',
+  		bitmaps: {
+  			start: 0,
+  			end: 204,
+  			"name-prefix": "LogoSeqBitmap%i"
+  		},
+  		frames: 'scenes/title/logo/logo.csv'
+  	}]
+  }, scene);
   
   //Title atlas
   var title_atlas = new b5.ImageAtlas('TitleAtlas', []);
@@ -347,6 +417,13 @@ b5.addSceneResources = function(scene, data, game) {
   scene.addResource(mus_ddd, 'sound', true);
   game.Music.add(mus_ddd);
   
+  var intm = new b5.Sound('intm', data.resourcePath + 'NOT.RIGHT.NOT.RIGHT.NOT.RIGHT');
+  intm.loop = true;
+  intm.output_gain = game.Music.volume;
+  intm.onDestroy = game.Music.remove;
+  scene.addResource(intm, 'sound', true);
+  game.Music.add(intm);
+  
   //WorldmapDifficultySelectAppear
   var wmdsa = new b5.Sound('WorldmapDifficultySelectAppear', b5.Paths.assets + 'sfx_WorldMap_LevelSelect_DiffucultySettings_Appear.ogg', false, false, true);
   wmdsa.output_gain = game.Sfx.volume;
@@ -354,11 +431,16 @@ b5.addSceneResources = function(scene, data, game) {
   wmdsa.global_stream = true;
   scene.addResource(wmdsa, 'sound');
   game.Sfx.add(wmdsa);
+  
+  //..
+  var sh = new b5.Shader('bsh', data.resourcePath+'shader/hdma.ish', true);
+  scene.addResource(sh, 'shader');
 };
 b5.onSceneUnload = function(world, scene, data, game, clearResources) {
     //Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
     //You can also remove created objects in b5.Game if they were created and used on the scene.
-    scene.findActor('Logo3D',true).destroy();
+ //   scene.findActor('Logo3D',true).destroy();
+   world.removeFilter();
 };
 
 // DEPRECATED

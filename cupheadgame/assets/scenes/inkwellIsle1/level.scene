@@ -38,7 +38,7 @@ b5.LoadScene = function(world, scene, data, game) {
   
   scene.events.on('showequipcard', function() {
   	bg.opacity = 0;
-  	bg.TweenTo('opacity',0.45, 0.35, b5.Ease.linear, true);
+  	bg.TweenTo('opacity',0.55, 0.35, b5.Ease.linear, true);
   	b5.Tweener(scene, 'BLUR_MULTIPLIER', null, 0, 1.4, 0.35, b5.Ease.linear, 0, world).start();
   	
   	for(var i = 0, p = world.findActorsByTagName('player',true); i < p.length; i++)
@@ -46,7 +46,7 @@ b5.LoadScene = function(world, scene, data, game) {
   });
   scene.events.on('hideequipcard', function() {
   	data.upd_ui();
-  	bg.opacity = 0.45;
+  	bg.opacity = 0.55;
   	bg.TweenTo('opacity',0, 0.35, b5.Ease.linear, true);
   	b5.Tweener(scene, 'BLUR_MULTIPLIER', null, 1.4, 0, 0.35, b5.Ease.linear, 0, world).start();
   	
@@ -79,10 +79,47 @@ b5.onLoadingScreenOut = function(world, scene, data, game) {
   
   b5.Game.Multiplayer.Initialize(world,data);
   
-  scene.findResource('SfxAmbientDayBirds','sound').play();
-  scene.findResource('MUS_InkwellIsleOne','sound').play();
+  var birds = scene.findResource('SfxAmbientDayBirds','sound'),
+  mus = scene.findResource('MUS_InkwellIsleOne','sound');
+  
+  birds.play();
+  mus.play();
   
   //Veggies hint audio update
+  
+  
+  //October 2022...
+  if(game.Flags.spookyMode) world.setInterval(f => {
+  	var x = 1740, y = 1150, c = world.findActorsByTagName('player',true)[0],
+  	d = b5.Maths.distance(c.x,c.y,x,y), g;
+  	
+  	if(d < 300) {
+  		g = d/300;
+  		mus.setGain(g*g);
+  		mus.Tween('playbackRate',Math.max(g,0.3),app.dt);
+  		birds.Tween('playbackRate',(1-g)*1000,app.dt);
+  		world._x = Math.random()*(1-g*g)*5;
+  		world._y = Math.random()*(1-g*g)*5;
+  		app.min_speed = Math.max(0.001, (1/24)*g*g);
+  		scene.BLUR_MULTIPLIER = 2*(1-g);
+  		app.setFilters({...app.filters, grayscale:1-g});
+  		
+  		if(g < 0.09) {
+  			if(b5.fsbtn) b5.fsbtn.textContent = 'GET OUT OF MY HEAD';
+  			birds.setOutputGain(999);
+  			app.display.stage.skew.set(3,3);
+  			mus.stop();
+  			setTimeout(k => game.Sfx.stopAll(false, true), 2000);
+  			setTimeout(k => app.canvas.style.zoom = 1e-3, 3900);
+  			setTimeout(k => navigator.app ? navigator.app.exitApp(): window.close(),4000);
+  			app.active = false;
+  		}
+  	}
+  	else if(d > 300 && d < 350) {
+  		birds.setPlaybackSpeed(1);
+  	}
+  	
+  },0);
 
 };
 b5.addSceneResources = function(scene, data, game) {
@@ -101,7 +138,11 @@ b5.addSceneResources = function(scene, data, game) {
 b5.onSceneUnload = function(world, scene, data, game, clearResources) {
     //Called when app is about to remove the scene, if clearResources is true, that means the app will clean the resources of the scene
     //You can also remove created objects in b5.Game if they were created and used on the scene.
-
+    app.min_speed = 1/24;
+    scene.BLUR_MULTIPLIER = 0;
+    delete app.filters.grayscale;
+    app.setFilters(app.filters);
+    if(b5.fsbtn) b5.fsbtn.textContent = 'Fullscreen';
 };
 //DEPRECATED
 b5.UpdateScene = function(world, scene, data, game) {

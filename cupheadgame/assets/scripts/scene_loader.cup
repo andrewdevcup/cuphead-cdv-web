@@ -132,13 +132,18 @@ b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenPropertie
 			sceneMain.background.removeAllActors();
 			sceneMain.background.timelines.remove();
 			sceneMain.background.cleanupDestroyedActors();
+			
+			delete sceneMain.view.onPreDraw;
 
 			for (var a = 0, acts = []; a < sceneMain.actors.length; a++) {
 				var b = sceneMain.actors[a];
 				b.name != "scene_background" && b.name != "scene_camera" && acts.push(b);
 			}
 
-			for(var a = 0; a < acts.length; a++) acts[a].destroy();
+			for(var a = 0; a < acts.length; a++) {
+				delete sceneMain.view[acts[a].name];
+				acts[a].destroy();
+			}
 
 			sceneMain.cleanupDestroyedActors();
 			
@@ -163,6 +168,9 @@ b5.Game.LoadScene = function(id, stopMusic, fadeOutMusic, loadingScreenPropertie
 
 			var s = b5.Utils.loadJS(sceneMain.data.resourcePath + 'level.scene');
 			s.id = 'CurrentScene';
+			s.onerror = function() {
+				app.texture_state = "SCENE NOT FOUND";
+			}
 			s.onload = function() {
 				var loadres = b5.addSceneResources;
 				!reload && loadres && loadres(sceneMain, sceneMain.data, b5.Game);
@@ -196,7 +204,7 @@ b5.Game.SceneLoader.update = function() {
 		//Start loading scene when loading screen is fully shown.
 		if (this.load_scene && b5.Game.loadingScreen.closed && !this.delay) {
 			app.events.dispatch('loadingscreenin');
-			app.texture_state = "reading";
+			app.texture_state = "READING";
 			this.load();
 			b5.Game.Flags.inPauseMenu && b5.Game.PauseMenu.hide(true);
 			b5.Game.GUI.disableButtons();

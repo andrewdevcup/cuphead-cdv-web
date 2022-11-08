@@ -95,6 +95,7 @@ b5.export = function(world, scene, data, game) {
     };
 	
 	data.createDialog = function(target, texts, camPos) {
+		if(!texts || !texts[0]) texts = ["no text array\nsupplied!"];
 		var dlgbg = new b5.Actor,
 		lns = texts[0].split('\n').length; //Lines
 		
@@ -147,6 +148,7 @@ b5.export = function(world, scene, data, game) {
 		bt.oy = 24;
 		bt._scale = 0.9;
 		dlgbg.addActor(bt);
+		bt.onTick = bt.dirty;
 		
 		//Arrow
 		var dlgarr = new b5.Actor;

@@ -12,7 +12,8 @@ b5.Cordova = {
 	file: !!(window.cordova && window.cordova.file),
 	orientation: !!(screen.lockOrientation && screen.unlockOrientation) && (window.cordova ? cordova.platformId != "browser" : !1),
 	statusbar: !!window.StatusBar,
-	fullscreen: !!window.AndroidFullScreen
+	fullscreen: !!window.AndroidFullScreen,
+	electronfs: !!(window.electron && window.electron.fs)
 };
 /*
 *
@@ -20,14 +21,19 @@ b5.Cordova = {
 *
 */
 
-internalStorage = null;
-requestFileSystem(LocalFileSystem.PERSISTENT, 0, fs => {
-	internalStorage = fs.root;
-});
-
 b5.File = {
+	resolvePath: function(path, addroot) {
+		path = path.replace('file://','');
+		switch(cordova.platformId) {
+			case 'android':
+				return (addroot ? '/sdcard' : '') + path.replace(/sdcard\/|storage\/emulated\/.*?\/|file:\/\/\//g,'').replace(/\/\//g,'/');
+		}
+	},
+	isNativePath: function(p) {
+		return !p.startsWith('file:///persistent') && !p.startsWith('filesystem:');
+	},
 	resolve: b5.Cordova.file && function(path,file,o) {
-		var e = path.replace('file://','').replace(/\/storage\/emulated\/.*?\//g,'/sdcard/'),
+		var e = b5.File.resolvePath(path, true),
 		t = "", n = {isFile:false, isDir:false};
 	  resolveLocalFileSystemURL('cdvfile://localhost' + (!e.startsWith('/') ? '/'+e : e) + (!e.endsWith('/')? "/" : ''), dirFS => {
 	  	o.type == "file" && dirFS.getFile(file, { create: o.create||false, exclusive: false }, fileEntry => {
@@ -48,7 +54,7 @@ b5.File = {
         	s = i.substr(0,i.lastIndexOf('/')+1);
         	
         	i = i.substr(i.lastIndexOf('/')+1);
-        	var entry = s.replace(/sdcard\/|storage\/emulated\/.*?\/|file:\/\/\//g,'').replace(/\/\//g,'/') + i,
+        	var entry = b5.File.resolvePath(s) + i,
         	c = new DirectoryEntry(i, entry, fileEntry.filesystem);
         	
          	fileEntry[o.copy ? 'copyTo' : o.move && 'moveTo'](c, o.to.name, o.onload, o.onerror);
@@ -87,19 +93,18 @@ b5.File = {
 	}
 };
 b5.File.readSync = function(file) {
-    //Browser compatibility
-  if(!file.startsWith('filesystem:')) {
+  //Browser compatibility
+  if(b5.File.isNativePath(file)) {
     var r = new XMLHttpRequest(), e = !0, t = !0;
     r.open('GET',file, !1);
     try{r.send()}catch(o){e=!1}
-   // b5.Cordova.file && !b5.File.isDir(file) && (t = !1);
     return (e || r.status === 200) && t && r.response.indexOf("onHasParentDirectory();")==-1 ? r.response : "";
   }
   else return localStorage.getItem(file);
 },
 b5.File.read = function(file) {
   var n = { onload: null, onerror: null };
-	if( b5.Cordova.file && !file.startsWith('filesystem:')) {
+	if( b5.Cordova.file && b5.File.isNativePath(file)) {
 		var e = file.lastIndexOf('/')+1,
 		t = file.substr(0,e),
 		o = file.substr(e);
@@ -112,26 +117,37 @@ b5.File.read = function(file) {
 },
 b5.File.write = function(file, text, add, pos) {
 	var n = { onwrite: null, onerror: null };
-	if( b5.Cordova.file && !file.startsWith('filesystem:')) {
-		var e = file.lastIndexOf('/')+1,
-		t = file.substr(0,e),
-		o = file.substr(e),
-		a = function() {
-			b5.File.resolve(t, o, {create: true, write: true, data:text, pointerpos:pos, type:"file", onload: (r)=>{n.onwrite && n.onwrite(r)}, onerror: (r)=>{n.onerror && n.onerror(r)}});
-		};
-		b5.File.resolve && (
-			add ? a()
-			: (
-				b5.File.resolve(t, o, {remove: true}),
-				a()
-			)
-		);
-	}
-	else {
+	if( b5.Cordova.file && b5.File.isNativePath(file)) {
+	  if(b5.Cordova.electronfs) {
+	  	//Use nodejs filesystem api
+	  	try {
+	    	window.electron.fs.writeFileSync(file.replace('file:///',''), text);
+	    	setTimeout(a => n.onwrite && n.onwrite(),1);
+	  	}
+	  	catch(e) {
+	  		setTimeout(a => n.onerror && n.onerror(e),1);
+	  	}
+	  }
+	  else {
+			var e = file.lastIndexOf('/')+1,
+			t = file.substr(0,e),
+			o = file.substr(e),
+			a = function() {
+				b5.File.resolve(t, o, {create: true, write: true, data:text, pointerpos:pos, type:"file", onload: (r)=>{n.onwrite && n.onwrite(r)}, onerror: (r)=>{n.onerror && n.onerror(r)}});
+			};
+			b5.File.resolve && (
+				add ? a()
+				: (
+					b5.File.resolve(t, o, {remove: true}),
+					a()
+				)
+			);
+  	}
+	} else {
 		//Write to persistent storage instead
 		localStorage.removeItem(file);
 		localStorage.setItem(file, text);
-		setTimeout(a => n.onwrite && n.onwrite(),10);
+		setTimeout(a => n.onwrite && n.onwrite(),1);
 	}
 	return n;
 },
@@ -171,21 +187,45 @@ b5.File.copyDir = function(src,dest) {
 },
 b5.File.createDir = function(dir) {
 	var n = { oncreate: null, onerror: null };
-	if( b5.Cordova.file && !dir.startsWith('filesystem:')) {
-		var e = dir.lastIndexOf('/')+1,
-		t = dir.substr(0,e),
-		o = dir.substr(e);
-		b5.File.resolve(t, o, {create: true, type: "dir", onload: (r)=>{n.oncreate && n.oncreate(r)}, onerror: (r)=>{n.onerror && n.onerror(r)}});
+	if( b5.Cordova.file && b5.File.isNativePath(dir)) {
+		if(b5.Cordova.electronfs) {
+	  	//Use nodejs filesystem api
+	  	try {
+	    	window.electron.fs.mkdirSync(dir.replace('file:///',''));
+	    	setTimeout(a => n.oncreate && n.oncreate(),1);
+	  	}
+	  	catch(e) {
+	  		setTimeout(a => n.onerror && n.onerror(e),1);
+	  	}
+	  }
+	  else {
+			var e = dir.lastIndexOf('/')+1,
+			t = dir.substr(0,e),
+			o = dir.substr(e);
+			b5.File.resolve(t, o, {create: true, type: "dir", onload: (r)=>{n.oncreate && n.oncreate(r)}, onerror: (r)=>{n.onerror && n.onerror(r)}});
+	  }
 	}
-	return setTimeout(a => n.oncreate && n.oncreate(),10), n;
+	return setTimeout(a => n.oncreate && n.oncreate(),1), n;
 },
-b5.File.delete = function(type, entry) {
+b5.File.delete = function(entry, type) {
 	var n = { ondelete: null, onerror: null };
-	if( b5.Cordova.file && !file.startsWith('filesystem:')) {
-		var e = entry.lastIndexOf('/')+1,
-		t = entry.substr(0,e),
-		o = entry.substr(e);
-		b5.File.resolve(t, o, {remove: true, type: type, onload: (r)=>{n.ondelete && n.ondelete(r)}, onerror: (r)=>{n.onerror && n.onerror(r)}});
+	if( b5.Cordova.file && b5.File.isNativePath(entry)) {
+		if(b5.Cordova.electronfs) {
+	  	//Use nodejs filesystem api
+	  	try {
+	    	window.electron.fs.rmSync(entry.replace('file:///',''));
+	    	setTimeout(a => n.ondelete && n.ondelete(),1);
+	  	}
+	  	catch(e) {
+	  		setTimeout(a => n.onerror && n.onerror(e),1);
+	  	}
+	  }
+	  else {
+			var e = entry.lastIndexOf('/')+1,
+			t = entry.substr(0,e),
+			o = entry.substr(e);
+			b5.File.resolve(t, o, {remove: true, type: type, onload: (r)=>{n.ondelete && n.ondelete(r)}, onerror: (r)=>{n.onerror && n.onerror(r)}});
+	  }
 	}
 	else {
 		localStorage.removeItem(entry);
@@ -194,12 +234,18 @@ b5.File.delete = function(type, entry) {
 },
 b5.File.exists = function(entry) {
 	//Browser compatibility
-	if(!entry.startsWith('filesystem:')) {
-		var r = new XMLHttpRequest(),
-		e = !0;
-		r.open('GET',entry,!1);
-		try{r.send()}catch(o){ e = !1}
-		return (e || r.status === 200) && r.response != "";
+	if(b5.File.isNativePath(entry)) {
+		if(b5.Cordova.electronfs) {
+			//Use nodejs filesystem api
+			return window.electron.fs.existsSync(entry.replace('file:///',''));
+		}
+		else {
+			var r = new XMLHttpRequest(),
+			e = !0;
+			r.open('GET',entry,!1);
+			try{r.send()}catch(o){ e = !1}
+			return (e || r.status === 200) && r.response != "";
+		}
 	}
 	else return localStorage.getItem(entry) !== null;
 },
@@ -269,7 +315,7 @@ b5.Cordova.statusbar && (b5.Utils.SetFullscreen = function(e,t) {
 */
 
 b5.Utils.loadRAW = function(e, t, o, a) {
-  if(e.startsWith('filesystem:')) return o(localStorage.getItem(e)), !0;
+  if(!b5.File.isNativePath(e)) return o(localStorage.getItem(e)), !0;
   var n = new XMLHttpRequest;
   n.open('GET', e, t),
   e.endsWith('.json') && n.overrideMimeType('application/json'),

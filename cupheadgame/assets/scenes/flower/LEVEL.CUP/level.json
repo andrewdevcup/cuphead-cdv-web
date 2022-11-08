@@ -36,8 +36,8 @@
 		{
 			"name": "LevelWall1",
 			"type": "RectActor",
-			"size": [10, 500],
-			"detectionSize": [10,450],
+			"size": [10, 1000],
+			"detectionSize": [10,1000],
 			"pos": [-680, 0],
 			"color": "red",
 			"visible": false,
@@ -54,8 +54,8 @@
 		{
 			"name": "LevelWall2",
 			"type": "RectActor",
-			"size": [10, 500],
-			"detectionSize": [10,500],
+			"size": [10, 1000],
+			"detectionSize": [10,1000],
 			"pos": [450, 0],
 			"color": "red",
 			"visible": false,
@@ -308,6 +308,26 @@
 					"pad": 1,
 					"src": "scenes/flower/form2/SpriteAtlasTexture_Flower2-#.png"
 				}
+			},
+			{
+				"name": "AcornBitmap0",
+				"src": "scenes/flower/form1/SpriteAtlasTexture_Acorn-0.png"
+			},
+			{
+				"name": "BoomerangBitmap0",
+				"src": "scenes/flower/form1/SpriteAtlasTexture_Boomerang.png"
+			},
+			{
+				"name": "FlowerGattlingFXBitmap0",
+				"src": "scenes/flower/form2/SpriteAtlasTexture_GattlingFX-0.png"
+			},
+			{
+				"name": "FlowerMugshot",
+				"src": "scenes/flower/death_card_mugshot_flower.png"
+			},
+			{
+				"name": "FlowerMugshot2",
+				"src": "scenes/flower/death_card_mugshot_superflower.png"
 			}
 		],
 		"brush": [
@@ -344,10 +364,104 @@
 					"start": 0,
 					"end": 5
 				},
-				"frames": "scenes/flower/form2/SpriteAtlasTexture_Flower2.csv"
+				"frames": "scenes/flower/form2/SpriteAtlasTexture_Flower2.csv",
+				"anims": "scenes/flower/form2/flower2.anims.json"
+			},
+			{
+				"name": "AcornAtlas",
+				"bitmaps": ["AcornBitmap0"],
+				"frames": "scenes/flower/form1/SpriteAtlasTexture_Acorn.csv",
+				"anims": "scenes/flower/form1/acorn.anims.json"
+			},
+			{
+				"name": "BoomerangAtlas",
+				"bitmaps": ["BoomerangBitmap0"],
+				"frames": "scenes/flower/form1/SpriteAtlasTexture_Boomerang.csv",
+				"anims": "scenes/flower/form1/boomerang.anims.json"
+			},
+			{
+				"name": "FlowerGattlingFXAtlas",
+				"bitmaps": ["FlowerGattlingFXBitmap0"],
+				"frames": "scenes/flower/form2/SpriteAtlasTexture_GattlingFX.csv",
+				"anims": "scenes/flower/form2/gattlingfx.anims.json"
 			}
 		],
 		"sound": [
+			{
+				"name": "Mus_Flower",
+				"src": "scenes/flower/MUS_Flower.ogg",
+				"category": "music",
+				"options": {
+					"equalizer": true,
+					"limiter": true,
+					"reverb": true
+				}
+			},
+			{
+				"name": "FlowerIntroSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_intro_yell.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "FlowerLaserStartSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_top_laser_attack_start.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "FlowerLaserLoopSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_top_laser_attack_hold_loop.ogg",
+				"category": "sfx",
+				"loop": true
+			},
+			{
+				"name": "FlowerLaserEndSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_top_laser_attack_end.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "FlowerHandsStartSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_pot_hands_start.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "FlowerHandsOpenSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_pot_hands_open.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "FlowerHandsEndSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_pot_hands_end.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "SeedPoofSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_bullet_seed_poof.ogg",
+				"category": "sfx",
+				"reuse": true
+			},
+			{
+				"name": "BoomerangLoopSfx",
+				"src": "scenes/flower/form1/AudioClip/sfx_flower_boomerang_projectile.ogg",
+				"category": "sfx",
+				"reuse": true,
+				"loop": true
+			},
+			{
+				"name": "FlowerGattlingStartSfx",
+				"src": "scenes/flower/form2/AudioClip/sfx_flower_gattling_start.ogg",
+				"category": "sfx"
+			},
+			{
+				"name": "FlowerGattlingLoopSfx",
+				"src": "scenes/flower/form2/AudioClip/sfx_flower_gattling_loop.ogg",
+				"category": "sfx",
+				"loop": true
+			},
+			{
+				"name": "FlowerGattlingEndSfx",
+				"src": "scenes/flower/form2/AudioClip/sfx_flower_gattling_end.ogg",
+				"category": "sfx"
+			}
 		]
 	}
 }

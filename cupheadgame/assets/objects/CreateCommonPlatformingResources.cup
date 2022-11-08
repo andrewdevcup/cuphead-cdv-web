@@ -5,6 +5,9 @@ b5.export = function(world, scene, data, game) {
 	var resources = JSON.parse(b5.File.readSync(b5.Paths.sceneRes + 'common_platforming/resources.json'));
 
 	game.parseResources(resources,scene);
+	
+	//Import Bravo fight texts resources
+	game.importObject('CreateBravoFightTextsResources');
 
 	//Load particles
 	var particles = Function(b5.File.readSync(b5.Paths.sceneRes + 'common_platforming/particles.cup'))();

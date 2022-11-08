@@ -16,6 +16,7 @@
 		multiplayerDamageMultiplier: 0.75,
 		forceChalice: false,
 		allItemsUnlocked: true,
-		originalCupheadHud: false
+		originalCupheadHud: false,
+		spookyMode: false
 	};
 })();

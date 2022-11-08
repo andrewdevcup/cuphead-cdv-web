@@ -1,0 +1,85 @@
+[vertex]
+[/vertex]
+[fragment]
+/* Written by AndrewDev */
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform vec4 outputFrame;
+
+uniform vec2 amplitude;
+uniform vec2 frequency;
+uniform vec2 time;
+uniform vec2 repeat;
+uniform vec2 offset;
+uniform bool interleaved;
+uniform bool mirrorWrap;
+
+float signX = 1.;
+float signY = 1.;
+
+//Number is even?
+bool even(float n) {
+	return fract(floor(n)*.5) == 0.;
+}
+
+float getSign(float p) {
+	//Calculate sign based on the current Y position.
+	//Positive for even numbers, negative for odd	numbers.
+	return even(p) ? 1.: -1.;
+}
+
+float wrap(float n, float x) {
+	//Wrap n between 0 and x
+	return x * fract(abs(n) / x);
+}
+
+float mirror(float n, float x) {
+	//Cycle between x and 0 back and forth,
+	//do this for every odd number of floor(m)
+	float m = abs(n) / x;
+	float o = floor(m);
+	float p = fract(m);
+	float q = fract(o * .5) == 0. ? p: 1. - p;
+	return q * x;
+}
+
+void main(void) {
+
+	if (interleaved) signX = getSign(vTextureCoord.y * outputFrame.w); //Change sign per "scanline"
+	//if (interleavedY) signY = getSign(vTextureCoord.x * outputFrame.z); //Change sign per "column"
+
+	float phaseX = (offset.x/outputFrame.z) + (vTextureCoord.x*repeat.x) + (amplitude.x > 0. ? signX*(cos(vTextureCoord.y * frequency.x + time.x) * amplitude.x): 0.);
+	float phaseY = (offset.y/outputFrame.w) + (vTextureCoord.y*repeat.y) + (amplitude.y > 0. ? signY*(cos(vTextureCoord.y * frequency.y + time.y) * amplitude.y): 0.);
+
+	//Wrapping
+	phaseX = mirrorWrap ? mirror(phaseX, 1.) : wrap(phaseX, 1.);
+	phaseY = mirrorWrap ? mirror(phaseY, 1.) : wrap(phaseY, 1.);
+	
+	vec4 col1 = texture2D(uSampler, vec2(phaseX, phaseY));
+	
+	phaseX += amplitude[0] * .25;
+	phaseY += amplitude[1] * .25;
+	
+	//Wrapping
+	phaseX = mirrorWrap ? mirror(phaseX, 1.) : wrap(phaseX, 1.);
+	phaseY = mirrorWrap ? mirror(phaseY, 1.) : wrap(phaseY, 1.);
+	
+	vec4 col2 = texture2D(uSampler, vec2(phaseX, phaseY));
+	
+	vec4 clr = vec4(mix(col1.rgb, col2.rgb, .9), col1.a);
+
+	gl_FragColor = clr;
+}
+[/fragment]
+[uniforms]
+{
+	"amplitude": [0.03,0.05],
+	"frequency": [3,5],
+	"time": [0,0],
+	"repeat": [1,1],
+	"offset": [0,0],
+	"interleaved": false,
+	"mirrorWrap": true
+}
+[/uniforms]
