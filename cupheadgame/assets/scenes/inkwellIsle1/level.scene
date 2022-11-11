@@ -140,7 +140,7 @@ b5.onSceneUnload = function(world, scene, data, game, clearResources) {
     //You can also remove created objects in b5.Game if they were created and used on the scene.
     app.min_speed = 1/24;
     scene.BLUR_MULTIPLIER = 0;
-    delete app.filters.grayscale;
+    if(app.filters.grayscale) delete app.filters.grayscale;
     app.setFilters(app.filters);
     if(b5.fsbtn) b5.fsbtn.textContent = 'Fullscreen';
 };
